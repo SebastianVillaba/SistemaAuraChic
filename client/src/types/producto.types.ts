@@ -13,6 +13,7 @@ export interface Producto {
   origen?: boolean;
   activo?: boolean;
   idImpuesto?: number;
+  imagenUrl?: string;
 }
 
 export interface TipoProducto {

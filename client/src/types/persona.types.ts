@@ -15,7 +15,6 @@ export interface Persona {
   idUsuarioAlta: number;             
   idTipoDocumento?: number;          
   nombreFantasia?: string;
-  apellido?: string;
   codigo?: number;
   idGrupoCliente?: number;           
   tipoPersonaJur: boolean;           

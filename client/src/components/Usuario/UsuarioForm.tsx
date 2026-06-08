@@ -64,7 +64,7 @@ export default function UsuarioForm({ formData, setFormData, isNewMode }: Usuari
         setFormData((prev) => ({
             ...prev,
             idPersona: persona.idPersona,
-            nombrePersona: `${persona.nombre} ${persona.apellido || ''}`.trim(),
+            nombrePersona: persona.nombre.trim(),
             ruc: persona.ruc || persona.documento
         }));
     };

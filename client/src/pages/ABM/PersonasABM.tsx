@@ -113,7 +113,6 @@ export default function PersonasABM(): JSX.Element {
         email: infoCompleta.email,
         idTipoDocumento: infoCompleta.idTipoDocumento,
         fechaNacimiento: infoCompleta.fechaNacimiento ? new Date(infoCompleta.fechaNacimiento).toISOString().split('T')[0] : '',
-        apellido: infoCompleta.apellido,
         nombreFantasia: infoCompleta.nombreFantasia || '',
         responsableProveedor: infoCompleta.responsable || '',
         timbrado: infoCompleta.timbrado || '',
@@ -121,7 +120,7 @@ export default function PersonasABM(): JSX.Element {
         idGrupoCliente: infoCompleta.idGrupoCliente,
         tipoPersonaJur: !!infoCompleta.nombreFantasia, // Si tiene nombreFantasia es Jurídica
         tipoProveedor: !!infoCompleta.responsable, // Si tiene responsable es Proveedor
-        tipoPersonaFis: !!infoCompleta.apellido, // Si tiene apellido es Física
+        tipoPersonaFis: !!infoCompleta.idPersonaFis, // Si tiene idPersonaFis es Física
         tipoPersonaCli: !!infoCompleta.codigo, // Si tiene código es Cliente
         tipoFuncionario: !!infoCompleta.idFuncionario,
         idSector: infoCompleta.idSector || null,
@@ -153,7 +152,6 @@ export default function PersonasABM(): JSX.Element {
       fechaNacimiento: '',
       idUsuarioAlta: 1, // TODO: Obtener del usuario logueado
       nombreFantasia: '',
-      apellido: '',
       codigo: 0,
       tipoPersonaJur: false,
       tipoProveedor: false,
@@ -184,11 +182,6 @@ export default function PersonasABM(): JSX.Element {
     }
 
     // 3. Validar campos específicos según tipo de persona
-    if (formData.tipoPersonaFis && (!formData.apellido || formData.apellido.trim() === '')) {
-      setError('El apellido es obligatorio para Persona Física');
-      return;
-    }
-
     if (formData.tipoPersonaJur && (!formData.nombreFantasia || formData.nombreFantasia.trim() === '')) {
       setError('El nombre de fantasía es obligatorio para Persona Jurídica');
       return;
@@ -315,7 +308,7 @@ export default function PersonasABM(): JSX.Element {
                   onClick={() => handleSelectPersona(persona)}
                 >
                   <ListItemText
-                    primary={persona.nombre + ' ' + persona.apellido}
+                    primary={persona.nombre}
                     secondary={`RUC: ${persona.ruc || 'N/A'}`}
                   />
                 </ListItemButton>

@@ -41,7 +41,6 @@ export const insertarPersona = async (req: Request, res: Response): Promise<void
       idUsuarioAlta,
       idTipoDocumento,
       nombreFantasia,
-      apellido,
       codigo,
       idGrupoCliente,
       tipoPersonaJur,
@@ -84,21 +83,20 @@ export const insertarPersona = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    // Si es Persona Física, debe tener apellido
-    if (tipoPersonaFis && !apellido) {
-      res.status(400).json({
-        success: false,
-        message: "Las Personas Físicas requieren 'apellido'"
-      });
-      return;
-    }
-
     if (tipoFuncionario && !idSector) {
       res.status(400).json({
         success: false,
         message: "Los Funcionarios requieren 'sector'"
       });
       return;
+    }
+
+    // Map pais string to idPais int
+    let idPaisVal = 1;
+    if (pais) {
+      const paisUpper = pais.toUpperCase();
+      if (paisUpper.includes("ARGENTINA")) idPaisVal = 2;
+      else if (paisUpper.includes("BRASIL")) idPaisVal = 3;
     }
 
     // PASO 5: Preparar los parámetros para el stored procedure
@@ -116,7 +114,6 @@ export const insertarPersona = async (req: Request, res: Response): Promise<void
       { name: 'idUsuarioAlta', type: sql.Int, value: idUsuarioAlta },
       { name: 'idTipoDocumento', type: sql.Int, value: idTipoDocumento || 0 },
       { name: 'nombreFantasia', type: sql.VarChar, value: nombreFantasia || '' },
-      { name: 'apellido', type: sql.VarChar, value: apellido || '' },
       { name: 'codigo', type: sql.Int, value: codigo || 0 },
       { name: 'idGrupoCliente', type: sql.Int, value: idGrupoCliente || 0 },
       { name: 'tipoPersonaJur', type: sql.Bit, value: tipoPersonaJur ? 1 : 0 },
@@ -125,8 +122,8 @@ export const insertarPersona = async (req: Request, res: Response): Promise<void
       { name: 'timbrado', type: sql.VarChar, value: timbrado || '' },
       { name: 'tipoPersonaFis', type: sql.Bit, value: tipoPersonaFis ? 1 : 0 },
       { name: 'tipoPersonaCli', type: sql.Bit, value: tipoPersonaCli ? 1 : 0 },
-      { name: 'tipoFuncionario', type: sql.Bit, value: tipoFuncionario ? 1 : 0 },
-      { name: 'idSector', type: sql.Int, value: idSector || 0 }
+      { name: 'idPais', type: sql.Int, value: idPaisVal },
+      { name: 'tipoPersonal', type: sql.Bit, value: tipoFuncionario ? 1 : 0 }
     ];
 
     // PASO 6: Ejecutar el stored procedure
@@ -350,7 +347,6 @@ export const agregarClienteRapido = async (req: Request, res: Response): Promise
       ruc,
       dv,
       nombre,
-      apellido,
       direccion,
       fechaNacimiento,
       celular,
@@ -376,7 +372,6 @@ export const agregarClienteRapido = async (req: Request, res: Response): Promise
         { name: 'ruc', type: sql.VarChar(10), value: ruc || ''},
         { name: 'dv', type: sql.VarChar(1), value: dv || '' },
         { name: 'nombre', type: sql.VarChar(40), value: nombre },
-        { name: 'apellido', type: sql.VarChar(40), value: apellido || '' },
         { name: 'direccion', type: sql.VarChar(100), value: direccion || null },
         { name: 'fechaNacimiento', type: sql.Date, value: fechaNacimiento || null },
         { name: 'celular', type: sql.VarChar(20), value: celular || null },
@@ -473,7 +468,6 @@ export const modificarPersona = async (req: Request, res: Response): Promise<voi
       idTipoDocumento,
       activo,
       nombreFantasia,
-      apellido,
       responsableProveedor,
       timbrado,
       idSector
@@ -504,7 +498,6 @@ export const modificarPersona = async (req: Request, res: Response): Promise<voi
       { name: 'idTipoDocumento', type: sql.Int, value: idTipoDocumento || 0 },
       { name: 'activo', type: sql.TinyInt, value: activo !== undefined ? activo : 1 },
       { name: 'nombreFantasia', type: sql.VarChar(50), value: nombreFantasia || null },
-      { name: 'apellido', type: sql.VarChar(40), value: apellido || null },
       { name: 'responsableProveedor', type: sql.VarChar(30), value: responsableProveedor || null },
       { name: 'timbrado', type: sql.VarChar(20), value: timbrado || null },
       { name: 'idSector', type: sql.Int, value: idSector || null }

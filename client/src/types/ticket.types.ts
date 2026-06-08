@@ -26,7 +26,7 @@ export interface ItemTicketPedido {
 export interface DatosFactura {
   // Datos de la empresa
   nombreFantasia: string;
-  empresaContable: string;
+  nombre: string;
   rubro: string;
   ruc: string;
   direccion: string;

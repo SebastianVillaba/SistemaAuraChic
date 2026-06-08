@@ -170,7 +170,7 @@ export default function PersonaForm({ formData, setFormData }: PersonaFormProps)
           />
           <TextField
             fullWidth
-            label="Nombre"
+            label="Nombre y Apellido / Razón Social"
             value={formData.nombre}
             onChange={handleChange('nombre')}
             required

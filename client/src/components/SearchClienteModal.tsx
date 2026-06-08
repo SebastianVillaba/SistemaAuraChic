@@ -307,7 +307,7 @@ const SearchClienteModal: React.FC<SearchClienteModalProps> = ({
               onClienteSelected={(cliente) => {
                 onClienteSelected({
                   idCliente: cliente.idPersona || 0,
-                  nombreCliente: `${cliente.nombre} ${cliente.apellido || ''}`,
+                  nombreCliente: cliente.nombre,
                   ruc: `${cliente.ruc}-${cliente.dv}`,
                   dv: cliente.dv,
                   direccion: cliente.direccion,

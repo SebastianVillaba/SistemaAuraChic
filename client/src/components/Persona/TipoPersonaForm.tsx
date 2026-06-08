@@ -92,26 +92,6 @@ export const TipoPersonaForm = ({ formData, setFormData }: TipoPersonaFormProps)
 
             <Divider sx={{ mb: 3 }} />
 
-            {/* Formulario para Persona Física */}
-            {formData.tipoPersonaFis && (
-                <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle1" gutterBottom color="primary">
-                        Datos de Persona Física
-                    </Typography>
-                    <Stack direction="row" spacing={2}>
-                        <TextField
-                            fullWidth
-                            label="Apellido"
-                            value={formData.apellido || ''}
-                            onChange={handleChange('apellido')}
-                            size="small"
-                            required
-                            error={formData.tipoPersonaFis && !formData.apellido}
-                            helperText={formData.tipoPersonaFis && !formData.apellido ? 'Campo obligatorio para Persona Física' : ''}
-                        />
-                    </Stack>
-                </Box>
-            )}
 
             {/* Formulario para Persona Jurídica */}
             {formData.tipoPersonaJur && (

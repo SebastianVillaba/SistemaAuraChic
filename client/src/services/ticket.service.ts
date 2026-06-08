@@ -802,6 +802,7 @@ class FacturaService {
      * Dibuja el encabezado del reporte
      */
     private dibujarEncabezado(doc: jsPDF, datos: DatosFactura): void {
+        
         // Nombre fantasia - negrita y centrado
         doc.setFont("helvetica", "bold");
         doc.setFontSize(12);
@@ -813,8 +814,8 @@ class FacturaService {
         // Empresa contable - cursiva y centrado
         doc.setFont("helvetica", "italic");
         doc.setFontSize(9);
-        const empresaContable = this.truncarTexto(datos.empresaContable, 50);
-        doc.text(empresaContable, this.ANCHO_TICKET / 2, this.posY, { align: 'center' });
+        const nombre = this.truncarTexto(datos.nombre, 50);
+        doc.text('de ' + nombre, this.ANCHO_TICKET / 2, this.posY, { align: 'center' });
         this.posY += 6;
 
 
@@ -901,8 +902,17 @@ class FacturaService {
         this.posY += 5;
 
         // Vendedor
-        doc.text(`Vendedor/a: ${datos.vendedor}`, this.MARGEN_IZQ, this.posY);
-        this.posY += 6;
+        const lineasVendedor = this.dividirTexto(datos.vendedor, 30);
+        for (let linea = 0; linea < lineasVendedor.length; linea++) {
+            if (linea === 0) {
+                doc.text(`Vendedor/a: ${lineasVendedor[linea]}`, this.MARGEN_IZQ, this.posY);
+                this.posY += 5;
+            }
+            else {
+                doc.text(lineasVendedor[linea], this.MARGEN_IZQ, this.posY);
+                this.posY += 5;
+            }
+        }
 
         this.dibujarLinea(doc);
     }

@@ -48,7 +48,7 @@ interface PersonaInfo {
   nombreDepartamento: string;  // Nombre del departamento
 
   // Campos de personaFis
-  apellido?: string;
+  idPersonaFis?: number;
 
   // Campos de personaJur
   nombreFantasia?: string | null;

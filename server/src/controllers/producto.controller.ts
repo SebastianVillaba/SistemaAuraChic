@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { executeRequest, sql } from "../utils/dbHandler";
 import { InsertarProductoRequest, InsertarProductoResponse, BuscarProductoRequest, ModificarProductoRequest } from "../types/producto/producto.type";
+import { flattenError } from "zod";
 
 /**
  * Controller para insertar una nueva persona en el sistema.
@@ -24,7 +25,8 @@ export const insertarProducto = async (req: Request, res: Response): Promise<voi
       gasto,
       origen,
       activo,
-      idImpuesto
+      idImpuesto,
+      imagenUrl
     } = req.body as InsertarProductoRequest;
 
     // PASO 2: Validar campos obligatorios
@@ -50,7 +52,8 @@ export const insertarProducto = async (req: Request, res: Response): Promise<voi
       { name: 'gasto', type: sql.Bit, value: gasto || false },
       { name: 'origen', type: sql.Bit, value: origen || false },
       { name: 'activo', type: sql.Bit, value: activo !== undefined ? activo : true },
-      { name: 'idImpuesto', type: sql.Int, value: idImpuesto || 0 }
+      { name: 'idImpuesto', type: sql.Int, value: idImpuesto || 0 },
+      { name: 'imagenUrl', type: sql.VarChar, value: imagenUrl || '' },
     ];
 
     const result = await executeRequest({
@@ -242,7 +245,8 @@ export const modificarProducto = async (req: Request, res: Response): Promise<vo
       idTipoProducto,
       gasto,
       activo,
-      idImpuesto
+      idImpuesto,
+      imagenUrl
     } = req.body as ModificarProductoRequest;
 
     // Validar campos obligatorios
@@ -267,7 +271,8 @@ export const modificarProducto = async (req: Request, res: Response): Promise<vo
       { name: 'gasto', type: sql.Bit, value: gasto || false },
       { name: 'origen', type: sql.Bit, value: origen !== undefined ? origen : false },
       { name: 'activo', type: sql.Bit, value: activo !== undefined ? activo : true },
-      { name: 'idImpuesto', type: sql.Int, value: idImpuesto || 0 }
+      { name: 'idImpuesto', type: sql.Int, value: idImpuesto || 0 },
+      { name: 'imagenUrl', type: sql.VarChar, value: imagenUrl || '' }
     ];
 
     const result = await executeRequest({
@@ -300,5 +305,21 @@ export const modificarProducto = async (req: Request, res: Response): Promise<vo
         error: error.message
       });
     }
+  }
+}
+
+export const obtenerPrecioDescuento = async (req: Request, res: Response): Promise<void> => {
+  const { idProducto } = req.query;
+  try {
+    const result = await executeRequest({
+      query: `select [dbo].[funObtenerPrecioOferta](${idProducto}) as precioDescuento`,
+      isStoredProcedure: false
+    })
+    res.status(200).json(result.recordset);
+  } catch (error: any) {
+    res.status(500).json({
+      message: "Error al obtener el precio de descuento!",
+      error: error.message
+    });
   }
 }

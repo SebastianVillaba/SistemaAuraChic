@@ -12,6 +12,7 @@ import {
     TableRow,
     Grid,
     IconButton,
+    CircularProgress,
 } from '@mui/material';
 import TextField from '../../components/UppercaseTextField';
 import SearchIcon from '@mui/icons-material/Search';
@@ -25,6 +26,7 @@ import HabilitarCompraModal from '../../components/HabilitarCompraModal';
 import { useTerminal } from '../../hooks/useTerminal';
 import { comprasService } from '../../services/compras.service';
 import type { DetalleCompraTmp } from '../../services/compras.service';
+import { productoService } from '../../services/producto.service';
 import RequirePermission from '../../components/RequirePermission';
 
 export default function Compras() {
@@ -58,6 +60,10 @@ export default function Compras() {
     const [openProductoModal, setOpenProductoModal] = useState(false);
     const [openHabilitarModal, setOpenHabilitarModal] = useState(false);
     const [productoSearchTerm, setProductoSearchTerm] = useState('');
+
+    // Estados para la vista previa de la imagen del producto
+    const [selectedProductImg, setSelectedProductImg] = useState<string | null>(null);
+    const [loadingImg, setLoadingImg] = useState<boolean>(false);
 
     // Totales calculados
     const totalIva5 = detalles.reduce((acc, item) => acc + item.gravada5, 0);
@@ -115,7 +121,7 @@ export default function Compras() {
         timbradoRef.current?.focus();
     };
 
-    const handleProductoSelected = (prod: any) => {
+    const handleProductoSelected = async (prod: any) => {
         setProducto(prod);
         setProductoSearchTerm(prod.nombreMercaderia || prod.nombre);
         // Al seleccionar producto, reseteamos valores
@@ -126,6 +132,27 @@ export default function Compras() {
         setBonificacion(0);
         setLote('');
         setVencimiento('');
+
+        // Obtener imagen del producto
+        setSelectedProductImg(null);
+        if (prod.imagenUrl) {
+            setSelectedProductImg(prod.imagenUrl);
+        } else if (prod.idProducto) {
+            setLoadingImg(true);
+            try {
+                const info = await productoService.obtenerInfoProducto(prod.idProducto);
+                if (info && info.length > 0) {
+                    setSelectedProductImg(info[0].imagenUrl || '');
+                } else {
+                    setSelectedProductImg('');
+                }
+            } catch (err) {
+                console.error('Error al obtener la imagen para la vista previa:', err);
+                setSelectedProductImg('');
+            } finally {
+                setLoadingImg(false);
+            }
+        }
 
         // Enfocar siguiente campo (Cantidad o Costo Total según flujo)
         setTimeout(() => {
@@ -233,6 +260,7 @@ export default function Compras() {
             setBonificacion(0);
             setLote('');
             setVencimiento('');
+            setSelectedProductImg(null);
 
             productoRef.current?.focus();
 
@@ -359,274 +387,326 @@ export default function Compras() {
         <RequirePermission permission="ACCESO_COMPRAS">
 
             <Box sx={{ p: 2, height: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column', gap: 1 }}>
-                {/* Cabecera */}
-                <Paper sx={{ p: 2, backgroundColor: '#f8f9fa' }}>
-                    <Grid container spacing={2} alignItems="center">
-                        <Grid item xs={12} md={4}>
-                            <Box sx={{ display: 'flex', gap: 1 }}>
-                                <TextField
-                                    fullWidth
-                                    label="Proveedor"
-                                    size="small"
-                                    value={proveedor ? proveedor.nombre : ''}
-                                    InputProps={{
-                                        readOnly: true,
-                                    }}
-                                    placeholder="Seleccione Proveedor"
-                                />
-                                <Button
-                                    variant="contained"
-                                    sx={{ minWidth: 'auto', px: 2 }}
-                                    onClick={() => setOpenProveedorModal(true)}
-                                    ref={botonBuscarProveedorRef}
-                                >
-                                    <SearchIcon />
-                                </Button>
-                            </Box>
-                        </Grid>
-                        <Grid item xs={2}>
-                            <TextField
-                                fullWidth
-                                label="Timbrado"
-                                size="small"
-                                value={timbrado}
-                                onChange={handleCabeceraChange}
-                                name="timbrado"
-                                inputRef={timbradoRef}
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        dsucRef.current?.focus();
-                                    }
-                                }}
-                            />
-                        </Grid>
-                        <Grid item size={3}>
-                            <Box sx={{ display: 'flex', gap: 1 }}>
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    value={dsuc}
-                                    onChange={handleCabeceraChange}
-                                    name="dsuc"
-                                    inputRef={dsucRef}
-                                    sx={{ width: '50%' }}
-                                    onKeyPress={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            dcajaRef.current?.focus();
-                                        }
-                                    }}
-                                />
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    value={dcaja}
-                                    onChange={handleCabeceraChange}
-                                    name="dcaja"
-                                    inputRef={dcajaRef}
-                                    sx={{ width: '50%' }}
-                                    onKeyPress={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            facturaRef.current?.focus();
-                                        }
-                                    }}
-                                />
-                                <TextField
-                                    fullWidth
-                                    size="small"
-                                    value={factura}
-                                    onChange={handleCabeceraChange}
-                                    name="factura"
-                                    inputRef={facturaRef}
-                                    sx={{ width: '80%' }}
-                                    onKeyPress={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            responsableRef.current?.focus();
-                                        }
-                                    }}
-                                />
-                            </Box>
-                        </Grid>
-                        <Grid item xs={12} md={2}>
-                            <TextField
-                                fullWidth
-                                label="Responsable"
-                                size="small"
-                                value={responsable}
-                                inputRef={responsableRef}
-                                onChange={handleCabeceraChange}
-                                name="responsable"
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        productoRef.current?.focus();
-                                    }
-                                }}
-                            />
-                        </Grid>
-                        <Grid item xs={1.5}>
-                            <TextField
-                                fullWidth
-                                type='date'
-                                size="small"
-                                value={fecha}
-                                inputRef={fechaRef}
-                                onChange={(e) => setFecha(e.target.value)}
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        productoRef.current?.focus();
-                                    }
-                                }}
-                            />
-                        </Grid>
-                    </Grid>
-                </Paper>
-
-                {/* Entrada de Productos */}
-                <Paper sx={{ p: 2, backgroundColor: '#e3f2fd' }}>
-                    <Grid container spacing={2} alignItems="center">
-                        <Grid item size={3}>
-                            <TextField
-                                fullWidth
-                                label="Producto (Enter para buscar)"
-                                size="small"
-                                value={productoSearchTerm}
-                                placeholder="Buscar producto..."
-                                inputRef={productoRef}
-                                onKeyDown={handleProductoSearchKeyDown}
-                                // Permitir escribir si no hay producto seleccionado para buscar
-                                onChange={(e) => {
-                                    setProductoSearchTerm(e.target.value);
-                                    const nombre = producto?.nombreMercaderia || producto?.nombre;
-                                    if (producto && e.target.value !== nombre) {
-                                        setProducto(null);
-                                    }
-                                }}
-                                InputProps={{
-                                    endAdornment: (
-                                        <IconButton size="small" onClick={() => setOpenProductoModal(true)}>
+                <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: 1
+                }}>
+                    <Box sx={{ flex: 1 }}>
+                        {/* Cabecera */}
+                        <Paper sx={{ p: 2, backgroundColor: '#f8f9fa' }}>
+                            <Grid container spacing={2} alignItems="center">
+                                <Grid item xs={12} md={6} lg={12}>
+                                    <Box sx={{ display: 'flex', gap: 1 }}>
+                                        <TextField
+                                            fullWidth
+                                            label="Proveedor"
+                                            size="small"
+                                            value={proveedor ? proveedor.nombre : ''}
+                                            InputProps={{
+                                                readOnly: true,
+                                            }}
+                                            placeholder="Seleccione Proveedor"
+                                        />
+                                        <Button
+                                            variant="contained"
+                                            sx={{ minWidth: 'auto', px: 2 }}
+                                            onClick={() => setOpenProveedorModal(true)}
+                                            ref={botonBuscarProveedorRef}
+                                        >
                                             <SearchIcon />
-                                        </IconButton>
-                                    )
-                                }}
-                            />
-                        </Grid>
+                                        </Button>
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={2}>
+                                    <TextField
+                                        fullWidth
+                                        label="Timbrado"
+                                        size="small"
+                                        value={timbrado}
+                                        onChange={handleCabeceraChange}
+                                        name="timbrado"
+                                        inputRef={timbradoRef}
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                dsucRef.current?.focus();
+                                            }
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item size={3}>
+                                    <Box sx={{ display: 'flex', gap: 1 }}>
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            value={dsuc}
+                                            onChange={handleCabeceraChange}
+                                            name="dsuc"
+                                            inputRef={dsucRef}
+                                            sx={{ width: '50%' }}
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    dcajaRef.current?.focus();
+                                                }
+                                            }}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            value={dcaja}
+                                            onChange={handleCabeceraChange}
+                                            name="dcaja"
+                                            inputRef={dcajaRef}
+                                            sx={{ width: '50%' }}
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    facturaRef.current?.focus();
+                                                }
+                                            }}
+                                        />
+                                        <TextField
+                                            fullWidth
+                                            size="small"
+                                            value={factura}
+                                            onChange={handleCabeceraChange}
+                                            name="factura"
+                                            inputRef={facturaRef}
+                                            sx={{ width: '80%' }}
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    responsableRef.current?.focus();
+                                                }
+                                            }}
+                                        />
+                                    </Box>
+                                </Grid>
+                                <Grid item xs={12} md={2}>
+                                    <TextField
+                                        fullWidth
+                                        label="Responsable"
+                                        size="small"
+                                        value={responsable}
+                                        inputRef={responsableRef}
+                                        onChange={handleCabeceraChange}
+                                        name="responsable"
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                productoRef.current?.focus();
+                                            }
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item xs={1.5}>
+                                    <TextField
+                                        fullWidth
+                                        type='date'
+                                        size="small"
+                                        value={fecha}
+                                        inputRef={fechaRef}
+                                        onChange={(e) => setFecha(e.target.value)}
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                productoRef.current?.focus();
+                                            }
+                                        }}
+                                    />
+                                </Grid>
+                            </Grid>
+                        </Paper>
 
-                        <Grid item size={1}>
-                            <TextField
-                                fullWidth
-                                label="% S/Costo"
-                                type="number"
-                                size="small"
-                                value={porcentajeSobreCosto}
-                                onChange={(e) => setPorcentajeSobreCosto(Number(e.target.value))}
-                                onFocus={(e) => e.target.select()}
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        cantidadRef.current?.focus();
-                                    }
-                                }}
-                                inputRef={porcentajeRef}
-                            />
-                        </Grid>
+                        {/* Entrada de Productos */}
+                        <Paper sx={{ p: 2, backgroundColor: '#e3f2fd' }}>
+                            <Grid container spacing={2} alignItems="center">
+                                <Grid item size={3}>
+                                    <TextField
+                                        fullWidth
+                                        label="Producto (Enter para buscar)"
+                                        size="small"
+                                        value={productoSearchTerm}
+                                        placeholder="Buscar producto..."
+                                        inputRef={productoRef}
+                                        onKeyDown={handleProductoSearchKeyDown}
+                                        // Permitir escribir si no hay producto seleccionado para buscar
+                                        onChange={(e) => {
+                                            setProductoSearchTerm(e.target.value);
+                                            const nombre = producto?.nombreMercaderia || producto?.nombre;
+                                            if (producto && e.target.value !== nombre) {
+                                                setProducto(null);
+                                                setSelectedProductImg(null);
+                                            }
+                                        }}
+                                        InputProps={{
+                                            endAdornment: (
+                                                <IconButton size="small" onClick={() => setOpenProductoModal(true)}>
+                                                    <SearchIcon />
+                                                </IconButton>
+                                            )
+                                        }}
+                                    />
+                                </Grid>
 
-                        <Grid item size={1.5}>
-                            <TextField
-                                fullWidth
-                                label="Cantidad"
-                                type="number"
-                                size="small"
-                                value={cantidad}
-                                onChange={(e) => setCantidad(Number(e.target.value))}
-                                onFocus={(e) => e.target.select()}
-                                inputRef={cantidadRef}
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        costoTotalRef.current?.focus();
-                                    }
-                                }}
-                            />
-                        </Grid>
+                                <Grid item size={1}>
+                                    <TextField
+                                        fullWidth
+                                        label="% S/Costo"
+                                        type="number"
+                                        size="small"
+                                        value={porcentajeSobreCosto}
+                                        onChange={(e) => setPorcentajeSobreCosto(Number(e.target.value))}
+                                        onFocus={(e) => e.target.select()}
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                cantidadRef.current?.focus();
+                                            }
+                                        }}
+                                        inputRef={porcentajeRef}
+                                    />
+                                </Grid>
 
-                        <Grid item size={1.5}>
-                            <TextField
-                                fullWidth
-                                label="Costo Total"
-                                type="number"
-                                size="small"
-                                value={costoTotal}
-                                onChange={(e) => setCostoTotal(Number(e.target.value))}
-                                onFocus={(e) => e.target.select()}
-                                inputRef={costoTotalRef}
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        bonificacionRef.current?.focus();
-                                    }
-                                }}
-                            />
-                        </Grid>
+                                <Grid item size={1.5}>
+                                    <TextField
+                                        fullWidth
+                                        label="Cantidad"
+                                        type="number"
+                                        size="small"
+                                        value={cantidad}
+                                        onChange={(e) => setCantidad(Number(e.target.value))}
+                                        onFocus={(e) => e.target.select()}
+                                        inputRef={cantidadRef}
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                costoTotalRef.current?.focus();
+                                            }
+                                        }}
+                                    />
+                                </Grid>
 
-                        <Grid item size={1.5}>
-                            <TextField
-                                fullWidth
-                                label="Bonificación"
-                                type="number"
-                                size="small"
-                                value={bonificacion}
-                                onChange={(e) => setBonificacion(Number(e.target.value))}
-                                onFocus={(e) => e.target.select()}
-                                inputRef={bonificacionRef}
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        precioRef.current?.focus();
-                                    }
-                                }}
-                            />
-                        </Grid>
+                                <Grid item size={1.5}>
+                                    <TextField
+                                        fullWidth
+                                        label="Costo Total"
+                                        type="number"
+                                        size="small"
+                                        value={costoTotal}
+                                        onChange={(e) => setCostoTotal(Number(e.target.value))}
+                                        onFocus={(e) => e.target.select()}
+                                        inputRef={costoTotalRef}
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                bonificacionRef.current?.focus();
+                                            }
+                                        }}
+                                    />
+                                </Grid>
 
+                                <Grid item size={1.5}>
+                                    <TextField
+                                        fullWidth
+                                        label="Bonificación"
+                                        type="number"
+                                        size="small"
+                                        value={bonificacion}
+                                        onChange={(e) => setBonificacion(Number(e.target.value))}
+                                        onFocus={(e) => e.target.select()}
+                                        inputRef={bonificacionRef}
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                precioRef.current?.focus();
+                                            }
+                                        }}
+                                    />
+                                </Grid>
+                                <Grid item size={1.5}>
+                                    <TextField
+                                        fullWidth
+                                        label="Precio"
+                                        type="number"
+                                        size="small"
+                                        value={precio}
+                                        onChange={handlePrecioChange}
+                                        onFocus={(e) => e.target.select()}
+                                        inputRef={precioRef}
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                e.preventDefault();
+                                                botonAgregarRef.current?.focus();
+                                            }
+                                        }}
+                                    />
+                                </Grid>
 
-
-                        <Grid item size={1.5}>
-                            <TextField
-                                fullWidth
-                                label="Precio"
-                                type="number"
-                                size="small"
-                                value={precio}
-                                onChange={handlePrecioChange}
-                                onFocus={(e) => e.target.select()}
-                                inputRef={precioRef}
-                                onKeyPress={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        botonAgregarRef.current?.focus();
-                                    }
-                                }}
-                            />
-                        </Grid>
-
-                        <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                            <Button
-                                variant="contained"
-                                color="error"
-                                startIcon={<AddIcon />}
-                                onClick={handleAgregarDetalle}
-                                fullWidth
-                                ref={botonAgregarRef}
-                            >
-                                Agregar
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </Paper>
+                                <Grid item xs={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                    <Button
+                                        variant="contained"
+                                        color="error"
+                                        startIcon={<AddIcon />}
+                                        onClick={handleAgregarDetalle}
+                                        fullWidth
+                                        ref={botonAgregarRef}
+                                    >
+                                        Agregar
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </Paper>
+                    </Box>
+                    <Box sx={{
+                        width: '200px',
+                        flexShrink: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        p: 1,
+                        backgroundColor: '#fafafa',
+                        borderRadius: 2,
+                        border: '1px solid #e0e0e0',
+                        minHeight: '120px'
+                    }}>
+                        {loadingImg ? (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                                <CircularProgress size={24} />
+                                <Typography variant="caption" color="text.secondary">
+                                    Cargando...
+                                </Typography>
+                            </Box>
+                        ) : selectedProductImg ? (
+                            <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                <img
+                                    src={productoService.obtenerUrlImagen(selectedProductImg)}
+                                    alt="Vista previa"
+                                    style={{
+                                        maxWidth: '100%',
+                                        maxHeight: '200px',
+                                        objectFit: 'contain',
+                                        borderRadius: '4px',
+                                        backgroundColor: 'white',
+                                        boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
+                                    }}
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                    }}
+                                />
+                            </Box>
+                        ) : (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.5, textAlign: 'center' }}>
+                                <Typography variant="caption" color="text.secondary">
+                                    {producto ? 'Sin imagen' : 'Sin producto'}
+                                </Typography>
+                            </Box>
+                        )}
+                    </Box>
+                </Box>
 
                 {/* Grilla de Detalles */}
                 <TableContainer component={Paper} sx={{ flexGrow: 1, overflow: 'auto' }}>

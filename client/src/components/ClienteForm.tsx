@@ -27,7 +27,6 @@ interface ClienteData {
   ruc: string;
   dv: string;
   nombre: string;
-  apellido?: string;
   direccion: string;
   idDepartamento?: number;
   idDistrito?: number;
@@ -57,7 +56,6 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ open, onClose, onClienteSelec
   const [ruc, setRuc] = useState('');
   const [dv, setDv] = useState('');
   const [nombre, setNombre] = useState('');
-  const [apellido, setApellido] = useState('');
   const [direccion, setDireccion] = useState('');
   const [pais, setPais] = useState('PARAGUAY');
   const [tipoDocumento, setTipoDocumento] = useState(2);
@@ -177,7 +175,6 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ open, onClose, onClienteSelec
 
         // Llenar los campos con la información encontrada
         setNombre(cliente.nombre || '');
-        setApellido(cliente.apellido || '');
         setDv(cliente.dv?.toString() || '');
         setDireccion(cliente.direccion || '');
         setTelefono(cliente.telefono || '');
@@ -200,7 +197,6 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ open, onClose, onClienteSelec
           ruc: cliente.ruc || ruc || '',
           dv: cliente.dv?.toString() || dv || '',
           nombre: cliente.nombre || '',
-          apellido: cliente.apellido || '',
           direccion: cliente.direccion || '',
           idDepartamento: cliente.idDepartamento,
           idDistrito: cliente.idDistrito,
@@ -246,7 +242,6 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ open, onClose, onClienteSelec
         'ruc': ruc || '',
         'dv': dv || '',
         nombre,
-        'apellido': apellido || '',
         direccion,
         idDepartamento,
         idDistrito,
@@ -271,7 +266,6 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ open, onClose, onClienteSelec
         ruc,
         dv,
         nombre,
-        apellido,
         direccion: direccion || undefined,
         fechaNacimiento: fechaNacimiento || undefined,
         celular: celular || undefined,
@@ -287,7 +281,6 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ open, onClose, onClienteSelec
         ruc: nuevoCliente.ruc,
         dv: nuevoCliente.dv,
         nombre: nombre,
-        apellido: apellido,
         direccion: nuevoCliente.direccion,
         idDepartamento,
         idDistrito,
@@ -316,7 +309,6 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ open, onClose, onClienteSelec
     setRuc('');
     setDv('');
     setNombre('');
-    setApellido('');
     setDireccion('');
     setTelefono('');
     setCelular('');
@@ -388,22 +380,13 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ open, onClose, onClienteSelec
           </Stack>
 
           {/* Nombre y Apellido */}
-          <Stack direction="row" spacing={2}>
-            <TextField
-              fullWidth
-              label="Nombre"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              size="small"
-            />
-            <TextField
-              fullWidth
-              label="Apellido"
-              value={apellido}
-              onChange={(e) => setApellido(e.target.value)}
-              size="small"
-            />
-          </Stack>
+          <TextField
+            fullWidth
+            label="Nombre y Apellido"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            size="small"
+          />
 
           {/* Dirección */}
           <TextField

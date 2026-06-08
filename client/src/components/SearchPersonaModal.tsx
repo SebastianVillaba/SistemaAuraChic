@@ -287,7 +287,7 @@ const SearchPersonaModal: React.FC<SearchPersonaModalProps> = ({
                                         }}
                                     >
                                         <TableCell>{persona.idPersona}</TableCell>
-                                        <TableCell>{persona.nombreCompleto || `${persona.nombre} ${persona.apellido}`}</TableCell>
+                                        <TableCell>{persona.nombreCompleto || persona.nombre}</TableCell>
                                         <TableCell>{persona.ruc || persona.documento}</TableCell>
                                         <TableCell>{persona.email}</TableCell>
                                         <TableCell>

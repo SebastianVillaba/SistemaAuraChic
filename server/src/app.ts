@@ -3,14 +3,16 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
-
+import path from 'path';
 import routes from './routes';
 import { logger } from './utils/logger';
 
 const app = express();
 
 app.use(cors());
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+}));
 app.use(compression());
 app.use(express.json());
 app.use(morgan('dev'));
@@ -22,6 +24,8 @@ app.get('/healthz', (req: Request, res: Response) => {
 
 // API routes
 app.use('/api', routes);
+
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 const ip = process.env.DB_SERVER;
 

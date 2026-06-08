@@ -44,6 +44,7 @@ export default function ProductosABM(): JSX.Element {
     idUsuarioAlta: 1, // TODO: Obtener del usuario logueado
     gasto: false,
     idImpuesto: 0,
+    imagenUrl: '',
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
@@ -93,6 +94,7 @@ export default function ProductosABM(): JSX.Element {
         idImpuesto: infoCompleta.idImpuesto || 0,
         origen: infoCompleta.origen || false, 
         activo: infoCompleta.activo || true,
+        imagenUrl: infoCompleta.imagenUrl || '',
       };
 
       setSelectedProducto(productoMapeado);
@@ -121,6 +123,7 @@ export default function ProductosABM(): JSX.Element {
       idUsuarioAlta: 1, // TODO: Obtener del usuario logueado
       gasto: false,
       idImpuesto: 0,
+      imagenUrl: '',
     });
   };
 
@@ -200,6 +203,7 @@ export default function ProductosABM(): JSX.Element {
       idUsuarioAlta: 1,
       gasto: false,
       idImpuesto: 0,
+      imagenUrl: '',
     });
   };
 

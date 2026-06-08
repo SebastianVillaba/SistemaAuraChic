@@ -32,6 +32,9 @@ import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { consultaVentaService } from '../../services/consultaVenta.service';
+import { reporteService } from '../../services/reporte.service';
+import facturaService from '../../services/ticket.service';
+import type { DatosFactura } from '../../types/ticket.types';
 
 // ──────────────────────────────────────────────
 // Tipos (se completarán cuando lleguen los SPs)
@@ -190,6 +193,75 @@ const ConsultaVentas: React.FC = () => {
   const navAnterior  = () => { if (currentIndex > 0) handleSelectVenta(ventas[currentIndex - 1], currentIndex - 1); };
   const navSiguiente = () => { if (currentIndex < ventas.length - 1) handleSelectVenta(ventas[currentIndex + 1], currentIndex + 1); };
   const navUltimo    = () => { if (ventas.length > 0) handleSelectVenta(ventas[ventas.length - 1], ventas.length - 1); };
+
+  // ── Imprimir Factura ────────────────────────
+  const handleImprimirFactura = async () => {
+    if (!selectedVenta) return;
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const datosReporte = await reporteService.obtenerDatosFactura(selectedVenta.idVenta);
+      console.log(datosReporte);
+      
+      
+      const datosFactura: DatosFactura = {
+        // Datos de la empresa
+        nombreFantasia: datosReporte.cabecera.nombreFantasia,
+        nombre: datosReporte.cabecera.nombre || '',
+        rubro: datosReporte.cabecera.rubro || '',
+        ruc: datosReporte.cabecera.ruc || '',
+        direccion: datosReporte.cabecera.direccionEmpresa || '',
+        telefono: datosReporte.cabecera.telefonoEmpresa || '',
+
+        // Datos de la venta
+        fechaHora: new Date(datosReporte.cabecera.fechaHora),
+        nroFactura: selectedVenta.nroFactura,
+        total: datosReporte.cabecera.total,
+
+        // Datos de control fiscal
+        timbrado: datosReporte.cabecera.timbrado || '',
+        fechaInicioVigencia: new Date(datosReporte.cabecera.fechaInicioVigencia),
+        fechaFinVigencia: new Date(datosReporte.cabecera.fechaFinVigencia),
+
+        // Datos del cliente
+        cliente: datosReporte.cabecera.cliente || '',
+        rucCliente: datosReporte.cabecera.rucCliente || '',
+        direccionCliente: datosReporte.cabecera.direccionCliente || '',
+        telefonoCliente: datosReporte.cabecera.telefonoCliente || '',
+
+        // Información adicional
+        vendedor: selectedVenta.usuario || datosReporte.cabecera.vendedor || 'Sistema',
+        tipoFactura: datosReporte.cabecera.tipoFactura || '',
+        formaVenta: datosReporte.cabecera.formaVenta || '',
+
+        // Liquidación IVA
+        gravada10: datosReporte.cabecera.gravada10 || 0,
+        gravada5: datosReporte.cabecera.gravada5 || 0,
+        exenta: datosReporte.cabecera.exenta || 0,
+        iva10: datosReporte.cabecera.iva10 || 0,
+        iva5: datosReporte.cabecera.iva5 || 0,
+        totalIva: datosReporte.cabecera.totalIva || 0,
+
+        // Items
+        items: datosReporte.items.map((item: any) => ({
+          cantidad: item.cantidad,
+          codigo: item.codigo,
+          mercaderia: item.mercaderia,
+          precio: item.precio,
+          subtotal: item.subtotal,
+          porcentajeImpuesto: item.porcentajeImpuesto
+        }))
+      };
+
+      await facturaService.generarTicket(datosFactura);
+    } catch (err: any) {
+      console.error('Error al imprimir factura:', err);
+      setError(err.message || 'Error al imprimir la factura');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // ── Helpers ─────────────────────────────────
   const formatMoneda = (v: number) => `₲ ${v.toLocaleString('es-PY')}`;
@@ -497,11 +569,9 @@ const ConsultaVentas: React.FC = () => {
                 variant="outlined"
                 startIcon={<PrintIcon />}
                 size="small"
-                disabled={!selectedVenta}
+                disabled={!selectedVenta || isLoading}
                 fullWidth
-                onClick={() => {
-                  // TODO: Conectar con el servicio de impresión
-                }}
+                onClick={handleImprimirFactura}
               >
                 Imprimir
               </Button>

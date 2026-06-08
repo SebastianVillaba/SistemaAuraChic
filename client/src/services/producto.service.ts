@@ -36,6 +36,7 @@ interface ProductoInfo {
   idTipoProducto: number;
   gasto: boolean;
   idImpuesto: number;
+  imagenUrl?: string;
 }
 
 /**
@@ -170,5 +171,67 @@ export const productoService = {
       console.error('Error al consultar precio del producto:', error);
       throw new Error('Error al consultar precio del producto');
     }
+  },
+
+  /**
+   * Obtiene precio de descuento de un producto
+   * @param idProducto - ID del producto
+   * @returns Lista con el precio de descuento del producto
+   */
+  obtenerPrecioDescuento: async (idProducto: number): Promise<any[]> => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/producto/precioDescuento`,
+        {
+          params: {
+            idProducto: idProducto
+          }
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error('Error al obtener precio de descuento:', error);
+      throw new Error('Error al obtener precio de descuento');
+    }
+  },
+
+  /**
+   * Sube una imagen para un producto
+   * @param file - Archivo de imagen a subir
+   * @returns Ruta de la imagen subida en el servidor
+   */
+  uploadImagen: async (file: File): Promise<{ success: boolean; imagenUrl: string }> => {
+    try {
+      const formData = new FormData();
+      formData.append('imagen', file);
+      const response = await axios.post<{ success: boolean; imagenUrl: string }>(
+        `${API_BASE_URL}/producto/upload-image`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+      return response.data;
+    } catch (error: any) {
+      console.error('Error al subir la imagen:', error);
+      if (error.response?.data) {
+        throw new Error(error.response.data.message || 'Error al subir la imagen');
+      }
+      throw new Error('Error de conexión al subir la imagen');
+    }
+  },
+
+  /**
+   * Obtiene la URL completa de una imagen
+   * @param path - Ruta relativa de la imagen
+   * @returns URL completa
+   */
+  obtenerUrlImagen: (path: string): string => {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    const baseUrl = API_BASE_URL.replace(/\/api$/, '');
+    return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
   }
 };

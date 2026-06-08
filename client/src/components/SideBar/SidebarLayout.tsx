@@ -32,7 +32,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import PersonalInjuryIcon from '@mui/icons-material/PersonalInjury';
 import Collapse from '@mui/material/Collapse';
 import { useNavigate } from 'react-router-dom';
-import { LocalHospital, PointOfSale } from '@mui/icons-material';
+import { LocalHospital, PointOfSale, LocalOffer, Add, Visibility } from '@mui/icons-material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import HistoryIcon from '@mui/icons-material/History';
 import ListSubheader from '@mui/material/ListSubheader';
@@ -198,35 +198,25 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
           icon: <ShoppingCartIcon />,
         },
         {
-          text: 'Sucursales',
-          icon: <BusinessIcon />,
-          subItems: [
-            { text: 'Remisiones', path: '/remisiones', icon: <ReceiptIcon /> },
-            { text: 'Recepciones Pendientes', path: '/recepciones-pendientes', icon: <InventoryIcon /> },
-          ],
-        },
-        {
-          text: 'Pedido Interno',
-          icon: <RequestQuoteIcon />,
-          subItems: [
-            { text: 'Generar Pedido', path: '/pedido-interno/generar', icon: <ReceiptIcon /> },
-            { text: 'Consulta Pedido', path: '/pedido-interno/consulta', icon: <ReceiptLongIcon /> },
-          ],
-        },
-        {
           text: 'Ajuste / Stock Inicial',
           icon: <InventoryIcon />,
           subItems: [
             { text: 'Ajustes', path: '/mercaderia/ajustes', icon: <InventoryIcon /> },
             { text: 'Stock Inicial', path: '/mercaderia/stock-inicial', icon: <InventoryIcon /> },
           ],
-        },
+        }
+      ],
+    },
+    // ──────────────── OFERTA ────────────────
+    {
+      label: 'Oferta',
+      items: [
         {
-          text: 'Sanatorio',
-          icon: <LocalHospital />,
+          text: 'Oferta',
+          icon: <LocalOffer />,
           subItems: [
-            { text: 'Pacientes', path: '/sanatorio/pacientes', icon: <PersonalInjuryIcon /> },
-            { text: 'Funcionarios', path: '/sanatorio/funcionarios', icon: <PeopleIcon /> },
+            { text: 'Crear Oferta', path: '/oferta/crear', icon: <Add /> },
+            { text: 'Ver Ofertas', path: '/oferta/ver', icon: <Visibility /> },
           ],
         },
       ],

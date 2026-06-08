@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Paper,
@@ -20,14 +20,14 @@ import {
   Card,
   CardContent,
   Stack,
+  CircularProgress,
 } from '@mui/material';
 import TextField from '../components/UppercaseTextField';
+import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import SearchIcon from '@mui/icons-material/Search';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
-import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
-import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import type { ItemFactura, Cliente } from '../types/factura.types';
 import type { Caja } from '../types/caja.types';
 import { ventaService } from '../services/venta.service';
@@ -36,14 +36,13 @@ import facturaService, { ticketService } from '../services/ticket.service';
 import { productoService } from '../services/producto.service';
 import type { DatosFactura, DatosTicket } from '../types/ticket.types';
 import SearchProductModal from '../components/SearchProductModal';
-import ClienteForm from '../components/ClienteForm';
 import CajaSelectorModal from '../components/CajaSelectorModal';
 import PagoModal from '../components/PagoModal';
 import TipoComprobanteModal from '../components/TipoComprobanteModal';
-import GastoModal from '../components/GastoModal';
 import { useTerminal } from '../hooks/useTerminal';
 import SearchClienteModal from '../components/SearchClienteModal';
 import RequirePermission from '../components/RequirePermission';
+import VendedorValidationModal from '../components/VendedorValidationModal';
 
 const Facturacion: React.FC = () => {
   // Obtener información de la terminal
@@ -60,17 +59,26 @@ const Facturacion: React.FC = () => {
   // TODO: Obtener idUsuario del contexto de autenticación
   const idUsuario = 1; // Temporal - reemplazar con usuario autenticado
 
-  // Estados para búsqueda
-  const [clientesOptions, setClientesOptions] = useState<Cliente[]>([]);
-  const [productosOptions, setProductosOptions] = useState<ItemFactura[]>([]);
+  // Estados para búsqueda>([]);
   const [termino, setTermino] = useState('');
   const [openSearchModal, setOpenSearchModal] = useState(false);
-  const [cantidadProducto, setCantidadProducto] = useState(1);
 
-  // Dialog para agregar producto
-  const [openProductDialog, setOpenProductDialog] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<ItemFactura | null>(null);
-  const [cantidad, setCantidad] = useState(1);
+  // Estados para el detalle de items y referencias
+  const [productoSeleccionado, setProductoSeleccionado] = useState<any | null>(null);
+  const [nombreProducto, setNombreProducto] = useState('');
+  const [cantidadProducto, setCantidadProducto] = useState(1);
+  const [precioProducto, setPrecioProducto] = useState(0);
+  const [precioDescuento, setPrecioDescuento] = useState(0);
+  const [porcentajeDescuento, setPorcentajeDescuento] = useState(0);
+  const [subtotalProducto, setSubtotalProducto] = useState(0);
+  const [selectedProductImg, setSelectedProductImg] = useState<string | null>(null);
+  const [loadingImg, setLoadingImg] = useState<boolean>(false);
+
+  // Referencias para usabilidad del teclado
+  const busquedaInputRef = useRef<HTMLInputElement>(null);
+  const precioDescuentoInputRef = useRef<HTMLInputElement>(null);
+  const cantidadInputRef = useRef<HTMLInputElement>(null);
+  const agregarButtonRef = useRef<HTMLButtonElement>(null);
 
   // Modal de cliente
   const [openClienteModal, setOpenClienteModal] = useState(false);
@@ -83,8 +91,9 @@ const Facturacion: React.FC = () => {
   const [openPagoModal, setOpenPagoModal] = useState(false);
   const [openTipoComprobanteModal, setOpenTipoComprobanteModal] = useState(false);
 
-  // Modal de gastos
-  const [openGastoModal, setOpenGastoModal] = useState(false);
+  // Modal de vendedor
+  const [openVendedorModal, setOpenVendedorModal] = useState(false);
+  const [vendedorAutorizado, setVendedorAutorizado] = useState<{ idVendedor: number; nombre: string } | null>(null);
 
   // Calcular totales
   const calcularTotales = () => {
@@ -129,8 +138,8 @@ const Facturacion: React.FC = () => {
       const results = await productoService.consultarPrecioProducto(busqueda, idTerminalWeb);
 
       if (results.length === 1) {
-        // Si hay un solo resultado, agregarlo directamente
-        await handleAgregarDesdeResultado(results[0]);
+        // Si hay un solo resultado, seleccionarlo
+        handleSeleccionarProducto(results[0]);
       } else if (results.length > 1) {
         // Si hay más de un resultado, abrir el modal
         setOpenSearchModal(true);
@@ -156,6 +165,9 @@ const Facturacion: React.FC = () => {
           return;
         }
       }
+      if (termino.length===0) {
+        setOpenSearchModal(true)
+      }
       handleBuscarProductos(termino);
     }
   };
@@ -180,8 +192,8 @@ const Facturacion: React.FC = () => {
           origen: det.origen,
           unidades: det.cantidad,
           precioUnitario: det.precioUnitario,
-          descuento: det.precioDescuento,
-          subtotal: det.subtotal,
+          descuento: (det.precioUnitario - det.precioDescuento) * det.cantidad,
+          subtotal: det.precioUnitario * det.cantidad,
           gravada10: det.gravada10,
           gravada5: det.gravada5,
           exenta: det.exenta,
@@ -223,10 +235,76 @@ const Facturacion: React.FC = () => {
     cargarNumeroFactura();
   }, [idTerminalWeb]);
 
-  // Agregar producto desde los resultados de búsqueda
-  const handleAgregarDesdeResultado = async (producto: any) => {
+  // Seleccionar producto para cargar en los inputs antes de agregar
+  const handleSeleccionarProducto = async (producto: any) => {
+    setProductoSeleccionado(producto);
+    setNombreProducto(producto.nombreMercaderia || producto.nombre || '');
+    setPrecioProducto(producto.precio || 0);
+    
+    let precioFinal = producto.precio || 0;
+    try {
+      const descData = await productoService.obtenerPrecioDescuento(producto.idProducto);
+      if (descData && descData.length > 0 && descData[0].precioDescuento !== null && descData[0].precioDescuento !== undefined) {
+        precioFinal = descData[0].precioDescuento;
+      }
+    } catch (err) {
+      console.error('Error al obtener precio de descuento de la API:', err);
+    }
+    
+    setPrecioDescuento(precioFinal);
+    
+    // Calcular % descuento inicial
+    const desc = (producto.precio || 0) - precioFinal;
+    const pct = producto.precio > 0 ? (desc / producto.precio) * 100 : 0;
+    setPorcentajeDescuento(parseFloat(pct.toFixed(1)));
+    
+    setSubtotalProducto(cantidadProducto * precioFinal);
+
+    // Obtener imagen del producto
+    setSelectedProductImg(null);
+    if (producto.imagenUrl) {
+      setSelectedProductImg(producto.imagenUrl);
+    } else if (producto.idProducto) {
+      setLoadingImg(true);
+      try {
+        const info = await productoService.obtenerInfoProducto(producto.idProducto);
+        if (info && info.length > 0) {
+          setSelectedProductImg(info[0].imagenUrl || '');
+        } else {
+          setSelectedProductImg('');
+        }
+      } catch (err) {
+        console.error('Error al obtener la imagen para la vista previa:', err);
+        setSelectedProductImg('');
+      } finally {
+        setLoadingImg(false);
+      }
+    }
+
+    // Enfocar el campo precioDescuento y seleccionar su texto
+    setTimeout(() => {
+      if (precioDescuentoInputRef.current) {
+        precioDescuentoInputRef.current.focus();
+        precioDescuentoInputRef.current.select();
+      }
+    }, 150);
+  };
+
+  // Agregar detalle de venta temporal tras validación
+  const handleAgregarDetalle = async () => {
     if (!idTerminalWeb) {
       setError('No hay terminal configurada');
+      return;
+    }
+    if (!productoSeleccionado) {
+      setError('Debe seleccionar un producto primero');
+      return;
+    }
+
+    // Validar que el precio con descuento no sea menor que el costo del producto
+    const costoProducto = productoSeleccionado.costo || 0;
+    if (precioDescuento < costoProducto) {
+      setError('No se puede establecer un precio menor al costo del producto');
       return;
     }
 
@@ -235,18 +313,32 @@ const Facturacion: React.FC = () => {
       await ventaService.agregarDetalleVenta({
         idTerminalWeb,
         idUsuario,
-        idProducto: producto.idProducto,
-        idStock: producto.idStock || 1,
+        idProducto: productoSeleccionado.idProducto,
+        idStock: productoSeleccionado.idStock || 1,
         cantidad: cantidadProducto,
-        precioUnitario: producto.precio,
-        precioDescuento: 0
+        precioUnitario: precioProducto, // precio original
+        precioDescuento: precioDescuento // precio ingresado por el usuario
       });
 
       // Recargar la lista
       await cargarDetalleVenta();
 
-      setTermino('');
+      // Limpiar estados de carga de producto
+      setProductoSeleccionado(null);
+      setNombreProducto('');
+      setPrecioProducto(0);
+      setPrecioDescuento(0);
+      setPorcentajeDescuento(0);
+      setSubtotalProducto(0);
       setCantidadProducto(1);
+      setTermino('');
+      setSelectedProductImg(null);
+
+      // Enfocar de nuevo en búsqueda
+      setTimeout(() => {
+        busquedaInputRef.current?.focus();
+      }, 50);
+
     } catch (error: any) {
       console.error('Error al agregar producto:', error);
       setError(error.message || 'Error al agregar producto');
@@ -299,8 +391,14 @@ const Facturacion: React.FC = () => {
   // Cuando se confirma el pago, abrir modal de tipo de comprobante
   const handleConfirmarPago = () => {
     setOpenPagoModal(false);
-    setOpenTipoComprobanteModal(true);
+    setOpenVendedorModal(true);
   };
+
+  const handleVendedorAutenticado= (idVendedor: number, nombre: string) => {
+    setVendedorAutorizado({ idVendedor, nombre });
+    setOpenVendedorModal(false);
+    setOpenTipoComprobanteModal(true);
+  }
 
   // Guardar venta según el tipo de comprobante seleccionado
   const handleGuardarVenta = async (esTicket: boolean) => {
@@ -323,12 +421,13 @@ const Facturacion: React.FC = () => {
         idMovimientoCaja: parseInt(idMovimientoCaja),
         idTipoPago: 1, // TODO: Obtener del formulario
         idTipoVenta: 1, // TODO: Obtener del formulario
-        idCliente: cliente?.idCliente || 8, // 8 = Cliente SIN NOMBRE
+        idCliente: cliente?.idCliente || 1, // 8 = Cliente SIN NOMBRE
         ruc: cliente?.documento || 'XXXXXXX',
         nombreCliente: cliente?.nombre || 'SIN NOMBRE',
         totalVenta: total,
         totalDescuento: descuentoTotal,
-        ticket: esTicket ? 1 : 0
+        ticket: esTicket ? 1 : 0,
+        idVendedor: vendedorAutorizado?.idVendedor || null
       };
 
       console.log('Venta a guardar:', ventaData);
@@ -467,6 +566,7 @@ const Facturacion: React.FC = () => {
   const handleNuevaFactura = async () => {
     setCliente(null);
     setItems([]);
+    setVendedorAutorizado(null);
     setError('');
     setSuccess('');
     // Incrementar número de factura
@@ -508,9 +608,9 @@ const Facturacion: React.FC = () => {
       <Box sx={{ height: 'calc(100vh - 120px)' }}>
         {/* Encabezado */}
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Paper sx={{ p: 2, mb: 2, width: '120vh' }}>
+          <Paper sx={{ p: 2, mb: 2, width: '140vh' }}>
             <Grid container spacing={4}>
-              <Grid xs={6}>
+              <Grid size={6}>
                 <Stack spacing={1}>
                   <div>
                     <TextField
@@ -553,7 +653,7 @@ const Facturacion: React.FC = () => {
                 </Stack>
               </Grid>
 
-              <Grid xs={3}>
+              <Grid size={3}>
                 <Stack spacing={1}>
                   <TextField
                     fullWidth
@@ -578,7 +678,7 @@ const Facturacion: React.FC = () => {
                   </div>
                 </Stack>
               </Grid>
-              <Grid xs={3}>
+              <Grid size={3}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Condición</InputLabel>
                   <Select
@@ -593,7 +693,6 @@ const Facturacion: React.FC = () => {
               </Grid>
             </Grid>
           </Paper>
-
           <Paper sx={{ p: 2, mb: 2, minHeight: '18vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Typography variant='h2'>₲</Typography>
@@ -644,88 +743,261 @@ const Facturacion: React.FC = () => {
           setCliente(null);
         }}>{success}</Alert>}
 
-        {/* Tabla de productos */}
-        <Paper sx={{ p: 2, mb: 2 }}>
-          <Box sx={{ display: 'flex', mb: 2, gap: 1, alignItems: 'flex-start' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <TextField
-                label="Cantidad/Kg"
-                size="small"
-                type="number"
-                value={cantidadProducto}
-                onChange={(e) => {
-                  const valor = parseFloat(e.target.value);
-                  setCantidadProducto(isNaN(valor) || valor <= 0 ? 1 : valor);
-                }}
-                sx={{ width: '120px' }}
-                inputProps={{ min: 0.001, step: 0.001 }}
-              />
-            </Box>
-            <TextField
-              fullWidth
-              label="Buscar producto (código, código de barra o nombre)"
-              size="small"
-              value={termino}
-              onChange={(e) => setTermino(e.target.value)}
-              onKeyPress={handleSearchKeyPress}
-              placeholder="Ingrese nombre o código del producto"
-              helperText="Tip: Escribe +1.5 y Enter para 1.5kg o +2 para 2 unidades"
-            />
-            <Button
-              variant="contained"
-              onClick={() => setOpenSearchModal(true)}
-              startIcon={<SearchIcon />}
-            >
-              Buscar
-            </Button>
-          </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Grid container spacing={1} sx={{
+            width: '100%'
+          }}>
+            <Grid size={10}>
+              {/* Tabla de productos */}
+              <Paper sx={{ p: 2, mb: 2 }}>
+                  <Grid container spacing={1} sx={{
+                    width: '100%'
+                  }}>
+                    <Grid size={7}>
+                      <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 0.5
+                      }}>
+                        <TextField
+                          fullWidth
+                          label="Buscar producto (código, código de barra o nombre)"
+                          size="small"
+                          value={termino}
+                          onChange={(e) => setTermino(e.target.value)}
+                          onKeyPress={handleSearchKeyPress}
+                          placeholder="Ingrese nombre o código del producto"
+                          inputRef={busquedaInputRef}
+                        />
+                        <TextField
+                          fullWidth
+                          size="small"
+                          value={nombreProducto}
+                          onChange={(e) => setNombreProducto(e.target.value)}
+                          variant='standard'
+                          disabled
+                        />
+                      </Box>
+                    </Grid>
+                    {/* ──────────────── */}
+                    {/* PRECIO DESCUENTO */}
+                    {/* ──────────────── */}
+                    <Grid size={1}>
+                      <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 0.5
+                      }}>
+                        <TextField 
+                          fullWidth
+                          label="Precio Desc"
+                          value={precioDescuento}
+                          onChange={(e) => {
+                            const val = parseFloat(e.target.value) || 0;
+                            setPrecioDescuento(val);
+                            
+                            // Calcular % Desc.
+                            const desc = precioProducto - val;
+                            const pct = precioProducto > 0 ? (desc / precioProducto) * 100 : 0;
+                            setPorcentajeDescuento(parseFloat(pct.toFixed(2)));
+                            
+                            // Calcular Subtotal
+                            setSubtotalProducto(cantidadProducto * val);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              cantidadInputRef.current?.focus();
+                              cantidadInputRef.current?.select();
+                            }
+                          }}
+                          size="small"
+                          sx={{
+                            width: '100%',
+                          }}
+                          inputRef={precioDescuentoInputRef}
+                        />
+                        <TextField 
+                          fullWidth
+                          value={precioProducto}
+                          size="small"
+                          label="Precio Unitario"
+                          sx={{
+                          '& .MuiOutlinedInput-root': {
+                            backgroundColor: '#f0f4f8',
+                          },
+                          width: '100%'
+                          }}
+                          disabled
+                        />
+                      </Box>
+                    </Grid>
+                    {/* ─────────── */}
+                    {/* % DESCUENTO */}
+                    {/* ─────────── */}
+                    <Grid size={1}>
+                      <TextField 
+                        fullWidth
+                        label="% Desc."
+                        value={porcentajeDescuento}
+                        disabled
+                        size="small"
+                      />
+                    </Grid>
+                    {/* ──────────── */}
+                    {/*   CANTIDAD   */}
+                    {/* ──────────── */}
+                    <Grid size={1}>
+                      <TextField
+                        label="Cantidad"
+                        size="small"
+                        type="number"
+                        value={cantidadProducto}
+                        onChange={(e) => {
+                          const valor = parseFloat(e.target.value);
+                          const qty = isNaN(valor) || valor <= 0 ? 1 : valor;
+                          setCantidadProducto(qty);
+                          setSubtotalProducto(qty * precioDescuento);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            agregarButtonRef.current?.focus();
+                          }
+                        }}
+                        inputProps={{ min: 0.001, step: 0.001 }}
+                        inputRef={cantidadInputRef}
+                      />
+                    </Grid>
+                    {/* ─────────── */}
+                    {/*  SUB-TOTAL  */}
+                    {/* ─────────── */}
+                    <Grid size={1}>
+                        <TextField
+                          fullWidth
+                          label="Subtotal"
+                          value={subtotalProducto}
+                          size="small"
+                          disabled
+                        />
+                    </Grid>
+                    <Grid size={1}>
+                      <Button 
+                        sx={{
+                          width: '100%'
+                        }}
+                        variant='contained'
+                        onClick={handleAgregarDetalle}
+                        ref={agregarButtonRef}
+                      >
+                        <AddIcon/>
+                      </Button>
+                    </Grid>
+                    <Grid size={2}>
+                    </Grid>
+                  </Grid>
+                
 
-          <TableContainer>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Descripción</TableCell>
-                  <TableCell>Origen</TableCell>
-                  <TableCell align="center">Cantidad</TableCell>
-                  <TableCell align="right">Precio Unit.</TableCell>
-                  <TableCell align="right">Subtotal</TableCell>
-                  <TableCell align="right">Descuento</TableCell>
-                  <TableCell align="right">Prec. Descuento</TableCell>
-                  <TableCell align="right">Acciones</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {items.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{item.descripcion || item.nombreMercaderia}</TableCell>
-                    <TableCell>{item.origen === 'N' ? 'Nacional' : 'Importado'}</TableCell>
-                    <TableCell align='center'>{item.unidades}</TableCell>
-                    <TableCell align="right">₲{(item.precioUnitario || item.precio || 0).toLocaleString()}</TableCell>
-                    <TableCell align="right">₲{(item.subtotal || 0).toLocaleString()}</TableCell>
-                    <TableCell align="right">
-                      {item.descuento}
-                    </TableCell>
-                    <TableCell align="right">₲{((item.subtotal || 0) - (item.descuento || 0)).toLocaleString()}</TableCell>
-                    <TableCell align="right">
-                      <IconButton size="small" color="error" onClick={() => handleEliminarItem(index)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {items.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
-                      <Typography color="text.secondary">
-                        No hay productos agregados, ingresa el codigo o nombre de un producto para comenzar.
+                <TableContainer>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Descripción</TableCell>
+                        <TableCell>Origen</TableCell>
+                        <TableCell align="center">Cantidad</TableCell>
+                        <TableCell align="right">Precio Unit.</TableCell>
+                        <TableCell align="right">Subtotal</TableCell>
+                        <TableCell align="right">Descuento</TableCell>
+                        <TableCell align="right">Prec. Descuento</TableCell>
+                        <TableCell align="right">Acciones</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {items.map((item, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{item.descripcion || item.nombreMercaderia}</TableCell>
+                          <TableCell>{item.origen === 'N' ? 'Nacional' : 'Importado'}</TableCell>
+                          <TableCell align='center'>{item.unidades}</TableCell>
+                          <TableCell align="right">₲{(item.precioUnitario || item.precio || 0).toLocaleString()}</TableCell>
+                          <TableCell align="right">₲{(item.subtotal || 0).toLocaleString()}</TableCell>
+                          <TableCell align="right">
+                            {item.descuento}
+                          </TableCell>
+                          <TableCell align="right">₲{((item.subtotal || 0) - (item.descuento || 0)).toLocaleString()}</TableCell>
+                          <TableCell align="right">
+                            <IconButton size="small" color="error" onClick={() => handleEliminarItem(index)}>
+                              <DeleteIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {items.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
+                            <Typography color="text.secondary">
+                              No hay productos agregados, ingresa el codigo o nombre de un producto para comenzar.
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Paper>
+            </Grid>
+            <Grid size={2}>
+              {/* Imagen del producto seleccionado */}
+                <Box sx={{
+                  minWidth: '100%',
+                  maxHeightheight: '80vh',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  p: 1,
+                  backgroundColor: '#fafafa',
+                  borderRadius: 2,
+                  border: '1px solid #e0e0e0',
+                  minHeight: '120px'
+                }}>
+                  {loadingImg ? (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                      <CircularProgress size={24} />
+                      <Typography variant="caption" color="text.secondary">
+                        Cargando...
                       </Typography>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
+                    </Box>
+                  ) : selectedProductImg ? (
+                    <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                      <img
+                        src={productoService.obtenerUrlImagen(selectedProductImg)}
+                        alt="Vista previa"
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '200px',
+                          objectFit: 'contain',
+                          borderRadius: '4px',
+                          backgroundColor: 'white',
+                          boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
+                        }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    </Box>
+                  ) : (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.5, textAlign: 'center' }}>
+                      <Typography variant="caption" color="text.secondary">
+                        {productoSeleccionado ? 'Sin imagen' : 'Sin producto'}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+            </Grid>
+          </Grid>
+
+
+        </Box>
 
         {/* Totales y acciones */}
         <Paper sx={{ p: 2 }}>
@@ -800,7 +1072,7 @@ const Facturacion: React.FC = () => {
           open={openSearchModal}
           onClose={() => setOpenSearchModal(false)}
           idTerminalWeb={idTerminalWeb}
-          onSelectProduct={handleAgregarDesdeResultado}
+          onSelectProduct={handleSeleccionarProducto}
           busqueda={termino}
         />
 
@@ -809,13 +1081,6 @@ const Facturacion: React.FC = () => {
           open={openClienteModal}
           onClose={() => setOpenClienteModal(false)}
           onClienteSelected={handleClienteSelected}
-        />
-
-        {/* Modal de selección de caja */}
-        <CajaSelectorModal
-          open={openCajaSelector}
-          onClose={() => setOpenCajaSelector(false)}
-          onSelectCaja={(caja) => setCajaSeleccionada(caja)}
         />
 
         {/* Modal de pago */}
@@ -832,6 +1097,13 @@ const Facturacion: React.FC = () => {
           onClose={() => setOpenTipoComprobanteModal(false)}
           onSelectTipo={handleGuardarVenta}
         />  
+
+        {/* Modal de validación de vendedor */}
+        <VendedorValidationModal
+          open={openVendedorModal}
+          onClose={() => setOpenVendedorModal(false)}
+          onSuccess={handleVendedorAutenticado}
+        />
       </Box>
     </RequirePermission>
   );

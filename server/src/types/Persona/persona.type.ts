@@ -12,7 +12,6 @@ export interface InsertarPersonaRequest {
   idUsuarioAlta: number;
   idTipoDocumento?: number;
   nombreFantasia?: string;
-  apellido?: string;
   codigo?: number;
   idGrupoCliente?: number;
   tipoPersonaJur: boolean;
@@ -58,7 +57,7 @@ export interface PersonaInfoCompleta {
   nombreDepartamento: string;  // Nombre del departamento
 
   // Campos de personaFis
-  apellido?: string;
+  idPersonaFis?: number;
 
   // Campos de personaJur
   nombreFantasia?: string;
@@ -89,7 +88,6 @@ export interface ModificarPersonaRequest {
   idTipoDocumento?: number;
   activo: number;
   nombreFantasia?: string;
-  apellido?: string;
   responsableProveedor?: string;
   timbrado?: string;
   idSector?: number;

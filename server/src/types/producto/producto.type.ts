@@ -10,6 +10,7 @@ export interface InsertarProductoRequest {
   gasto?: boolean;
   activo?: boolean;
   idImpuesto?: number;
+  imagenUrl?: string;
 }
 
 export interface InsertarProductoResponse {
@@ -36,4 +37,5 @@ export interface ModificarProductoRequest {
   gasto?: boolean;
   activo?: boolean;
   idImpuesto?: number;
+  imagenUrl?: string;
 }
