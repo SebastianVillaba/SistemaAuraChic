@@ -204,6 +204,11 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
             { text: 'Ajustes', path: '/mercaderia/ajustes', icon: <InventoryIcon /> },
             { text: 'Stock Inicial', path: '/mercaderia/stock-inicial', icon: <InventoryIcon /> },
           ],
+        },
+        {
+          text: 'Carga de Productos',
+          path: '/mercaderia/carga-productos',
+          icon: <InventoryIcon />,
         }
       ],
     },

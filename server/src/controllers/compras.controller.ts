@@ -212,6 +212,8 @@ export const buscarProducto = async (req: Request, res: Response) => {
             ]
         });
         res.status(200).json(result.recordset);
+        console.log(result.recordset);
+        
     } catch (error: any) {
         console.error('Error al buscar producto:', error);
         res.status(500).json({ message: 'Error al buscar producto', error: error.message || 'Error desconocido' });

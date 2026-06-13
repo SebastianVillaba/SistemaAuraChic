@@ -26,6 +26,7 @@ import Roles from './pages/Administracion/Roles';
 import UsuariosABM from './pages/Administracion/UsuariosABM';
 import TerminalesABM from './pages/Administracion/TerminalesABM';
 import StockInicial from './pages/Mercaderia/StockInicial';
+import CargaProductos from './pages/Mercaderia/CargaProductos';
 import ArqueoCaja from './pages/Caja/ArqueoCaja';
 import ConsultaVentas from './pages/Consultas/ConsultaVentas';
 import Reportes from './pages/Reportes/Reportes';
@@ -83,6 +84,7 @@ const AppRouter: React.FC = () => {
         <Route path="mercaderia">
           <Route path="ajustes" element={<Ajustes />} />
           <Route path="stock-inicial" element={<StockInicial />} />
+          <Route path="carga-productos" element={<CargaProductos />} />
         </Route>
         <Route path="sanatorio">
           <Route path="pacientes" element={<PlanillaPacientes />} />

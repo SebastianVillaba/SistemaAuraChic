@@ -743,161 +743,153 @@ const Facturacion: React.FC = () => {
           setCliente(null);
         }}>{success}</Alert>}
 
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Box >
+          {/* Tabla de productos */}
+          <Paper sx={{ p: 2, mb: 2 }}>
+            <Grid container spacing={1} sx={{
+              width: '100%'
+            }}>
+              <Grid size={7}>
+                <Box sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 0.5
+                }}>
+                  <TextField
+                    fullWidth
+                    label="Buscar producto (código, código de barra o nombre)"
+                    size="small"
+                    value={termino}
+                    onChange={(e) => setTermino(e.target.value)}
+                    onKeyPress={handleSearchKeyPress}
+                    placeholder="Ingrese nombre o código del producto"
+                    inputRef={busquedaInputRef}
+                  />
+                  <TextField
+                    fullWidth
+                    size="small"
+                    value={nombreProducto}
+                    onChange={(e) => setNombreProducto(e.target.value)}
+                    variant='standard'
+                    disabled
+                  />
+                </Box>
+              </Grid>
+              {/* PRECIO DESCUENTO */}
+              <Grid size={1}>
+                <Box sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 0.5
+                }}>
+                  <TextField 
+                    fullWidth
+                    label="Precio Desc"
+                    value={precioDescuento}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      setPrecioDescuento(val);
+                      
+                      // Calcular % Desc.
+                      const desc = precioProducto - val;
+                      const pct = precioProducto > 0 ? (desc / precioProducto) * 100 : 0;
+                      setPorcentajeDescuento(parseFloat(pct.toFixed(2)));
+                      
+                      // Calcular Subtotal
+                      setSubtotalProducto(cantidadProducto * val);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        cantidadInputRef.current?.focus();
+                        cantidadInputRef.current?.select();
+                      }
+                    }}
+                    size="small"
+                    sx={{
+                      width: '100%',
+                    }}
+                    inputRef={precioDescuentoInputRef}
+                  />
+                  <TextField 
+                    fullWidth
+                    value={precioProducto}
+                    size="small"
+                    label="Precio Unitario"
+                    sx={{
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: '#f0f4f8',
+                    },
+                    width: '100%'
+                    }}
+                    disabled
+                  />
+                </Box>
+              </Grid>
+              {/* DESCUENTO */}
+              <Grid size={1}>
+                <TextField 
+                  fullWidth
+                  label="% Desc."
+                  value={porcentajeDescuento}
+                  disabled
+                  size="small"
+                />
+              </Grid>
+              {/*   CANTIDAD   */}
+              <Grid size={1}>
+                <TextField
+                  label="Cantidad"
+                  size="small"
+                  type="number"
+                  value={cantidadProducto}
+                  onChange={(e) => {
+                    const valor = parseFloat(e.target.value);
+                    const qty = isNaN(valor) || valor <= 0 ? 1 : valor;
+                    setCantidadProducto(qty);
+                    setSubtotalProducto(qty * precioDescuento);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      agregarButtonRef.current?.focus();
+                    }
+                  }}
+                  inputProps={{ min: 0.001, step: 0.001 }}
+                  inputRef={cantidadInputRef}
+                />
+              </Grid>
+              {/* ─────────── */}
+              {/*  SUB-TOTAL  */}
+              {/* ─────────── */}
+              <Grid size={1}>
+                  <TextField
+                    fullWidth
+                    label="Subtotal"
+                    value={subtotalProducto}
+                    size="small"
+                    disabled
+                  />
+              </Grid>
+              <Grid size={1}>
+                <Button 
+                  sx={{
+                    width: '100%'
+                  }}
+                  variant='contained'
+                  onClick={handleAgregarDetalle}
+                  ref={agregarButtonRef}
+                >
+                  <AddIcon/>
+                </Button>
+              </Grid>
+            </Grid>
+          </Paper>
           <Grid container spacing={1} sx={{
             width: '100%'
           }}>
             <Grid size={10}>
-              {/* Tabla de productos */}
               <Paper sx={{ p: 2, mb: 2 }}>
-                  <Grid container spacing={1} sx={{
-                    width: '100%'
-                  }}>
-                    <Grid size={7}>
-                      <Box sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 0.5
-                      }}>
-                        <TextField
-                          fullWidth
-                          label="Buscar producto (código, código de barra o nombre)"
-                          size="small"
-                          value={termino}
-                          onChange={(e) => setTermino(e.target.value)}
-                          onKeyPress={handleSearchKeyPress}
-                          placeholder="Ingrese nombre o código del producto"
-                          inputRef={busquedaInputRef}
-                        />
-                        <TextField
-                          fullWidth
-                          size="small"
-                          value={nombreProducto}
-                          onChange={(e) => setNombreProducto(e.target.value)}
-                          variant='standard'
-                          disabled
-                        />
-                      </Box>
-                    </Grid>
-                    {/* ──────────────── */}
-                    {/* PRECIO DESCUENTO */}
-                    {/* ──────────────── */}
-                    <Grid size={1}>
-                      <Box sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 0.5
-                      }}>
-                        <TextField 
-                          fullWidth
-                          label="Precio Desc"
-                          value={precioDescuento}
-                          onChange={(e) => {
-                            const val = parseFloat(e.target.value) || 0;
-                            setPrecioDescuento(val);
-                            
-                            // Calcular % Desc.
-                            const desc = precioProducto - val;
-                            const pct = precioProducto > 0 ? (desc / precioProducto) * 100 : 0;
-                            setPorcentajeDescuento(parseFloat(pct.toFixed(2)));
-                            
-                            // Calcular Subtotal
-                            setSubtotalProducto(cantidadProducto * val);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              cantidadInputRef.current?.focus();
-                              cantidadInputRef.current?.select();
-                            }
-                          }}
-                          size="small"
-                          sx={{
-                            width: '100%',
-                          }}
-                          inputRef={precioDescuentoInputRef}
-                        />
-                        <TextField 
-                          fullWidth
-                          value={precioProducto}
-                          size="small"
-                          label="Precio Unitario"
-                          sx={{
-                          '& .MuiOutlinedInput-root': {
-                            backgroundColor: '#f0f4f8',
-                          },
-                          width: '100%'
-                          }}
-                          disabled
-                        />
-                      </Box>
-                    </Grid>
-                    {/* ─────────── */}
-                    {/* % DESCUENTO */}
-                    {/* ─────────── */}
-                    <Grid size={1}>
-                      <TextField 
-                        fullWidth
-                        label="% Desc."
-                        value={porcentajeDescuento}
-                        disabled
-                        size="small"
-                      />
-                    </Grid>
-                    {/* ──────────── */}
-                    {/*   CANTIDAD   */}
-                    {/* ──────────── */}
-                    <Grid size={1}>
-                      <TextField
-                        label="Cantidad"
-                        size="small"
-                        type="number"
-                        value={cantidadProducto}
-                        onChange={(e) => {
-                          const valor = parseFloat(e.target.value);
-                          const qty = isNaN(valor) || valor <= 0 ? 1 : valor;
-                          setCantidadProducto(qty);
-                          setSubtotalProducto(qty * precioDescuento);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            agregarButtonRef.current?.focus();
-                          }
-                        }}
-                        inputProps={{ min: 0.001, step: 0.001 }}
-                        inputRef={cantidadInputRef}
-                      />
-                    </Grid>
-                    {/* ─────────── */}
-                    {/*  SUB-TOTAL  */}
-                    {/* ─────────── */}
-                    <Grid size={1}>
-                        <TextField
-                          fullWidth
-                          label="Subtotal"
-                          value={subtotalProducto}
-                          size="small"
-                          disabled
-                        />
-                    </Grid>
-                    <Grid size={1}>
-                      <Button 
-                        sx={{
-                          width: '100%'
-                        }}
-                        variant='contained'
-                        onClick={handleAgregarDetalle}
-                        ref={agregarButtonRef}
-                      >
-                        <AddIcon/>
-                      </Button>
-                    </Grid>
-                    <Grid size={2}>
-                    </Grid>
-                  </Grid>
-                
-
                 <TableContainer>
                   <Table size="small">
                     <TableHead>
@@ -1010,13 +1002,13 @@ const Facturacion: React.FC = () => {
                       <Typography variant="body2" color="text.secondary">Subtotal:</Typography>
                     </Grid>
                     <Grid xs={6}>
-                      <Typography variant="body1" align="right">₲{subtotal.toLocaleString()}</Typography>
+                      <Typography variant="body1" align="right">{subtotal.toLocaleString()}</Typography>
                     </Grid>
                     <Grid xs={6}>
                       <Typography variant="body2" color="text.secondary">Descuento:</Typography>
                     </Grid>
                     <Grid xs={6}>
-                      <Typography variant="body1" align="right" color="error">-₲{descuentoTotal.toLocaleString()}</Typography>
+                      <Typography variant="body1" align="right" color="error">-{descuentoTotal.toLocaleString()}</Typography>
                     </Grid>
                   </Grid>
                 </CardContent>
@@ -1031,19 +1023,19 @@ const Facturacion: React.FC = () => {
                       <Typography variant="body2" color="text.secondary">IVA 5%:</Typography>
                     </Grid>
                     <Grid xs={6}>
-                      <Typography variant="body1" align="right">₲{iva5Total.toLocaleString()}</Typography>
+                      <Typography variant="body1" align="right">{iva5Total.toLocaleString()}</Typography>
                     </Grid>
                     <Grid xs={6}>
                       <Typography variant="body2" color="text.secondary">IVA 10%:</Typography>
                     </Grid>
                     <Grid xs={6}>
-                      <Typography variant="body1" align="right">₲{iva10Total.toLocaleString()}</Typography>
+                      <Typography variant="body1" align="right">{iva10Total.toLocaleString()}</Typography>
                     </Grid>
                     <Grid xs={6}>
                       <Typography variant="h6">Total IVA:</Typography>
                     </Grid>
                     <Grid xs={6}>
-                      <Typography variant="h6" align="right" color="primary">₲{ivaTotal.toLocaleString()}</Typography>
+                      <Typography variant="h6" align="right" color="primary">{ivaTotal.toLocaleString()}</Typography>
                     </Grid>
                   </Grid>
                 </CardContent>

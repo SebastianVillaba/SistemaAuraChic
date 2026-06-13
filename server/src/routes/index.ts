@@ -27,6 +27,7 @@ import denominacionRoutes from './denominacion.routes';
 import anulacionRoutes from './anulacion.routes';
 import consultaVentaRoutes from './consultaVenta.routes';
 import ofertaRoutes from './oferta.routes';
+import cargaProductosRoutes from './cargaProductos.routes';
 
 const router = Router();
 
@@ -58,5 +59,6 @@ router.use('/stock-inicial', stockInicialRoutes);
 router.use('/anulacion', anulacionRoutes);
 router.use('/consulta-venta', consultaVentaRoutes);
 router.use('/ofertas', ofertaRoutes);
+router.use('/carga-productos', cargaProductosRoutes);
 
 export default router;
