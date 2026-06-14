@@ -1,5 +1,5 @@
 import express from 'express';
-import { buscarInfoPersona, buscarPersona, buscarClientePorRuc, agregarClienteRapido, insertarPersona, consultaCliente, modificarPersona } from '../controllers/persona.controller';
+import { buscarInfoPersona, buscarPersona, buscarClientePorRuc, agregarClienteRapido, insertarPersona, consultaCliente, modificarPersona, obtenerGruposCliente } from '../controllers/persona.controller';
 
 const router = express.Router();
 
@@ -11,6 +11,7 @@ router.get('/consulta', buscarPersona);
 router.get('/consultaCliente', consultaCliente);
 router.get('/info', buscarInfoPersona);
 router.get('/buscarCliente', buscarClientePorRuc);
+router.get('/gruposCliente', obtenerGruposCliente);
 router.post('/agregarClienteRapido', agregarClienteRapido);
 
 export default router;

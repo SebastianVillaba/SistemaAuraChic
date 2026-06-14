@@ -23,8 +23,8 @@ export interface Persona {
   timbrado?: string;                 
   tipoPersonaFis: boolean;           
   tipoPersonaCli: boolean;           
-  tipoFuncionario: boolean;
-  idSector?: number | null;
+  tipoPersonal: boolean;
+  tipoVendedor: boolean;
 }
 
 export interface PersonaFormData extends Persona {}
@@ -32,4 +32,9 @@ export interface PersonaFormData extends Persona {}
 export interface PersonaSearchParams {
   searchTerm?: string;
   searchBy?: 'nombre' | 'codigo' | 'ruc';
+}
+
+export interface GrupoCliente {
+  idGrupoCliente: number;
+  nombreGrupoCliente: string;
 }

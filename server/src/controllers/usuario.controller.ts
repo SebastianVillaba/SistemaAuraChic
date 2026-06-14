@@ -5,7 +5,19 @@ import { CrearUsuarioRequest, ModificarUsuarioRequest } from '../types/usuario.t
 import bcrypt from 'bcryptjs';
 
 export const crearUsuario = async (req: Request, res: Response) => {
-    const { idPersona, username, password, idRol, idUsuarioAlta } = req.body as CrearUsuarioRequest;
+    const { 
+        idPersonal, 
+        username, 
+        password, 
+        idRol, 
+        idUsuarioAlta,
+        anularCompra,
+        anularVenta,
+        anularRemision,
+        anularRecepcion,
+        anularAjuste,
+        anularCargaProducto
+    } = req.body as CrearUsuarioRequest;
 
     try {
         const salt = await bcrypt.genSalt(10);
@@ -15,11 +27,17 @@ export const crearUsuario = async (req: Request, res: Response) => {
             isStoredProcedure: true,
             query: 'sp_crearUsuario',
             inputs: [
-                { name: 'idPersona', type: sql.Int, value: idPersona },
+                { name: 'idPersonal', type: sql.Int, value: idPersonal },
                 { name: 'username', type: sql.VarChar(50), value: username },
                 { name: 'password', type: sql.VarChar(255), value: hashedPassword },
                 { name: 'idRol', type: sql.Int, value: idRol },
-                { name: 'idUsuarioAlta', type: sql.Int, value: idUsuarioAlta }
+                { name: 'idUsuarioAlta', type: sql.Int, value: idUsuarioAlta },
+                { name: 'anularCompra', type: sql.Bit, value: !!anularCompra },
+                { name: 'anularVenta', type: sql.Bit, value: !!anularVenta },
+                { name: 'anularRemision', type: sql.Bit, value: !!anularRemision },
+                { name: 'anularRecepcion', type: sql.Bit, value: !!anularRecepcion },
+                { name: 'anularAjuste', type: sql.Bit, value: !!anularAjuste },
+                { name: 'anularCargaProducto', type: sql.Bit, value: !!anularCargaProducto }
             ]
         });
 
@@ -31,7 +49,19 @@ export const crearUsuario = async (req: Request, res: Response) => {
 };
 
 export const modificarUsuario = async (req: Request, res: Response) => {
-    const { idUsuario, username, password, idRol, activo } = req.body as ModificarUsuarioRequest;
+    const { 
+        idUsuario, 
+        username, 
+        password, 
+        idRol, 
+        activo,
+        anularCompra,
+        anularVenta,
+        anularRemision,
+        anularRecepcion,
+        anularAjuste,
+        anularCargaProducto
+    } = req.body as ModificarUsuarioRequest;
 
     try {
         let hashedPassword = null;
@@ -48,7 +78,13 @@ export const modificarUsuario = async (req: Request, res: Response) => {
                 { name: 'username', type: sql.VarChar(50), value: username },
                 { name: 'password', type: sql.VarChar(255), value: hashedPassword },
                 { name: 'idRol', type: sql.Int, value: idRol },
-                { name: 'activo', type: sql.TinyInt, value: activo }
+                { name: 'activo', type: sql.TinyInt, value: activo },
+                { name: 'anularCompra', type: sql.Bit, value: !!anularCompra },
+                { name: 'anularVenta', type: sql.Bit, value: !!anularVenta },
+                { name: 'anularRemision', type: sql.Bit, value: !!anularRemision },
+                { name: 'anularRecepcion', type: sql.Bit, value: !!anularRecepcion },
+                { name: 'anularAjuste', type: sql.Bit, value: !!anularAjuste },
+                { name: 'anularCargaProducto', type: sql.Bit, value: !!anularCargaProducto }
             ]
         });
 
@@ -175,6 +211,37 @@ export const validarVendedor = async (req: Request, res: Response): Promise<void
 
     } catch (error: any) {
         logger.error('Error al validar vendedor:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+/**
+ * Controller para obtener la lista de personales creados que no tienen usuario.
+ */
+export const obtenerPersonalesSinUsuario = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const result = await executeRequest({
+            query: `
+                SELECT 
+                    per.idPersonal,
+                    p.idPersona,
+                    p.nombre AS nombreCompleto,
+                    ISNULL(p.ruc, 'S/RUC') AS ruc,
+                    p.email
+                FROM dbo.personal per
+                INNER JOIN dbo.personaFis pf ON per.idPersonaFis = pf.idPersonaFis
+                INNER JOIN dbo.persona p ON pf.idPersona = p.idPersona
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM dbo.v_usuario u WHERE u.idPersona = p.idPersona
+                ) AND per.activo = 1
+                ORDER BY p.nombre;
+            `,
+            isStoredProcedure: false
+        });
+
+        res.json(result.recordset);
+    } catch (error: any) {
+        logger.error('Error al obtener personales sin usuario:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 };

@@ -32,6 +32,7 @@ import ConsultaVentas from './pages/Consultas/ConsultaVentas';
 import Reportes from './pages/Reportes/Reportes';
 import CrearOferta from './pages/Ofertas/CrearOferta';
 import VerOfertas from './pages/Ofertas/VerOfertas';
+import ConsultaStock from './pages/Mercaderia/ConsultaStock';
 
 // Placeholder components for sub-routes
 const ClientesABM = () => <Container><h3>Submenú Clientes (ABM)</h3></Container>;
@@ -85,6 +86,7 @@ const AppRouter: React.FC = () => {
           <Route path="ajustes" element={<Ajustes />} />
           <Route path="stock-inicial" element={<StockInicial />} />
           <Route path="carga-productos" element={<CargaProductos />} />
+          <Route path="consulta-stock" element={<ConsultaStock />} />
         </Route>
         <Route path="sanatorio">
           <Route path="pacientes" element={<PlanillaPacientes />} />

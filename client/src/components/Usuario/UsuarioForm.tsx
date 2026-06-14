@@ -11,7 +11,8 @@ import {
     FormControlLabel,
     Button,
     InputAdornment,
-    IconButton
+    IconButton,
+    Grid
 } from '@mui/material';
 import TextField from '../UppercaseTextField'; // Custom Uppercase TextField
 import { useState, useEffect } from 'react';
@@ -160,12 +161,7 @@ export default function UsuarioForm({ formData, setFormData, isNewMode }: Usuari
                     <FormControlLabel
                         control={
                             <Checkbox
-                                checked={formData.activo === true || formData.activo === undefined} // Default to true if undefined? Or handle properly
-                                // Actually backend sends 1/0 for tinyint, frontend types say boolean. Need to ensure conversion.
-                                // Let's assume service handles conversion or we handle it here.
-                                // If formData.activo comes as number 1/0, we need to handle it.
-                                // In types/usuario.types.ts I defined active?: boolean.
-                                // In controller it expects tinyint.
+                                checked={formData.activo === true || formData.activo === undefined} 
                                 onChange={(e) => setFormData(prev => ({ ...prev, activo: e.target.checked }))}
                                 name="activo"
                             />
@@ -173,6 +169,81 @@ export default function UsuarioForm({ formData, setFormData, isNewMode }: Usuari
                         label="Activo"
                     />
                 )}
+
+                {/* Permisos Especiales */}
+                <Box sx={{ mt: 1, p: 2, borderRadius: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2, color: '#1e293b' }}>
+                        Permisos Especiales de Anulación
+                    </Typography>
+                    <Grid container spacing={1}>
+                        <Grid item xs={12} sm={6}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={!!formData.anularCompra}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, anularCompra: e.target.checked }))}
+                                    />
+                                }
+                                label="Anular Compra"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={!!formData.anularVenta}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, anularVenta: e.target.checked }))}
+                                    />
+                                }
+                                label="Anular Venta"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={!!formData.anularRemision}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, anularRemision: e.target.checked }))}
+                                    />
+                                }
+                                label="Anular Remisión"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={!!formData.anularRecepcion}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, anularRecepcion: e.target.checked }))}
+                                    />
+                                }
+                                label="Anular Recepción"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={!!formData.anularAjuste}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, anularAjuste: e.target.checked }))}
+                                    />
+                                }
+                                label="Anular Ajuste"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={!!formData.anularCargaProducto}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, anularCargaProducto: e.target.checked }))}
+                                    />
+                                }
+                                label="Anular Carga de Producto"
+                            />
+                        </Grid>
+                    </Grid>
+                </Box>
             </Stack>
 
             <SearchPersonaModal

@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { personaService } from '../../services/persona.service';
-import { sectorService } from '../../services/sector.service';
-import type { Sector } from '../../services/sector.service';
 import {
   Box,
   Paper,
@@ -44,25 +42,11 @@ export default function PersonasABM(): JSX.Element {
     tipoProveedor: false,
     tipoPersonaFis: false,
     tipoPersonaCli: false,
-    tipoFuncionario: false,
-    idSector: null,
+    tipoPersonal: false,
+    tipoVendedor: false,
   });
-  const [sectores, setSectores] = useState<Sector[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-
-  useEffect(() => {
-    cargarSectores();
-  }, []);
-
-  const cargarSectores = async () => {
-    try {
-      const data = await sectorService.consultaSectoresActivos();
-      setSectores(data || []);
-    } catch (err) {
-      console.error('Error al cargar sectores', err);
-    }
-  };
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
@@ -118,12 +102,12 @@ export default function PersonasABM(): JSX.Element {
         timbrado: infoCompleta.timbrado || '',
         codigo: infoCompleta.codigo,
         idGrupoCliente: infoCompleta.idGrupoCliente,
-        tipoPersonaJur: !!infoCompleta.nombreFantasia, // Si tiene nombreFantasia es Jurídica
-        tipoProveedor: !!infoCompleta.responsable, // Si tiene responsable es Proveedor
-        tipoPersonaFis: !!infoCompleta.idPersonaFis, // Si tiene idPersonaFis es Física
-        tipoPersonaCli: !!infoCompleta.codigo, // Si tiene código es Cliente
-        tipoFuncionario: !!infoCompleta.idFuncionario,
-        idSector: infoCompleta.idSector || null,
+        tipoPersonaJur: !!infoCompleta.nombreFantasia,
+        tipoProveedor: !!infoCompleta.responsable || !!infoCompleta.timbrado,
+        tipoPersonaFis: !infoCompleta.nombreFantasia,
+        tipoPersonaCli: !!infoCompleta.codigo,
+        tipoPersonal: !!infoCompleta.idPersonal,
+        tipoVendedor: !!infoCompleta.idVendedor,
         idUsuarioAlta: 1, // TODO: Obtener del usuario logueado
       };
       setSelectedPersona(personaMapeada);
@@ -159,8 +143,8 @@ export default function PersonasABM(): JSX.Element {
       timbrado: '',
       tipoPersonaFis: false,
       tipoPersonaCli: false,
-      tipoFuncionario: false,
-      idSector: null,
+      tipoPersonal: false,
+      tipoVendedor: false,
     });
   };
 
@@ -187,10 +171,7 @@ export default function PersonasABM(): JSX.Element {
       return;
     }
 
-    if (formData.tipoFuncionario && !formData.idSector) {
-      setError('Debe seleccionar un sector para el funcionario');
-      return;
-    }
+    // Validation for funcionario sector is removed
 
     // 4. Convertir fecha si existe (de YYYY-MM-DD a DD/MM/YYYY para el API)
     let fechaFormateada = '';
@@ -256,8 +237,8 @@ export default function PersonasABM(): JSX.Element {
       tipoProveedor: false,
       tipoPersonaFis: false,
       tipoPersonaCli: false,
-      tipoFuncionario: false,
-      idSector: null,
+      tipoPersonal: false,
+      tipoVendedor: false,
     });
   };
 
@@ -344,48 +325,6 @@ export default function PersonasABM(): JSX.Element {
           <Box>
             <PersonaForm formData={formData} setFormData={setFormData} />
 
-            {/* Funcionario Section - Only visible if Persona Fisica is checked */}
-            {formData.tipoPersonaFis && (
-              <Box sx={{ mt: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>Datos de Funcionario</Typography>
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={formData.tipoFuncionario}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          tipoFuncionario: e.target.checked,
-                          idSector: e.target.checked ? formData.idSector : null
-                        })}
-                      />
-                    }
-                    label="Es Funcionario"
-                  />
-
-                  <Autocomplete
-                    disabled={!formData.tipoFuncionario}
-                    options={sectores}
-                    getOptionLabel={(option) => option.nombreSector}
-                    value={sectores.find(s => s.idSector === formData.idSector) || null}
-                    onChange={(_, newValue) => {
-                      setFormData({
-                        ...formData,
-                        idSector: newValue ? newValue.idSector : null
-                      });
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Sector"
-                        size="small"
-                        sx={{ width: 300 }}
-                      />
-                    )}
-                  />
-                </Box>
-              </Box>
-            )}
           </Box>
         ) : (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60%' }}>

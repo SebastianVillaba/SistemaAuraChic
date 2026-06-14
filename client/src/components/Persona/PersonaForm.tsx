@@ -94,9 +94,6 @@ export default function PersonaForm({ formData, setFormData }: PersonaFormProps)
                 idDistrito: encarnacion.idDistrito
               }));
             }
-          } else if (formData.idDistrito) {
-            // Limpiar distrito y ciudad si cambia el departamento y ya tenía distrito
-            setFormData(prev => ({ ...prev, idDistrito: undefined, idCiudad: undefined }));
           }
         } catch (error) {
           console.error('Error al cargar distritos:', error);
@@ -129,9 +126,6 @@ export default function PersonaForm({ formData, setFormData }: PersonaFormProps)
                 idCiudad: encarnacion.idCiudad.toString()
               }));
             }
-          } else if (formData.idCiudad) {
-            // Limpiar ciudad si cambia el distrito y ya tenía ciudad
-            setFormData(prev => ({ ...prev, idCiudad: undefined }));
           }
         } catch (error) {
           console.error('Error al cargar ciudades:', error);

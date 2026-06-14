@@ -36,6 +36,7 @@ import { LocalHospital, PointOfSale, LocalOffer, Add, Visibility } from '@mui/ic
 import SettingsIcon from '@mui/icons-material/Settings';
 import HistoryIcon from '@mui/icons-material/History';
 import ListSubheader from '@mui/material/ListSubheader';
+import ApiIcon from '@mui/icons-material/Api';
 
 const drawerWidth = 240;
 
@@ -199,7 +200,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         },
         {
           text: 'Ajuste / Stock Inicial',
-          icon: <InventoryIcon />,
+          icon: <ApiIcon />,
           subItems: [
             { text: 'Ajustes', path: '/mercaderia/ajustes', icon: <InventoryIcon /> },
             { text: 'Stock Inicial', path: '/mercaderia/stock-inicial', icon: <InventoryIcon /> },
@@ -209,6 +210,13 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
           text: 'Carga de Productos',
           path: '/mercaderia/carga-productos',
           icon: <InventoryIcon />,
+        },
+        {
+          text: 'Mercaderia',
+          icon: <InventoryIcon />,
+          subItems: [
+            { text: 'Consulta Stock', path: '/mercaderia/consulta-stock', icon: <InventoryIcon /> },
+          ],
         }
       ],
     },

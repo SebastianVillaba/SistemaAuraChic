@@ -195,6 +195,33 @@ export const productoService = {
   },
 
   /**
+   * Consulta stock de producto por código, código de barra o nombre
+   * @param busqueda - Término de búsqueda (código, código de barra o nombre)
+   * @param idTerminalWeb - ID de la terminal web
+   * @returns Lista de productos encontrados con stock
+   */
+  consultarStockProducto: async (busqueda: string, idTerminalWeb: number): Promise<any[]> => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/producto/stock`,
+        {
+          params: {
+            busqueda: busqueda,
+            idTerminalWeb: idTerminalWeb
+          }
+        }
+      );
+      return response.data.result;
+    } catch (error: any) {
+      console.error('Error al consultar stock del producto:', error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw new Error('Error al consultar stock del producto');
+    }
+  },
+
+  /**
    * Obtiene precio de descuento de un producto
    * @param idProducto - ID del producto
    * @returns Lista con el precio de descuento del producto

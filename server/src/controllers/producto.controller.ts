@@ -229,6 +229,56 @@ export const consultarPrecioProducto = async (req: Request, res: Response): Prom
     }
   }
 }
+
+/**
+ * Controller para consultar stock de producto
+ * Ejecuta sp_consultaStockProducto que busca por código, código de barra o nombre en el depósito de la terminal
+ */
+export const consultarStockProducto = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { busqueda, idTerminalWeb } = req.query as any;
+
+    if (!idTerminalWeb) {
+      res.status(400).json({
+        success: false,
+        message: "El parámetro 'idTerminalWeb' es obligatorio"
+      });
+      return;
+    }
+
+    const searchVal = (busqueda === undefined || busqueda === null || busqueda === '') ? '%' : busqueda;
+
+    const inputs = [
+      { name: 'busqueda', type: sql.VarChar, value: searchVal },
+      { name: 'idTerminalWeb', type: sql.Int, value: parseInt(idTerminalWeb) }
+    ];
+
+    const result = await executeRequest({
+      query: 'sp_consultaStockProducto',
+      inputs: inputs as any,
+      isStoredProcedure: true
+    });
+
+    res.status(200).json({
+      success: true,
+      result: result.recordset
+    });
+  } catch (error: any) {
+    if (error.number >= 50000) {
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: "Error al consultar stock del producto",
+        error: error.message
+      });
+    }
+  }
+}
+
 /**
  * Controller para modificar un producto existente.
  */

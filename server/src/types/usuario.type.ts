@@ -1,9 +1,15 @@
 export interface CrearUsuarioRequest {
-    idPersona: number;
+    idPersonal: number;
     username: string;
     password: string;
     idRol: number;
     idUsuarioAlta: number;
+    anularCompra: boolean;
+    anularVenta: boolean;
+    anularRemision: boolean;
+    anularRecepcion: boolean;
+    anularAjuste: boolean;
+    anularCargaProducto: boolean;
 }
 
 export interface ModificarUsuarioRequest {
@@ -12,6 +18,12 @@ export interface ModificarUsuarioRequest {
     password?: string;
     idRol: number;
     activo: number;
+    anularCompra: boolean;
+    anularVenta: boolean;
+    anularRemision: boolean;
+    anularRecepcion: boolean;
+    anularAjuste: boolean;
+    anularCargaProducto: boolean;
 }
 
 export interface Usuario {
@@ -31,4 +43,10 @@ export interface UsuarioDetalle {
     idPersona: number;
     nombrePersona: string;
     ruc: string;
+    anularCompra: boolean;
+    anularVenta: boolean;
+    anularRemision: boolean;
+    anularRecepcion: boolean;
+    anularAjuste: boolean;
+    anularCargaProducto: boolean;
 }

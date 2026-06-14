@@ -20,8 +20,8 @@ export interface InsertarPersonaRequest {
   timbrado?: string;
   tipoPersonaFis: boolean;
   tipoPersonaCli: boolean;
-  tipoFuncionario: boolean;
-  idSector: number | null;
+  tipoPersonal: boolean;
+  tipoVendedor?: boolean;
 }
 
 export interface InsertarPersonaResponse {
@@ -90,5 +90,12 @@ export interface ModificarPersonaRequest {
   nombreFantasia?: string;
   responsableProveedor?: string;
   timbrado?: string;
-  idSector?: number;
+  tipoPersonal?: boolean;
+  tipoPersonaJur?: boolean;
+  tipoProveedor?: boolean;
+  tipoPersonaFis?: boolean;
+  tipoPersonaCli?: boolean;
+  codigo?: number;
+  idGrupoCliente?: number;
+  tipoVendedor?: boolean;
 }

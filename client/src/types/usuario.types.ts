@@ -6,9 +6,16 @@ export interface Usuario {
     nombreRol?: string;
     activo?: boolean;
     idPersona: number;
+    idPersonal?: number;
     nombrePersona?: string;
     ruc?: string;
     idUsuarioAlta?: number;
+    anularCompra?: boolean;
+    anularVenta?: boolean;
+    anularRemision?: boolean;
+    anularRecepcion?: boolean;
+    anularAjuste?: boolean;
+    anularCargaProducto?: boolean;
 }
 
 export interface UsuarioSearchResult {

@@ -600,9 +600,9 @@ export default function ProductoForm({ formData, setFormData, guardarRef }: Prod
             fullWidth
             variant="outlined"
             value={quickCreateNombre}
-            onChange={(e) => setQuickCreateNombre(e.target.value)}
+            onChange={(e) => setQuickCreateNombre(e.target.value.toUpperCase())}
             disabled={quickCreateLoading}
-            inputProps={{ maxLength: 30 }}
+            inputProps={{ maxLength: 30, style: { textTransform: 'uppercase' } }}
             onKeyPress={(e) => {
               if (e.key === 'Enter') {
                 handleSaveQuickCreate();

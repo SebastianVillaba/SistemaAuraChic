@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Box,
     Paper,
@@ -28,15 +28,38 @@ export default function UsuariosABM(): JSX.Element {
     const [usuarios, setUsuarios] = useState<UsuarioSearchResult[]>([]);
     const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null);
     const [isNewMode, setIsNewMode] = useState<boolean>(false);
+    const [personalesSinUsuario, setPersonalesSinUsuario] = useState<any[]>([]);
     const [formData, setFormData] = useState<Usuario>({
         username: '',
         password: '',
         idRol: 0,
         idPersona: 0,
+        idPersonal: 0,
         activo: true,
+        anularCompra: false,
+        anularVenta: false,
+        anularRemision: false,
+        anularRecepcion: false,
+        anularAjuste: false,
+        anularCargaProducto: false,
     });
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
+
+    // Cargar usuarios al entrar al módulo
+    useEffect(() => {
+        handleSearch();
+    }, []);
+
+    const handleSelectPersonalForNewUser = (personal: any) => {
+        setFormData(prev => ({
+            ...prev,
+            idPersona: personal.idPersona,
+            idPersonal: personal.idPersonal,
+            nombrePersona: personal.nombreCompleto,
+            ruc: personal.ruc
+        }));
+    };
 
     const handleSearch = async () => {
         // Permitir búsqueda vacía para traer todos
@@ -75,7 +98,7 @@ export default function UsuariosABM(): JSX.Element {
         }
     };
 
-    const handleNew = () => {
+    const handleNew = async () => {
         setIsNewMode(true);
         setSelectedUsuario(null);
         setError('');
@@ -84,8 +107,26 @@ export default function UsuariosABM(): JSX.Element {
             password: '',
             idRol: 0,
             idPersona: 0,
+            idPersonal: 0,
             activo: true,
+            anularCompra: false,
+            anularVenta: false,
+            anularRemision: false,
+            anularRecepcion: false,
+            anularAjuste: false,
+            anularCargaProducto: false,
         });
+
+        setLoading(true);
+        try {
+            const data = await usuarioService.obtenerPersonalesSinUsuario();
+            setPersonalesSinUsuario(data);
+        } catch (err: any) {
+            console.error('Error al cargar personales sin usuario:', err);
+            setError(err.message || 'Error al cargar personales sin usuario');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleSave = async () => {
@@ -156,7 +197,14 @@ export default function UsuariosABM(): JSX.Element {
             password: '',
             idRol: 0,
             idPersona: 0,
+            idPersonal: 0,
             activo: true,
+            anularCompra: false,
+            anularVenta: false,
+            anularRemision: false,
+            anularRecepcion: false,
+            anularAjuste: false,
+            anularCargaProducto: false,
         });
     };
 
@@ -177,8 +225,9 @@ export default function UsuariosABM(): JSX.Element {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                            disabled={isNewMode}
                         />
-                        <IconButton color="primary" onClick={handleSearch}>
+                        <IconButton color="primary" onClick={handleSearch} disabled={isNewMode}>
                             <SearchIcon />
                         </IconButton>
                     </Box>
@@ -187,21 +236,54 @@ export default function UsuariosABM(): JSX.Element {
 
                     {/* Lista de resultados */}
                     <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-                        <List dense>
-                            {usuarios.map((usuario) => (
-                                <ListItem key={usuario.idUsuario} disablePadding>
-                                    <ListItemButton
-                                        selected={selectedUsuario?.idUsuario === usuario.idUsuario}
-                                        onClick={() => handleSelectUsuario(usuario)}
-                                    >
-                                        <ListItemText
-                                            primary={usuario.username}
-                                            secondary={`${usuario.nombreCompleto} - ${usuario.nombreRol}`}
-                                        />
-                                    </ListItemButton>
-                                </ListItem>
-                            ))}
-                        </List>
+                        {isNewMode ? (
+                            <List dense>
+                                <Typography 
+                                    variant="subtitle2" 
+                                    sx={{ px: 2, py: 1, color: 'primary.main', fontWeight: 600 }}
+                                >
+                                    Personal sin Usuario:
+                                </Typography>
+                                {personalesSinUsuario.map((personal) => (
+                                    <ListItem key={personal.idPersona} disablePadding>
+                                        <ListItemButton
+                                            selected={formData.idPersona === personal.idPersona}
+                                            onClick={() => handleSelectPersonalForNewUser(personal)}
+                                            sx={{
+                                                borderLeft: formData.idPersona === personal.idPersona ? '4px solid #4caf50' : 'none',
+                                                backgroundColor: formData.idPersona === personal.idPersona ? 'action.hover' : 'inherit'
+                                            }}
+                                        >
+                                            <ListItemText
+                                                primary={personal.nombreCompleto}
+                                                secondary={`RUC: ${personal.ruc}`}
+                                            />
+                                        </ListItemButton>
+                                    </ListItem>
+                                ))}
+                                {personalesSinUsuario.length === 0 && !loading && (
+                                    <Typography variant="body2" sx={{ p: 2, color: 'text.secondary', textAlign: 'center' }}>
+                                        No hay personal sin usuario disponible.
+                                    </Typography>
+                                )}
+                            </List>
+                        ) : (
+                            <List dense>
+                                {usuarios.map((usuario) => (
+                                    <ListItem key={usuario.idUsuario} disablePadding>
+                                        <ListItemButton
+                                            selected={selectedUsuario?.idUsuario === usuario.idUsuario}
+                                            onClick={() => handleSelectUsuario(usuario)}
+                                        >
+                                            <ListItemText
+                                                primary={usuario.username}
+                                                secondary={`${usuario.nombreCompleto} - ${usuario.nombreRol}`}
+                                            />
+                                        </ListItemButton>
+                                    </ListItem>
+                                ))}
+                            </List>
+                        )}
                     </Box>
                 </Paper>
 

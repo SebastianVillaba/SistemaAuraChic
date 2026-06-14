@@ -49,8 +49,8 @@ export const insertarPersona = async (req: Request, res: Response): Promise<void
       timbrado,
       tipoPersonaFis,
       tipoPersonaCli,
-      tipoFuncionario,
-      idSector
+      tipoPersonal,
+      tipoVendedor
     } = req.body as InsertarPersonaRequest;
 
     // PASO 2: Validar campos obligatorios
@@ -83,13 +83,7 @@ export const insertarPersona = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    if (tipoFuncionario && !idSector) {
-      res.status(400).json({
-        success: false,
-        message: "Los Funcionarios requieren 'sector'"
-      });
-      return;
-    }
+    // Validation for funcionario sector is removed
 
     // Map pais string to idPais int
     let idPaisVal = 1;
@@ -123,7 +117,8 @@ export const insertarPersona = async (req: Request, res: Response): Promise<void
       { name: 'tipoPersonaFis', type: sql.Bit, value: tipoPersonaFis ? 1 : 0 },
       { name: 'tipoPersonaCli', type: sql.Bit, value: tipoPersonaCli ? 1 : 0 },
       { name: 'idPais', type: sql.Int, value: idPaisVal },
-      { name: 'tipoPersonal', type: sql.Bit, value: tipoFuncionario ? 1 : 0 }
+      { name: 'tipoPersonal', type: sql.Bit, value: tipoPersonal ? 1 : 0 },
+      { name: 'tipoVendedor', type: sql.Bit, value: tipoVendedor ? 1 : 0 }
     ];
 
     // PASO 6: Ejecutar el stored procedure
@@ -470,7 +465,14 @@ export const modificarPersona = async (req: Request, res: Response): Promise<voi
       nombreFantasia,
       responsableProveedor,
       timbrado,
-      idSector
+      tipoPersonal,
+      tipoPersonaJur,
+      tipoProveedor,
+      tipoPersonaFis,
+      tipoPersonaCli,
+      codigo,
+      idGrupoCliente,
+      tipoVendedor
     } = req.body as ModificarPersonaRequest;
 
     // Validar campos obligatorios CRÍTICOS
@@ -500,7 +502,14 @@ export const modificarPersona = async (req: Request, res: Response): Promise<voi
       { name: 'nombreFantasia', type: sql.VarChar(50), value: nombreFantasia || null },
       { name: 'responsableProveedor', type: sql.VarChar(30), value: responsableProveedor || null },
       { name: 'timbrado', type: sql.VarChar(20), value: timbrado || null },
-      { name: 'idSector', type: sql.Int, value: idSector || null }
+      { name: 'tipoPersonal', type: sql.Bit, value: tipoPersonal ? 1 : 0 },
+      { name: 'tipoPersonaJur', type: sql.Bit, value: tipoPersonaJur ? 1 : 0 },
+      { name: 'tipoProveedor', type: sql.Bit, value: tipoProveedor ? 1 : 0 },
+      { name: 'tipoPersonaFis', type: sql.Bit, value: tipoPersonaFis ? 1 : 0 },
+      { name: 'tipoPersonaCli', type: sql.Bit, value: tipoPersonaCli ? 1 : 0 },
+      { name: 'codigo', type: sql.Int, value: codigo || 0 },
+      { name: 'idGrupoCliente', type: sql.Int, value: idGrupoCliente || 0 },
+      { name: 'tipoVendedor', type: sql.Bit, value: tipoVendedor ? 1 : 0 }
     ];
 
     const result = await executeRequest({
@@ -540,3 +549,24 @@ export const modificarPersona = async (req: Request, res: Response): Promise<voi
     }
   }
 };
+
+export const obtenerGruposCliente = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await executeRequest({
+      query: 'select idGrupoCliente, nombreGrupoCliente from grupoCliente',
+      isStoredProcedure: false
+    });
+    res.status(200).json({
+      success: true,
+      result: result.recordset
+    });
+  } catch (error: any) {
+    console.error('Error al obtener grupos de clientes:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al obtener grupos de clientes',
+      error: error.message
+    });
+  }
+};
+

@@ -261,4 +261,3 @@ export const consultaDepositos = async (Req: Request, res: Response) => {
         res.status(500).json({ message: 'Error al consultar depositos', error: error.message || 'Error desconocido' });
     }
 }
-

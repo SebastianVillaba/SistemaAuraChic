@@ -44,10 +44,10 @@ export default function ProductosABM(): JSX.Element {
     precio: 0,
     costo: 0,
     idTipoProducto: 1,
-    idUsuarioAlta: 1, // TODO: Obtener del usuario logueado
+    idUsuarioAlta: 1, // TODO: Obtener sdel usuario logueado
     gasto: false,
     idImpuesto: 2,
-    origen: true,
+    origen: false,
     imagenUrl: '',
   });
   const [loading, setLoading] = useState<boolean>(false);
@@ -80,7 +80,6 @@ export default function ProductosABM(): JSX.Element {
     try {
       // Obtener información detallada del producto seleccionado
       const productoInfo = await productoService.obtenerInfoProducto(producto.idProducto!);
-      console.log(productoInfo[0]);
 
       // Usar el primer resultado (debería haber solo uno)
       const infoCompleta = productoInfo[0];
@@ -128,7 +127,7 @@ export default function ProductosABM(): JSX.Element {
       idUsuarioAlta: 1, // TODO: Obtener del usuario logueado
       gasto: false,
       idImpuesto: 2,
-      origen: true,
+      origen: false,
       imagenUrl: '',
     });
   };
@@ -209,7 +208,7 @@ export default function ProductosABM(): JSX.Element {
       idUsuarioAlta: 1,
       gasto: false,
       idImpuesto: 2,
-      origen: true,
+      origen: false,
       imagenUrl: '',
     });
   };
