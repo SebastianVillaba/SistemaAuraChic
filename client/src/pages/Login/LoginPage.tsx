@@ -44,6 +44,7 @@ export default function LoginPage(): JSX.Element {
         // Guardar información del usuario
         if (response.data.user) {
           localStorage.setItem('user', JSON.stringify(response.data.user));
+          localStorage.setItem('idUsuario', response.data.user.idUsuario.toString());
         }
 
         // Redirigir al home
@@ -87,7 +88,7 @@ export default function LoginPage(): JSX.Element {
           autoComplete="username"
           required
           fullWidth
-          inputProps={{ maxLength: 10 }}
+          inputProps={{ maxLength: 50 }}
           disabled={loading}
         />
 
@@ -99,7 +100,7 @@ export default function LoginPage(): JSX.Element {
           autoComplete="current-password"
           required
           fullWidth
-          inputProps={{ maxLength: 10 }}
+          inputProps={{ maxLength: 100 }}
           disabled={loading}
         />
 

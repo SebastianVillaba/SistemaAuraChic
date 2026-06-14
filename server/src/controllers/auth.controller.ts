@@ -58,6 +58,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       query: `SELECT * FROM usuario WHERE username = '${username}'`
     });
 
+    console.log();
+    
+
     if (result.recordset.length === 0) {
       res.status(401).json({ message: "Usuario no encontrado" });
       return;

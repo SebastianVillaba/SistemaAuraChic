@@ -163,6 +163,8 @@ export default function UsuariosABM(): JSX.Element {
                     ...formData,
                     idUsuarioAlta: idUsuarioActual,
                 };
+                console.log(dataToSend);
+                
                 const response = await usuarioService.crearUsuario(dataToSend);
                 alert(`✓ ${response.message}`);
                 handleCancel();
