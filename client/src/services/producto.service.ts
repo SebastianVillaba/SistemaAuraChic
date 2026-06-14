@@ -151,6 +151,27 @@ export const productoService = {
   },
 
   /**
+   * Crea un nuevo tipo de producto en el sistema (creación rápida)
+   * @param nombre - Nombre del tipo de producto
+   * @param idUsuarioAlta - ID del usuario creador
+   * @returns Respuesta del servidor
+   */
+  insertarTipoProducto: async (nombre: string, idUsuarioAlta: number): Promise<{ success: boolean; message: string }> => {
+    try {
+      const response = await axios.post<{ success: boolean; message: string }>(
+        `${API_BASE_URL}/producto/tipoProducto`,
+        { nombre, idUsuarioAlta }
+      );
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.data) {
+        throw new Error(error.response.data.message || 'Error al insertar el tipo de producto');
+      }
+      throw new Error('Error de conexión con el servidor');
+    }
+  },
+
+  /**
    * Consulta precio de producto por código, código de barra o nombre
    * @param busqueda - Término de búsqueda (código, código de barra o nombre)
    * @returns Lista de productos encontrados con precio y stock

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { productoService } from '../../services/producto.service';
 import {
   Box,
@@ -33,6 +33,9 @@ export default function ProductosABM(): JSX.Element {
   const [productos, setProductos] = useState<any[]>([]);
   const [selectedProducto, setSelectedProducto] = useState<Producto | null>(null);
   const [isNewMode, setIsNewMode] = useState<boolean>(false);
+
+  const guardarRef = useRef<HTMLButtonElement>(null);
+
   const [formData, setFormData] = useState<Producto>({
     nombre: '',
     presentacion: '',
@@ -40,10 +43,11 @@ export default function ProductosABM(): JSX.Element {
     codigoBarra: '',
     precio: 0,
     costo: 0,
-    idTipoProducto: 0,
+    idTipoProducto: 1,
     idUsuarioAlta: 1, // TODO: Obtener del usuario logueado
     gasto: false,
-    idImpuesto: 0,
+    idImpuesto: 2,
+    origen: true,
     imagenUrl: '',
   });
   const [loading, setLoading] = useState<boolean>(false);
@@ -76,6 +80,7 @@ export default function ProductosABM(): JSX.Element {
     try {
       // Obtener información detallada del producto seleccionado
       const productoInfo = await productoService.obtenerInfoProducto(producto.idProducto!);
+      console.log(productoInfo[0]);
 
       // Usar el primer resultado (debería haber solo uno)
       const infoCompleta = productoInfo[0];
@@ -94,7 +99,7 @@ export default function ProductosABM(): JSX.Element {
         idImpuesto: infoCompleta.idImpuesto || 0,
         origen: infoCompleta.origen || false, 
         activo: infoCompleta.activo || true,
-        imagenUrl: infoCompleta.imagenUrl || '',
+        imagenUrl: infoCompleta.imagenUrl || ''
       };
 
       setSelectedProducto(productoMapeado);
@@ -119,10 +124,11 @@ export default function ProductosABM(): JSX.Element {
       codigoBarra: '',
       precio: 0,
       costo: 0,
-      idTipoProducto: 0,
+      idTipoProducto: 1,
       idUsuarioAlta: 1, // TODO: Obtener del usuario logueado
       gasto: false,
-      idImpuesto: 0,
+      idImpuesto: 2,
+      origen: true,
       imagenUrl: '',
     });
   };
@@ -173,7 +179,7 @@ export default function ProductosABM(): JSX.Element {
         const dataToSend = {
           ...formData,
           idUsuarioMod: 1, // TODO: Obtener del usuario logueado
-          activo: true
+          activo: formData.activo !== undefined ? formData.activo : true
         };
         const response = await productoService.modificarProducto(dataToSend);
         alert(`✓ ${response.message}`);
@@ -199,10 +205,11 @@ export default function ProductosABM(): JSX.Element {
       codigoBarra: '',
       precio: 0,
       costo: 0,
-      idTipoProducto: 0,
+      idTipoProducto: 1,
       idUsuarioAlta: 1,
       gasto: false,
-      idImpuesto: 0,
+      idImpuesto: 2,
+      origen: true,
       imagenUrl: '',
     });
   };
@@ -287,7 +294,7 @@ export default function ProductosABM(): JSX.Element {
         )}
 
         {(isNewMode || selectedProducto) ? (
-          <ProductoForm formData={formData} setFormData={setFormData} />
+          <ProductoForm formData={formData} setFormData={setFormData} guardarRef={guardarRef} />
         ) : (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60%' }}>
             <Typography variant="h6" color="text.secondary">
@@ -308,6 +315,7 @@ export default function ProductosABM(): JSX.Element {
           {(isNewMode || selectedProducto) && (
             <>
               <Button
+                ref={guardarRef}
                 variant="contained"
                 color="success"
                 startIcon={<SaveIcon />}

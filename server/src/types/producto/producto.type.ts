@@ -39,3 +39,8 @@ export interface ModificarProductoRequest {
   idImpuesto?: number;
   imagenUrl?: string;
 }
+
+export interface InsertarTipoProductoRequest {
+  nombre: string;
+  idUsuarioAlta: number;
+}

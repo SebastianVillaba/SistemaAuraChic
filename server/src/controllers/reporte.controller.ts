@@ -176,9 +176,13 @@ export const reporteCierreCaja = async (req: Request, res: Response): Promise<vo
       ]
     });
 
-    // El SP devuelve 2 recordsets:
+    // El SP devuelve 6 recordsets:
     // recordset[0] = Resumen general y balance
     // recordset[1] = Detalle de gastos
+    // recordset[2] = Detalle de Arqueo Moneda (Billete/Moneda extranjero/nacional)
+    // recordset[3] = Detalle de Arqueo Tarjeta Crédito
+    // recordset[4] = Detalle de Arqueo Tarjeta Débito
+    // recordset[5] = Detalle de Arqueo Transferencias
 
     const recordsets = (result as typeof result & { recordsets?: any[] }).recordsets;
 
@@ -186,7 +190,11 @@ export const reporteCierreCaja = async (req: Request, res: Response): Promise<vo
       success: true,
       message: 'Reporte de cierre de caja generado exitosamente',
       resumen: recordsets?.[0]?.[0] ?? null,
-      gastos: recordsets?.[1] ?? []
+      gastos: recordsets?.[1] ?? [],
+      arqueoMoneda: recordsets?.[2] ?? [],
+      tarjetasCredito: recordsets?.[3] ?? [],
+      tarjetasDebito: recordsets?.[4] ?? [],
+      transferencias: recordsets?.[5] ?? []
     });
   } catch (error) {
     console.error('Error al generar reporte de cierre de caja:', error);

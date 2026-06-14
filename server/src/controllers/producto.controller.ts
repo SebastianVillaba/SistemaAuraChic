@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { executeRequest, sql } from "../utils/dbHandler";
-import { InsertarProductoRequest, InsertarProductoResponse, BuscarProductoRequest, ModificarProductoRequest } from "../types/producto/producto.type";
+import { InsertarProductoRequest, InsertarProductoResponse, BuscarProductoRequest, ModificarProductoRequest, InsertarTipoProductoRequest } from "../types/producto/producto.type";
 import { flattenError } from "zod";
 
 /**
@@ -139,6 +139,7 @@ export const obtenerInfoProducto = async (req: Request, res: Response): Promise<
       inputs: inputs as any,
       isStoredProcedure: true
     });
+    console.log(result);
 
     res.status(200).json({
       success: true,
@@ -322,4 +323,62 @@ export const obtenerPrecioDescuento = async (req: Request, res: Response): Promi
       error: error.message
     });
   }
-}
+};
+
+/**
+ * Controller para insertar un nuevo tipo de producto rápido
+ */
+export const insertarTipoProducto = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { nombre, idUsuarioAlta } = req.body as InsertarTipoProductoRequest;
+
+    if (!nombre) {
+      res.status(400).json({
+        success: false,
+        message: "El nombre es obligatorio"
+      });
+      return;
+    }
+
+    if (!idUsuarioAlta) {
+      res.status(400).json({
+        success: false,
+        message: "El usuario de alta es obligatorio"
+      });
+      return;
+    }
+
+    const inputs = [
+      { name: 'nombre', type: sql.VarChar, value: nombre },
+      { name: 'idUsuarioAlta', type: sql.Int, value: idUsuarioAlta }
+    ];
+
+    const result = await executeRequest({
+      query: 'sp_insertarTipoProducto',
+      inputs: inputs as any,
+      isStoredProcedure: true
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Tipo de producto insertado exitosamente",
+      rowsAffected: result.rowsAffected[0]
+    });
+
+  } catch (error: any) {
+    const validationErrorCodes = [50000, 50001, 50002, 50003, 50004];
+
+    if (validationErrorCodes.includes(error.number)) {
+      res.status(400).json({
+        success: false,
+        message: error.message || "Error de validación en los datos del tipo de producto."
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: "Error interno del servidor al insertar el tipo de producto.",
+        error: error.message
+      });
+    }
+  }
+};

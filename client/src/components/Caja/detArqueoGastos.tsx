@@ -38,6 +38,7 @@ interface EditingGasto {
     idGastoCajaTmp: number;
     concepto: string;
     montoGasto: string;
+    factura: string;
 }
 
 // cajaAbierta
@@ -55,20 +56,21 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
     const [totalGastos, setTotalGastos] = useState(0);
 
     // Estado para nueva fila
-    const [nuevaFila, setNuevaFila] = useState<{ concepto: string; montoGasto: string } | null>(null);
-    const [shouldFocusMonto, setShouldFocusMonto] = useState(false);
+    const [nuevaFila, setNuevaFila] = useState<{ concepto: string; montoGasto: string; factura: string } | null>(null);
+    const [shouldFocusFactura, setShouldFocusFactura] = useState(false);
 
     // Estado para edición
     const [editingGasto, setEditingGasto] = useState<EditingGasto | null>(null);
 
     // Refs para navegación de teclado
     const addButtonRef = useRef<HTMLButtonElement>(null);
+    const facturaInputRef = useRef<HTMLInputElement>(null);
     const montoInputRef = useRef<HTMLInputElement>(null);
     const conceptoInputRef = useRef<HTMLInputElement>(null);
     const saveButtonRef = useRef<HTMLButtonElement>(null);
+    const editFacturaInputRef = useRef<HTMLInputElement>(null);
     const editMontoInputRef = useRef<HTMLInputElement>(null);
     const editConceptoInputRef = useRef<HTMLInputElement>(null);
-
 
     useEffect(() => {
         handleListarGastosTmp();
@@ -80,22 +82,22 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
         onTotalChange?.(total);
     }, [gastos, onTotalChange]);
 
-    // Enfocar el campo de monto solo cuando se crea una nueva fila
+    // Enfocar el campo de factura solo cuando se crea una nueva fila
     useEffect(() => {
-        if (shouldFocusMonto) {
+        if (shouldFocusFactura) {
             setTimeout(() => {
-                montoInputRef.current?.focus();
+                facturaInputRef.current?.focus();
             }, 100);
-            setShouldFocusMonto(false);
+            setShouldFocusFactura(false);
         }
-    }, [shouldFocusMonto]);
+    }, [shouldFocusFactura]);
 
-    // Enfocar el campo de monto cuando se está editando
+    // Enfocar el campo de factura cuando se está editando
     useEffect(() => {
         if (editingGasto) {
             setTimeout(() => {
-                editMontoInputRef.current?.focus();
-                editMontoInputRef.current?.select();
+                editFacturaInputRef.current?.focus();
+                editFacturaInputRef.current?.select();
             }, 100);
         }
     }, [editingGasto?.idGastoCajaTmp]);
@@ -107,22 +109,34 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
         }
         // Cancelar edición si hay una activa
         setEditingGasto(null);
-        setNuevaFila({ concepto: '', montoGasto: '' });
-        setShouldFocusMonto(true);
+        setNuevaFila({ concepto: '', montoGasto: '', factura: '' });
+        setShouldFocusFactura(true);
     };
 
     const handleGuardarNuevaFila = async () => {
         if (!nuevaFila || !idMovimientoCaja) return;
 
+        const facturaNumerica = parseInt(nuevaFila.factura, 10);
         const montoNumerico = parseFloat(nuevaFila.montoGasto);
-        if (!nuevaFila.concepto.trim()) {
-            alert('El concepto es obligatorio');
-            conceptoInputRef.current?.focus();
+
+        if (isNaN(facturaNumerica) || facturaNumerica <= 0) {
+            alert('El número de factura debe ser un número válido mayor a 0');
+            facturaInputRef.current?.focus();
+            return;
+        }
+        if (nuevaFila.factura.trim().length > 7) {
+            alert('El número de factura no puede tener más de 7 dígitos');
+            facturaInputRef.current?.focus();
             return;
         }
         if (isNaN(montoNumerico) || montoNumerico <= 0) {
             alert('El monto debe ser mayor a 0');
             montoInputRef.current?.focus();
+            return;
+        }
+        if (!nuevaFila.concepto.trim()) {
+            alert('El concepto es obligatorio');
+            conceptoInputRef.current?.focus();
             return;
         }
 
@@ -132,7 +146,8 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
                 idTerminalWeb,
                 idMovimientoCaja,
                 nuevaFila.concepto.trim(),
-                montoNumerico
+                montoNumerico,
+                facturaNumerica
             );
 
             // Recargar lista desde el servidor
@@ -158,21 +173,34 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
             idGastoCajaTmp: gasto.idGastoCajaTmp,
             concepto: gasto.concepto,
             montoGasto: gasto.montoGasto.toString(),
+            factura: gasto.factura !== undefined && gasto.factura !== null ? gasto.factura.toString() : '',
         });
     };
 
     const handleGuardarEdicion = async () => {
         if (!editingGasto || !idMovimientoCaja) return;
 
+        const facturaNumerica = parseInt(editingGasto.factura, 10);
         const montoNumerico = parseFloat(editingGasto.montoGasto);
-        if (!editingGasto.concepto.trim()) {
-            alert('El concepto es obligatorio');
-            editConceptoInputRef.current?.focus();
+
+        if (isNaN(facturaNumerica) || facturaNumerica <= 0) {
+            alert('El número de factura debe ser un número válido mayor a 0');
+            editFacturaInputRef.current?.focus();
+            return;
+        }
+        if (editingGasto.factura.trim().length > 7) {
+            alert('El número de factura no puede tener más de 7 dígitos');
+            editFacturaInputRef.current?.focus();
             return;
         }
         if (isNaN(montoNumerico) || montoNumerico <= 0) {
             alert('El monto debe ser mayor a 0');
             editMontoInputRef.current?.focus();
+            return;
+        }
+        if (!editingGasto.concepto.trim()) {
+            alert('El concepto es obligatorio');
+            editConceptoInputRef.current?.focus();
             return;
         }
 
@@ -184,6 +212,7 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
                 idMovimientoCaja,
                 editingGasto.concepto.trim(),
                 montoNumerico,
+                facturaNumerica,
                 editingGasto.idGastoCajaTmp // Pasar el ID para editar
             );
 
@@ -207,6 +236,16 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
         setEditingGasto(null);
     };
 
+    const handleEditFacturaKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            editMontoInputRef.current?.focus();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            handleCancelarEdicion();
+        }
+    };
+
     const handleEditMontoKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -224,6 +263,13 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
         } else if (e.key === 'Escape') {
             e.preventDefault();
             handleCancelarEdicion();
+        }
+    };
+
+    const handleFacturaKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            montoInputRef.current?.focus();
         }
     };
 
@@ -332,6 +378,9 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
                             <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#ffebee', width: 60 }}>
                                 Nro
                             </TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#ffebee', width: 120 }}>
+                                Factura
+                            </TableCell>
                             <TableCell align="right" sx={{ fontWeight: 'bold', backgroundColor: '#ffebee', width: 150 }}>
                                 Monto
                             </TableCell>
@@ -360,6 +409,23 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
                                             <TextField
                                                 size="small"
                                                 type="text"
+                                                value={editingGasto.factura}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    if (value === '' || /^\d{0,7}$/.test(value)) {
+                                                        setEditingGasto({ ...editingGasto, factura: value });
+                                                    }
+                                                }}
+                                                onKeyDown={handleEditFacturaKeyDown}
+                                                inputRef={editFacturaInputRef}
+                                                placeholder="Factura"
+                                                sx={{ width: '100%' }}
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <TextField
+                                                size="small"
+                                                type="text"
                                                 value={editingGasto.montoGasto}
                                                 onChange={(e) => {
                                                     const value = e.target.value;
@@ -370,9 +436,7 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
                                                 onKeyDown={handleEditMontoKeyDown}
                                                 inputRef={editMontoInputRef}
                                                 placeholder="0"
-                                                InputProps={{
-                                                    startAdornment: <InputAdornment position="start">Gs.</InputAdornment>,
-                                                }}
+                                                
                                                 sx={{ width: '100%' }}
                                             />
                                         </TableCell>
@@ -419,9 +483,14 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
                                             {index + 1}
                                         </Typography>
                                     </TableCell>
+                                    <TableCell>
+                                        <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                                            {gasto.factura || '—'}
+                                        </Typography>
+                                    </TableCell>
                                     <TableCell align="right">
                                         <Typography variant="body1" fontWeight="bold" color="error.main">
-                                            Gs. {formatCurrency(gasto.montoGasto)}
+                                            {formatCurrency(gasto.montoGasto)}
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
@@ -465,6 +534,25 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
                                     <TextField
                                         size="small"
                                         type="text"
+                                        variant='standard'
+                                        value={nuevaFila.factura}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            if (value === '' || /^\d{0,7}$/.test(value)) {
+                                                setNuevaFila({ ...nuevaFila, factura: value });
+                                            }
+                                        }}
+                                        onKeyDown={handleFacturaKeyDown}
+                                        inputRef={facturaInputRef}
+                                        placeholder="Factura"
+                                        sx={{ width: '100%' }}
+                                    />
+                                </TableCell>
+                                <TableCell>
+                                    <TextField
+                                        size="small"
+                                        type="text"
+                                        variant='standard'
                                         value={nuevaFila.montoGasto}
                                         onChange={(e) => {
                                             const value = e.target.value;
@@ -475,15 +563,13 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
                                         onKeyDown={handleMontoKeyDown}
                                         inputRef={montoInputRef}
                                         placeholder="0"
-                                        InputProps={{
-                                            startAdornment: <InputAdornment position="start">Gs.</InputAdornment>,
-                                        }}
-                                        sx={{ width: '100%' }}
+                                        fullWidth
                                     />
                                 </TableCell>
                                 <TableCell>
                                     <TextField
                                         size="small"
+                                        variant='standard'
                                         value={nuevaFila.concepto}
                                         onChange={(e) => setNuevaFila({ ...nuevaFila, concepto: e.target.value })}
                                         onKeyDown={handleConceptoKeyDown}
@@ -518,7 +604,7 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
 
                         {gastos.length === 0 && !nuevaFila && (
                             <TableRow>
-                                <TableCell colSpan={4} align="center" sx={{ py: 4 }}>
+                                <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
                                     <Typography color="text.secondary">
                                         No hay gastos registrados. Click en "Agregar Gasto" para comenzar.
                                     </Typography>
@@ -530,9 +616,10 @@ const DetArqueoGastos: React.FC<DetArqueoGastosProps> = ({
             </TableContainer>
 
             {/* Total */}
-            <Paper sx={{ p: 2, mt: 2, backgroundColor: '#ffebee' }}>
-                <Typography variant="h5" align="right" fontWeight="bold" color="error.main">
-                    TOTAL GASTOS: Gs. {formatCurrency(totalGastos)}
+            <Paper sx={{ p: 1.5, mt: 2, backgroundColor: '#e3f2fd', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="subtitle2" color="text.secondary">Total Gastos:</Typography>
+                <Typography variant="h6" fontWeight="bold" color="primary.dark">
+                    Gs. {formatCurrency(totalGastos)}
                 </Typography>
             </Paper>
         </Box>

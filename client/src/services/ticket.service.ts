@@ -71,16 +71,21 @@ class TicketService {
     }
 
     public async generarTicketCierreCaja(datos: DatosCierreCaja): Promise<void> {
+        const alturaTicket = this.calcularAlturaCierreCaja(datos);
         const doc = new jsPDF({
             orientation: 'portrait',
             unit: 'mm',
-            format: [this.ANCHO_TICKET, 306.3]
+            format: [this.ANCHO_TICKET, alturaTicket]
         });
 
         this.posY = 10;
 
         this.dibujarEncabezadoCierreCaja(doc, datos);
         this.dibujarResumenCierreCaja(doc, datos);
+        this.dibujarArqueoMoneda(doc, datos);
+        this.dibujarTarjetasDebito(doc, datos);
+        this.dibujarTarjetasCredito(doc, datos);
+        this.dibujarTransferencias(doc, datos);
         this.dibujarGastosCierreCaja(doc, datos);
         this.dibujarFooterCierreCaja(doc);
 
@@ -358,6 +363,19 @@ class TicketService {
         this.dibujarFilaResumen(doc, 'Total Cobranza:', datos.resumen.totalCobranza);
         this.dibujarFilaResumen(doc, 'Total Gastos:', datos.resumen.totalGastos);
 
+        if (datos.resumen.totalMoneda !== undefined && datos.resumen.totalMoneda !== null) {
+            this.dibujarFilaResumen(doc, 'Total Efectivo (Arqueo):', datos.resumen.totalMoneda);
+        }
+        if (datos.resumen.totalTarjetaDebito !== undefined && datos.resumen.totalTarjetaDebito !== null) {
+            this.dibujarFilaResumen(doc, 'Total Tarj. Débito:', datos.resumen.totalTarjetaDebito);
+        }
+        if (datos.resumen.totalTarjetaCredito !== undefined && datos.resumen.totalTarjetaCredito !== null) {
+            this.dibujarFilaResumen(doc, 'Total Tarj. Crédito:', datos.resumen.totalTarjetaCredito);
+        }
+        if (datos.resumen.totalTransferencia !== undefined && datos.resumen.totalTransferencia !== null) {
+            this.dibujarFilaResumen(doc, 'Total Transferencias:', datos.resumen.totalTransferencia);
+        }
+
         this.dibujarLinea(doc);
 
         this.dibujarFilaResumen(doc, 'Saldo Teorico:', datos.resumen.saldoTeorico);
@@ -375,6 +393,100 @@ class TicketService {
         doc.text(etiqueta, this.MARGEN_IZQ, this.posY);
         doc.text(this.formatearNumero(valor || 0), this.ANCHO_TICKET - this.MARGEN_IZQ, this.posY, { align: 'right' });
         this.posY += 5;
+    }
+
+    private dibujarArqueoMoneda(doc: jsPDF, datos: DatosCierreCaja): void {
+        if (datos.arqueoMoneda && datos.arqueoMoneda.length > 0) {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.text('DETALLE EFECTIVO (ARQUEO)', this.ANCHO_TICKET / 2, this.posY, { align: 'center' });
+            this.posY += 5;
+
+            doc.setFontSize(8);
+            doc.text('Moneda', this.MARGEN_IZQ, this.posY);
+            doc.text('Monto', this.MARGEN_IZQ + 28, this.posY);
+            doc.text('Total Gs.', this.ANCHO_TICKET - this.MARGEN_IZQ, this.posY, { align: 'right' });
+            this.posY += 4;
+
+            doc.setFont('helvetica', 'normal');
+            datos.arqueoMoneda.forEach(item => {
+                doc.text(this.truncarTexto(item.nombre || 'Moneda', 15), this.MARGEN_IZQ, this.posY);
+                doc.text(this.formatearNumero(item.montoMoneda || 0), this.MARGEN_IZQ + 28, this.posY);
+                doc.text(this.formatearNumero(item.total || 0), this.ANCHO_TICKET - this.MARGEN_IZQ, this.posY, { align: 'right' });
+                this.posY += 4;
+            });
+
+            this.dibujarLinea(doc);
+        }
+    }
+
+    private dibujarTarjetasDebito(doc: jsPDF, datos: DatosCierreCaja): void {
+        if (datos.tarjetasDebito && datos.tarjetasDebito.length > 0) {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.text('ARQUEO TARJETAS DEBITO', this.ANCHO_TICKET / 2, this.posY, { align: 'center' });
+            this.posY += 5;
+
+            doc.setFontSize(8);
+            doc.text('Tarjeta', this.MARGEN_IZQ, this.posY);
+            doc.text('Monto Gs.', this.ANCHO_TICKET - this.MARGEN_IZQ, this.posY, { align: 'right' });
+            this.posY += 4;
+
+            doc.setFont('helvetica', 'normal');
+            datos.tarjetasDebito.forEach(item => {
+                doc.text(this.truncarTexto(item.nombreTarjetaDebito || 'Tarjeta', 20), this.MARGEN_IZQ, this.posY);
+                doc.text(this.formatearNumero(item.monto || 0), this.ANCHO_TICKET - this.MARGEN_IZQ, this.posY, { align: 'right' });
+                this.posY += 4;
+            });
+
+            this.dibujarLinea(doc);
+        }
+    }
+
+    private dibujarTarjetasCredito(doc: jsPDF, datos: DatosCierreCaja): void {
+        if (datos.tarjetasCredito && datos.tarjetasCredito.length > 0) {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.text('ARQUEO TARJETAS CREDITO', this.ANCHO_TICKET / 2, this.posY, { align: 'center' });
+            this.posY += 5;
+
+            doc.setFontSize(8);
+            doc.text('Tarjeta', this.MARGEN_IZQ, this.posY);
+            doc.text('Monto Gs.', this.ANCHO_TICKET - this.MARGEN_IZQ, this.posY, { align: 'right' });
+            this.posY += 4;
+
+            doc.setFont('helvetica', 'normal');
+            datos.tarjetasCredito.forEach(item => {
+                doc.text(this.truncarTexto(item.nombreTarjetaDebito || 'Tarjeta', 20), this.MARGEN_IZQ, this.posY);
+                doc.text(this.formatearNumero(item.monto || 0), this.ANCHO_TICKET - this.MARGEN_IZQ, this.posY, { align: 'right' });
+                this.posY += 4;
+            });
+
+            this.dibujarLinea(doc);
+        }
+    }
+
+    private dibujarTransferencias(doc: jsPDF, datos: DatosCierreCaja): void {
+        if (datos.transferencias && datos.transferencias.length > 0) {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.text('ARQUEO TRANSFERENCIAS', this.ANCHO_TICKET / 2, this.posY, { align: 'center' });
+            this.posY += 5;
+
+            doc.setFontSize(8);
+            doc.text('Concepto', this.MARGEN_IZQ, this.posY);
+            doc.text('Monto Gs.', this.ANCHO_TICKET - this.MARGEN_IZQ, this.posY, { align: 'right' });
+            this.posY += 4;
+
+            doc.setFont('helvetica', 'normal');
+            datos.transferencias.forEach(item => {
+                doc.text(this.truncarTexto(item.concepto || 'Transferencia', 20), this.MARGEN_IZQ, this.posY);
+                doc.text(this.formatearNumero(item.monto || 0), this.ANCHO_TICKET - this.MARGEN_IZQ, this.posY, { align: 'right' });
+                this.posY += 4;
+            });
+
+            this.dibujarLinea(doc);
+        }
     }
 
     private dibujarGastosCierreCaja(doc: jsPDF, datos: DatosCierreCaja): void {
@@ -404,6 +516,84 @@ class TicketService {
         doc.setFontSize(8);
         doc.text('*** FIN DEL REPORTE ***', this.ANCHO_TICKET / 2, this.posY, { align: 'center' });
         this.posY += 5;
+    }
+
+    private calcularAlturaCierreCaja(datos: DatosCierreCaja): number {
+        let altura = 10; // margen superior
+
+        // Encabezado
+        altura += 6; // CIERRE DE CAJA
+        altura += 6; // Nombre de la caja
+        altura += 5; // Separador
+        altura += 5; // Cajero Apertura
+        altura += 5; // Cajero Cierre
+        altura += 5; // Apertura
+        altura += 5; // Cierre
+        altura += 5; // Separador
+
+        // Resumen
+        altura += 5; // Monto Inicial
+        altura += 5; // Total Ventas
+        altura += 5; // Total Cobranza
+        altura += 5; // Total Gastos
+        
+        if (datos.resumen.totalMoneda !== undefined && datos.resumen.totalMoneda !== null) altura += 5;
+        if (datos.resumen.totalTarjetaDebito !== undefined && datos.resumen.totalTarjetaDebito !== null) altura += 5;
+        if (datos.resumen.totalTarjetaCredito !== undefined && datos.resumen.totalTarjetaCredito !== null) altura += 5;
+        if (datos.resumen.totalTransferencia !== undefined && datos.resumen.totalTransferencia !== null) altura += 5;
+
+        altura += 5; // Separador
+        altura += 5; // Saldo Teórico
+        altura += 5; // Saldo Real
+        altura += 5; // Diferencia
+        altura += 5; // Estado Cierre
+        altura += 5; // Separador
+
+        // Arqueo Moneda
+        if (datos.arqueoMoneda && datos.arqueoMoneda.length > 0) {
+            altura += 5; // Título
+            altura += 4; // Header tabla
+            altura += datos.arqueoMoneda.length * 4;
+            altura += 5; // Separador
+        }
+
+        // Tarjetas Débito
+        if (datos.tarjetasDebito && datos.tarjetasDebito.length > 0) {
+            altura += 5; // Título
+            altura += 4; // Header tabla
+            altura += datos.tarjetasDebito.length * 4;
+            altura += 5; // Separador
+        }
+
+        // Tarjetas Crédito
+        if (datos.tarjetasCredito && datos.tarjetasCredito.length > 0) {
+            altura += 5; // Título
+            altura += 4; // Header tabla
+            altura += datos.tarjetasCredito.length * 4;
+            altura += 5; // Separador
+        }
+
+        // Transferencias
+        if (datos.transferencias && datos.transferencias.length > 0) {
+            altura += 5; // Título
+            altura += 4; // Header tabla
+            altura += datos.transferencias.length * 4;
+            altura += 5; // Separador
+        }
+
+        // Gastos
+        if (datos.gastos && datos.gastos.length > 0) {
+            altura += 5; // Título
+            altura += 4; // Header tabla
+            altura += datos.gastos.length * 4;
+            altura += 5; // Separador
+        }
+
+        // Footer
+        altura += 5; // FIN REPORTE
+        altura += 10; // margen inferior
+
+        return Math.max(altura, 100);
     }
 
     /**

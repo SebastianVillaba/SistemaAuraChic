@@ -18,10 +18,16 @@ import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import MoneyIcon from '@mui/icons-material/Money';
 import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import SyncIcon from '@mui/icons-material/Sync';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
 
 import DetArqueoEfectivo from '../../components/Caja/detArqueoEfectivo';
 import DetArqueoGastos from '../../components/Caja/detArqueoGastos';
 import DetArqueoTransferencias from '../../components/Caja/detArqueoTransferencias';
+import DetArqueoTarjetaCredito from '../../components/Caja/detArqueoTarjetaCredito';
+import DetArqueoTarjetaDebito from '../../components/Caja/detArqueoTarjetaDebito';
+import DetArqueoMoneda from '../../components/Caja/detArqueoMoneda';
+
 import RequirePermission from '../../components/RequirePermission';
 import { useTerminal } from '../../hooks/useTerminal';
 import { cajaService } from '../../services/caja.service';
@@ -38,10 +44,18 @@ const ArqueoCaja: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [refreshKey, setRefreshKey] = useState(0);
 
     // Totales de las secciones
     const [totalEfectivo, setTotalEfectivo] = useState(0);
     const [totalGastos, setTotalGastos] = useState(0);
+    const [totalMonedas, setTotalMonedas] = useState(0);
+    const [totalTarjetaCredito, setTotalTarjetaCredito] = useState(0);
+    const [totalTarjetaDebito, setTotalTarjetaDebito] = useState(0);
+    const [totalTransferencias, setTotalTransferencias] = useState(0);
+
+    // Calcular total arqueado
+    const totalArqueado = totalEfectivo + totalMonedas + totalTarjetaCredito + totalTarjetaDebito + totalTransferencias;
 
     // Verificar estado de caja al cargar
     useEffect(() => {
@@ -64,8 +78,8 @@ const ArqueoCaja: React.FC = () => {
         }
 
         // Verificar que haya arqueo cargado
-        if (totalEfectivo <= 0) {
-            setError('Debe cargar el arqueo de efectivo antes de iniciar la caja');
+        if (totalArqueado <= 0) {
+            setError('Debe cargar algún valor en el arqueo antes de iniciar la caja');
             return;
         }
 
@@ -86,6 +100,7 @@ const ArqueoCaja: React.FC = () => {
                 setCajaAbierta(true);
                 setNroCajaEstado(1); // TODO: Obtener del backend
                 setSuccess('Caja abierta exitosamente');
+                setRefreshKey(prev => prev + 1);
             }
         } catch (err: any) {
             console.error('Error al abrir caja:', err);
@@ -102,7 +117,7 @@ const ArqueoCaja: React.FC = () => {
         }
 
         // Verificar que haya arqueo de cierre
-        if (totalEfectivo <= 0) {
+        if (totalArqueado <= 0) {
             setError('Debe cargar el arqueo de cierre antes de cerrar la caja');
             return;
         }
@@ -124,6 +139,7 @@ const ArqueoCaja: React.FC = () => {
                 setCajaAbierta(false);
                 setNroCajaEstado(null);
                 setSuccess('Caja cerrada exitosamente');
+                setRefreshKey(prev => prev + 1);
 
                 // Generar reporte de cierre de caja
                 const idParaReporte = response.idMovimientoCaja || idMovimientoCaja;
@@ -235,33 +251,63 @@ const ArqueoCaja: React.FC = () => {
                 {/* Resumen de totales */}
                 <Paper sx={{ p: 2, mb: 3 }}>
                     <Grid container spacing={2}>
-                        <Grid size={{ xs: 12, md: 4 }}>
-                            <Box sx={{ textAlign: 'center', p: 2 }}>
+                        <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+                            <Box sx={{ textAlign: 'center', p: 1 }}>
                                 <Typography variant="subtitle2" color="text.secondary">
-                                    Total Efectivo
+                                    Efectivo Gs.
                                 </Typography>
-                                <Typography variant="h5" color="success.main" fontWeight="bold">
+                                <Typography variant="h6" color="success.main" fontWeight="bold">
                                     Gs. {formatCurrency(totalEfectivo)}
                                 </Typography>
                             </Box>
                         </Grid>
-                        <Grid size={{ xs: 12, md: 4 }}>
-                            <Box sx={{ textAlign: 'center', p: 2 }}>
+                        <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+                            <Box sx={{ textAlign: 'center', p: 1 }}>
                                 <Typography variant="subtitle2" color="text.secondary">
-                                    Total Gastos
+                                    Monedas Ext.
                                 </Typography>
-                                <Typography variant="h5" color="error.main" fontWeight="bold">
+                                <Typography variant="h6" color="warning.main" fontWeight="bold">
+                                    Gs. {formatCurrency(totalMonedas)}
+                                </Typography>
+                            </Box>
+                        </Grid>
+                        <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+                            <Box sx={{ textAlign: 'center', p: 1 }}>
+                                <Typography variant="subtitle2" color="text.secondary">
+                                    Tarjetas
+                                </Typography>
+                                <Typography variant="h6" color="primary.main" fontWeight="bold">
+                                    Gs. {formatCurrency(totalTarjetaCredito + totalTarjetaDebito)}
+                                </Typography>
+                            </Box>
+                        </Grid>
+                        <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+                            <Box sx={{ textAlign: 'center', p: 1 }}>
+                                <Typography variant="subtitle2" color="text.secondary">
+                                    Transferencias
+                                </Typography>
+                                <Typography variant="h6" color="info.main" fontWeight="bold">
+                                    Gs. {formatCurrency(totalTransferencias)}
+                                </Typography>
+                            </Box>
+                        </Grid>
+                        <Grid size={{ xs: 6, sm: 4, md: 2 }}>
+                            <Box sx={{ textAlign: 'center', p: 1 }}>
+                                <Typography variant="subtitle2" color="text.secondary">
+                                    Gastos
+                                </Typography>
+                                <Typography variant="h6" color="error.main" fontWeight="bold">
                                     Gs. {formatCurrency(totalGastos)}
                                 </Typography>
                             </Box>
                         </Grid>
-                        <Grid size={{ xs: 12, md: 4 }}>
-                            <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#e3f2fd', borderRadius: 1 }}>
-                                <Typography variant="subtitle2" color="text.secondary">
+                        <Grid size={{ xs: 12, sm: 4, md: 2 }}>
+                            <Box sx={{ textAlign: 'center', p: 1, backgroundColor: '#e3f2fd', borderRadius: 1 }}>
+                                <Typography variant="subtitle2" color="text.secondary" fontWeight="bold">
                                     Saldo Neto
                                 </Typography>
-                                <Typography variant="h5" color="primary.main" fontWeight="bold">
-                                    Gs. {formatCurrency(totalEfectivo - totalGastos)}
+                                <Typography variant="h6" color="primary.dark" fontWeight="bold">
+                                    Gs. {formatCurrency(totalArqueado - totalGastos)}
                                 </Typography>
                             </Box>
                         </Grid>
@@ -271,19 +317,20 @@ const ArqueoCaja: React.FC = () => {
                 {/* Secciones modulares */}
                 <Grid container spacing={3}>
                     {/* Arqueo de Efectivo */}
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                         <Card elevation={3}>
                             <CardHeader
                                 avatar={<MoneyIcon color="success" />}
                                 title={
                                     <Typography variant="h6" fontWeight="bold">
-                                        💵 Arqueo de Efectivo (Guaraníes)
+                                        💵 Arqueo de Efectivo (Gs.)
                                     </Typography>
                                 }
                                 sx={{ backgroundColor: '#e8f5e9', borderBottom: '1px solid #c8e6c9' }}
                             />
                             <CardContent>
                                 <DetArqueoEfectivo
+                                    key={`efectivo-${refreshKey}`}
                                     idTerminalWeb={idTerminalWeb || 0}
                                     onTotalChange={setTotalEfectivo}
                                 />
@@ -291,14 +338,106 @@ const ArqueoCaja: React.FC = () => {
                         </Card>
                     </Grid>
 
+                    {/* Monedas Extranjeras */}
+                    <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+                        <Card elevation={3}>
+                            <CardHeader
+                                avatar={<CurrencyExchangeIcon color="warning" />}
+                                title={
+                                    <Typography variant="h6" fontWeight="bold">
+                                        🪙 Monedas Extranjeras
+                                    </Typography>
+                                }
+                                sx={{ backgroundColor: '#fff3e0', borderBottom: '1px solid #ffe0b2' }}
+                            />
+                            <CardContent>
+                                <DetArqueoMoneda
+                                    key={`moneda-${refreshKey}`}
+                                    idTerminalWeb={idTerminalWeb || 0}
+                                    onTotalChange={setTotalMonedas}
+                                    disabled={!cajaAbierta}
+                                />
+                            </CardContent>
+                        </Card>
+                    </Grid>
+
+                    {/* Tarjetas de Crédito */}
+                    <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+                        <Card elevation={3}>
+                            <CardHeader
+                                avatar={<CreditCardIcon color="primary" />}
+                                title={
+                                    <Typography variant="h6" fontWeight="bold">
+                                        💳 Tarjetas de Crédito
+                                    </Typography>
+                                }
+                                sx={{ backgroundColor: '#e3f2fd', borderBottom: '1px solid #bbdefb' }}
+                            />
+                            <CardContent>
+                                <DetArqueoTarjetaCredito
+                                    key={`credito-${refreshKey}`}
+                                    idTerminalWeb={idTerminalWeb || 0}
+                                    onTotalChange={setTotalTarjetaCredito}
+                                    disabled={!cajaAbierta}
+                                />
+                            </CardContent>
+                        </Card>
+                    </Grid>
+
+                    {/* Tarjetas de Débito */}
+                    <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+                        <Card elevation={3}>
+                            <CardHeader
+                                avatar={<CreditCardIcon color="secondary" />}
+                                title={
+                                    <Typography variant="h6" fontWeight="bold">
+                                        💳 Tarjetas de Débito
+                                    </Typography>
+                                }
+                                sx={{ backgroundColor: '#f3e5f5', borderBottom: '1px solid #e1bee7' }}
+                            />
+                            <CardContent>
+                                <DetArqueoTarjetaDebito
+                                    key={`debito-${refreshKey}`}
+                                    idTerminalWeb={idTerminalWeb || 0}
+                                    onTotalChange={setTotalTarjetaDebito}
+                                    disabled={!cajaAbierta}
+                                />
+                            </CardContent>
+                        </Card>
+                    </Grid>
+
+                    {/* Transferencias */}
+                    <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+                        <Card elevation={3}>
+                            <CardHeader
+                                avatar={<SyncIcon color="info" />}
+                                title={
+                                    <Typography variant="h6" fontWeight="bold">
+                                        🔄 Transferencias Bancarias
+                                    </Typography>
+                                }
+                                sx={{ backgroundColor: '#e0f7fa', borderBottom: '1px solid #b2ebf2' }}
+                            />
+                            <CardContent>
+                                <DetArqueoTransferencias
+                                    key={`transferencias-${refreshKey}`}
+                                    idTerminalWeb={idTerminalWeb || 0}
+                                    onTotalChange={setTotalTransferencias}
+                                    disabled={!cajaAbierta}
+                                />
+                            </CardContent>
+                        </Card>
+                    </Grid>
+
                     {/* Gastos */}
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                         <Card elevation={3}>
                             <CardHeader
                                 avatar={<MoneyOffIcon color="error" />}
                                 title={
                                     <Typography variant="h6" fontWeight="bold">
-                                        📝 Gastos
+                                        📝 Gastos de Caja
                                     </Typography>
                                 }
                                 sx={{
@@ -310,34 +449,12 @@ const ArqueoCaja: React.FC = () => {
                             />
                             <CardContent>
                                 <DetArqueoGastos
+                                    key={`gastos-${refreshKey}`}
                                     idTerminalWeb={idTerminalWeb || 0}
                                     idMovimientoCaja={idMovimientoCaja}
                                     onTotalChange={setTotalGastos}
                                     disabled={!cajaAbierta}
                                 />
-                            </CardContent>
-                        </Card>
-                    </Grid>
-
-                    {/* Transferencias */}
-                    <Grid size={{ xs: 12, md: 6 }}>
-                        <Card elevation={3}>
-                            <CardHeader
-                                avatar={<SyncIcon color="primary" />}
-                                title={
-                                    <Typography variant="h6" fontWeight="bold">
-                                        🔄 Transferencias
-                                    </Typography>
-                                }
-                                sx={{
-                                    backgroundColor: cajaAbierta
-                                        ? '#e3f2fd'
-                                        : 'rgba(180, 180, 180, 0.4)',
-                                    borderBottom: '1px solid #bbdefb'
-                                }}
-                            />
-                            <CardContent>
-                                <DetArqueoTransferencias disabled={!cajaAbierta} />
                             </CardContent>
                         </Card>
                     </Grid>

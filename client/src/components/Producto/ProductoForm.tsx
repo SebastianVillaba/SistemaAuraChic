@@ -10,21 +10,30 @@ import {
   FormControlLabel,
   CircularProgress,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Alert,
+  TextField as MuiTextField,
 } from '@mui/material';
 import TextField from '../UppercaseTextField';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Producto, TipoProducto } from '../../types/producto.types';
 import { productoService } from '../../services/producto.service';
 import { impuestoService } from '../../services/impuesto.service';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 
 interface ProductoFormProps {
   formData: Producto;
   setFormData: React.Dispatch<React.SetStateAction<Producto>>;
+  guardarRef?: React.RefObject<HTMLButtonElement>;
 }
 
-export default function ProductoForm({ formData, setFormData }: ProductoFormProps): JSX.Element {
+export default function ProductoForm({ formData, setFormData, guardarRef }: ProductoFormProps): JSX.Element {
   const [tiposProducto, setTiposProducto] = useState<TipoProducto[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [impuestos, setImpuestos] = useState<any[]>([]);
@@ -32,6 +41,27 @@ export default function ProductoForm({ formData, setFormData }: ProductoFormProp
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+
+  // States for Quick Create Tipo Producto Modal
+  const nombreRef = useRef<HTMLInputElement>(null);
+  const presentacionRef = useRef<HTMLInputElement>(null);
+  const codigoRef = useRef<HTMLInputElement>(null);
+  const codigoBarraRef = useRef<HTMLInputElement>(null);
+  const precioRef = useRef<HTMLInputElement>(null);
+  const tipoProductoRef = useRef<HTMLInputElement>(null);
+  const impuestoRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Focus the Nombre field when the form is mounted
+    setTimeout(() => {
+      nombreRef.current?.focus();
+    }, 100);
+  }, []);
+
+  const [openQuickCreate, setOpenQuickCreate] = useState<boolean>(false);
+  const [quickCreateNombre, setQuickCreateNombre] = useState<string>('');
+  const [quickCreateError, setQuickCreateError] = useState<string>('');
+  const [quickCreateLoading, setQuickCreateLoading] = useState<boolean>(false);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -100,21 +130,76 @@ export default function ProductoForm({ formData, setFormData }: ProductoFormProp
   };
 
   console.log(formData);
-  
+
+  const fetchTiposProducto = async (): Promise<TipoProducto[]> => {
+    setLoading(true);
+    try {
+      const tipos = await productoService.obtenerTiposProducto();
+      setTiposProducto(tipos);
+      return tipos;
+    } catch (error) {
+      console.error('Error al cargar tipos de producto:', error);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOpenQuickCreate = () => {
+    setQuickCreateNombre('');
+    setQuickCreateError('');
+    setOpenQuickCreate(true);
+  };
+
+  const handleCloseQuickCreate = () => {
+    setOpenQuickCreate(false);
+  };
+
+  const handleSaveQuickCreate = async () => {
+    if (!quickCreateNombre.trim()) {
+      setQuickCreateError('El nombre es obligatorio');
+      return;
+    }
+
+    setQuickCreateLoading(true);
+    setQuickCreateError('');
+
+    try {
+      // Usamos el ID de usuario 1 como default (o el que corresponda)
+      const response = await productoService.insertarTipoProducto(
+        quickCreateNombre.trim(),
+        1
+      );
+
+      if (response.success) {
+        // Refrescar lista de tipos de producto
+        const updatedTipos = await fetchTiposProducto();
+        
+        // Buscar el tipo recién creado en la lista actualizada (case insensitive)
+        const createdType = updatedTipos.find(
+          (t) => t.nombreTipo.trim().toUpperCase() === quickCreateNombre.trim().toUpperCase()
+        );
+
+        if (createdType) {
+          setFormData((prev) => ({
+            ...prev,
+            idTipoProducto: createdType.idTipoProducto,
+          }));
+        }
+
+        handleCloseQuickCreate();
+      } else {
+        setQuickCreateError(response.message || 'Error al crear el tipo de producto');
+      }
+    } catch (err: any) {
+      console.error('Error al crear tipo de producto rápido:', err);
+      setQuickCreateError(err.message || 'Error al crear el tipo de producto');
+    } finally {
+      setQuickCreateLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTiposProducto = async () => {
-      setLoading(true);
-      try {
-        const tipos = await productoService.obtenerTiposProducto();
-        setTiposProducto(tipos);
-      } catch (error) {
-        console.error('Error al cargar tipos de producto:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     const fetchImpuesto = async () => {
       setLoading(true);
       try {
@@ -186,6 +271,13 @@ export default function ProductoForm({ formData, setFormData }: ProductoFormProp
                 size="small"
                 error={!formData.nombre}
                 helperText={!formData.nombre ? 'Campo obligatorio' : ''}
+                inputRef={nombreRef}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    presentacionRef.current?.focus();
+                  }
+                }}
               />
             </Stack>
 
@@ -198,6 +290,13 @@ export default function ProductoForm({ formData, setFormData }: ProductoFormProp
                 onChange={handleChange('presentacion')}
                 size="small"
                 helperText={!formData.presentacion}
+                inputRef={presentacionRef}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    codigoRef.current?.focus();
+                  }
+                }}
               />
               <TextField
                 fullWidth
@@ -206,6 +305,13 @@ export default function ProductoForm({ formData, setFormData }: ProductoFormProp
                 onChange={handleChange('codigo')}
                 size="small"
                 helperText={''}
+                inputRef={codigoRef}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    codigoBarraRef.current?.focus();
+                  }
+                }}
               />
             </Stack>
 
@@ -216,6 +322,13 @@ export default function ProductoForm({ formData, setFormData }: ProductoFormProp
               value={formData.codigoBarra}
               onChange={handleChange('codigoBarra')}
               size="small"
+              inputRef={codigoBarraRef}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  precioRef.current?.focus();
+                }
+              }}
             />
 
             {/* Fila 4: Precio */}
@@ -230,24 +343,55 @@ export default function ProductoForm({ formData, setFormData }: ProductoFormProp
               error={formData.precio <= 0}
               helperText={formData.precio <= 0 ? 'Precio debe ser mayor a 0' : ''}
               inputProps={{ min: 0, step: 0.01 }}
+              inputRef={precioRef}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  tipoProductoRef.current?.focus();
+                }
+              }}
             />
 
             {/* Fila 5: Tipo de Producto */}
-            <FormControl fullWidth size="small">
-              <InputLabel>Tipo de Producto</InputLabel>
-              <Select
-                value={formData.idTipoProducto || ''}
-                onChange={handleChange('idTipoProducto')}
-                label="Tipo de Producto"
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Tipo de Producto</InputLabel>
+                <Select
+                  value={formData.idTipoProducto || ''}
+                  onChange={handleChange('idTipoProducto')}
+                  label="Tipo de Producto"
+                  disabled={loading}
+                  inputRef={tipoProductoRef}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      impuestoRef.current?.focus();
+                    }
+                  }}
+                >
+                  {tiposProducto.map((tipo) => (
+                    <MenuItem key={tipo.idTipoProducto} value={tipo.idTipoProducto}>
+                      {tipo.nombreTipo}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <IconButton 
+                color="primary" 
+                onClick={handleOpenQuickCreate}
                 disabled={loading}
+                title="Crear tipo de producto rápido"
+                sx={{ 
+                  backgroundColor: 'action.hover',
+                  '&:hover': {
+                    backgroundColor: 'primary.light',
+                    color: 'primary.contrastText',
+                  }
+                }}
               >
-                {tiposProducto.map((tipo) => (
-                  <MenuItem key={tipo.idTipoProducto} value={tipo.idTipoProducto}>
-                    {tipo.nombreTipo}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                <AddIcon />
+              </IconButton>
+            </Box>
 
             {/* Fila 6: Impuesto */}
             <FormControl fullWidth size="small">
@@ -257,6 +401,13 @@ export default function ProductoForm({ formData, setFormData }: ProductoFormProp
                 onChange={handleChange('idImpuesto')}
                 label="Impuesto"
                 disabled={loading}
+                inputRef={impuestoRef}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    guardarRef?.current?.focus();
+                  }
+                }}
               >
                 {impuestos.map((impuesto) => (
                   <MenuItem key={impuesto.idImpuesto} value={impuesto.idImpuesto}>
@@ -426,6 +577,57 @@ export default function ProductoForm({ formData, setFormData }: ProductoFormProp
           )}
         </Box>
       </Box>
+
+      {/* Dialogo para creacion rapida de Tipo de Producto */}
+      <Dialog 
+        open={openQuickCreate} 
+        onClose={handleCloseQuickCreate}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 600 }}>Crear Tipo de Producto Rápido</DialogTitle>
+        <DialogContent>
+          {quickCreateError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {quickCreateError}
+            </Alert>
+          )}
+          <MuiTextField
+            autoFocus
+            margin="dense"
+            label="Nombre del Tipo de Producto"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={quickCreateNombre}
+            onChange={(e) => setQuickCreateNombre(e.target.value)}
+            disabled={quickCreateLoading}
+            inputProps={{ maxLength: 30 }}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleSaveQuickCreate();
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5 }}>
+          <Button 
+            onClick={handleCloseQuickCreate} 
+            color="inherit"
+            disabled={quickCreateLoading}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            onClick={handleSaveQuickCreate} 
+            variant="contained" 
+            color="primary"
+            disabled={quickCreateLoading}
+          >
+            {quickCreateLoading ? 'Guardando...' : 'Guardar'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

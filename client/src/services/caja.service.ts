@@ -135,6 +135,7 @@ export const cajaService = {
         idMovimientoCaja: number,
         concepto: string,
         montoGasto: number,
+        factura: number,
         idGastoCajaTmp: number | null = null
     ): Promise<{ success: boolean; message?: string }> => {
         const response = await axios.post(`${API_URL}/caja/gasto`, {
@@ -142,7 +143,8 @@ export const cajaService = {
             idTerminalWeb,
             idMovimientoCaja,
             concepto,
-            montoGasto
+            montoGasto,
+            factura
         });
         return response.data;
     },
@@ -175,6 +177,189 @@ export const cajaService = {
         });
         return response.data;
     },
+
+    /**
+     * Lista las tarjetas disponibles para el selector
+     */
+    listarTarjetas: async (): Promise<{ success: boolean; result: any[] }> => {
+        const response = await axios.get(`${API_URL}/caja/tarjetas`);
+        return response.data;
+    },
+
+    /**
+     * Lista las monedas activas para el selector
+     */
+    listarMonedas: async (): Promise<{ success: boolean; result: any[] }> => {
+        const response = await axios.get(`${API_URL}/caja/monedas`);
+        return response.data;
+    },
+
+    /**
+     * Agrega un detalle de tarjeta de crédito al arqueo temporal
+     */
+    agregarDetArqueoTarjetaCreditoTmp: async (
+        idTerminalWeb: number,
+        idTarjetaDebito: number,
+        monto: number
+    ): Promise<{ success: boolean; message?: string }> => {
+        const response = await axios.post(`${API_URL}/caja/agregarDetArqueoTarjetaCreditoTmp`, {
+            idTerminalWeb,
+            idTarjetaDebito,
+            monto
+        });
+        return response.data;
+    },
+
+    /**
+     * Lista los detalles de tarjeta de crédito temporal y su total
+     */
+    listarDetArqueoTarjetaCreditoTmp: async (
+        idTerminalWeb: number
+    ): Promise<{ success: boolean; result: any[]; totalArqueo: number }> => {
+        const response = await axios.get(`${API_URL}/caja/listarDetArqueoTarjetaCreditoTmp`, {
+            params: { idTerminalWeb }
+        });
+        return response.data;
+    },
+
+    /**
+     * Elimina un detalle de tarjeta de crédito temporal
+     */
+    eliminarDetArqueoTarjetaCreditoTmp: async (
+        idTerminalWeb: number,
+        idTarjetaDebito: number
+    ): Promise<{ success: boolean; message?: string }> => {
+        const response = await axios.delete(`${API_URL}/caja/eliminarDetArqueoTarjetaCreditoTmp`, {
+            params: { idTerminalWeb, idTarjetaDebito }
+        });
+        return response.data;
+    },
+
+    /**
+     * Agrega un detalle de tarjeta de débito al arqueo temporal
+     */
+    agregarDetArqueoTarjetaDebitoTmp: async (
+        idTerminalWeb: number,
+        idTarjetaDebito: number,
+        monto: number
+    ): Promise<{ success: boolean; message?: string }> => {
+        const response = await axios.post(`${API_URL}/caja/agregarDetArqueoTarjetaDebitoTmp`, {
+            idTerminalWeb,
+            idTarjetaDebito,
+            monto
+        });
+        return response.data;
+    },
+
+    /**
+     * Lista los detalles de tarjeta de débito temporal y su total
+     */
+    listarDetArqueoTarjetaDebitoTmp: async (
+        idTerminalWeb: number
+    ): Promise<{ success: boolean; result: any[]; totalArqueo: number }> => {
+        const response = await axios.get(`${API_URL}/caja/listarDetArqueoTarjetaDebitoTmp`, {
+            params: { idTerminalWeb }
+        });
+        return response.data;
+    },
+
+    /**
+     * Elimina un detalle de tarjeta de débito temporal
+     */
+    eliminarDetArqueoTarjetaDebitoTmp: async (
+        idTerminalWeb: number,
+        idTarjetaDebito: number
+    ): Promise<{ success: boolean; message?: string }> => {
+        const response = await axios.delete(`${API_URL}/caja/eliminarDetArqueoTarjetaDebitoTmp`, {
+            params: { idTerminalWeb, idTarjetaDebito }
+        });
+        return response.data;
+    },
+
+    /**
+     * Agrega un detalle de transferencia al arqueo temporal
+     */
+    agregarDetArqueoTransferenciaTmp: async (
+        idTerminalWeb: number,
+        concepto: string,
+        monto: number
+    ): Promise<{ success: boolean; message?: string }> => {
+        const response = await axios.post(`${API_URL}/caja/agregarDetArqueoTransferenciaTmp`, {
+            idTerminalWeb,
+            concepto,
+            monto
+        });
+        return response.data;
+    },
+
+    /**
+     * Lista los detalles de transferencia temporal y su total
+     */
+    listarDetArqueoTransferenciaTmp: async (
+        idTerminalWeb: number
+    ): Promise<{ success: boolean; result: any[]; totalArqueo: number }> => {
+        const response = await axios.get(`${API_URL}/caja/listarDetArqueoTransferenciaTmp`, {
+            params: { idTerminalWeb }
+        });
+        return response.data;
+    },
+
+    /**
+     * Elimina un detalle de transferencia temporal
+     */
+    eliminarDetArqueoTransferenciaTmp: async (
+        idTerminalWeb: number,
+        concepto: string
+    ): Promise<{ success: boolean; message?: string }> => {
+        const response = await axios.delete(`${API_URL}/caja/eliminarDetArqueoTransferenciaTmp`, {
+            params: { idTerminalWeb, concepto }
+        });
+        return response.data;
+    },
+
+    /**
+     * Agrega un detalle de moneda extranjera al arqueo temporal
+     */
+    agregarDetArqueoMonedaTmp: async (
+        idTerminalWeb: number,
+        idMoneda: number,
+        montoMoneda: number,
+        total: number
+    ): Promise<{ success: boolean; message?: string }> => {
+        const response = await axios.post(`${API_URL}/caja/agregarDetArqueoMonedaTmp`, {
+            idTerminalWeb,
+            idMoneda,
+            montoMoneda,
+            total
+        });
+        return response.data;
+    },
+
+    /**
+     * Lista los detalles de moneda extranjera temporal y su total
+     */
+    listarDetArqueoMonedaTmp: async (
+        idTerminalWeb: number
+    ): Promise<{ success: boolean; result: any[]; totalArqueo: number }> => {
+        const response = await axios.get(`${API_URL}/caja/listarDetArqueoMonedaTmp`, {
+            params: { idTerminalWeb }
+        });
+        return response.data;
+    },
+
+    /**
+     * Elimina un detalle de moneda temporal
+     */
+    eliminarDetArqueoMonedaTmp: async (
+        idTerminalWeb: number,
+        idMoneda: number
+    ): Promise<{ success: boolean; message?: string }> => {
+        const response = await axios.delete(`${API_URL}/caja/eliminarDetArqueoMonedaTmp`, {
+            params: { idTerminalWeb, idMoneda }
+        });
+        return response.data;
+    },
 };
 
 export default cajaService;
+

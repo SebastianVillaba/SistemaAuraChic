@@ -12,15 +12,19 @@ import {
     IconButton,
     Typography,
     CircularProgress,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
     Grid,
     TextField,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { cajaService } from '../../services/caja.service';
-import type { DetArqueoTransferenciaTmp } from '../../types/caja.types';
+import type { DetArqueoTarjetaCreditoTmp, TarjetaDebito } from '../../types/caja.types';
 
-interface DetArqueoTransferenciasProps {
+interface DetArqueoTarjetaCreditoProps {
     idTerminalWeb: number;
     onTotalChange?: (total: number) => void;
     disabled?: boolean;
@@ -34,13 +38,14 @@ export const formatCurrency = (value: number) => {
     }).format(value);
 };
 
-const DetArqueoTransferencias: React.FC<DetArqueoTransferenciasProps> = ({
+const DetArqueoTarjetaCredito: React.FC<DetArqueoTarjetaCreditoProps> = ({
     idTerminalWeb,
     onTotalChange,
     disabled = false,
 }) => {
-    const [items, setItems] = useState<DetArqueoTransferenciaTmp[]>([]);
-    const [concepto, setConcepto] = useState<string>('');
+    const [items, setItems] = useState<DetArqueoTarjetaCreditoTmp[]>([]);
+    const [tarjetas, setTarjetas] = useState<TarjetaDebito[]>([]);
+    const [selectedTarjeta, setSelectedTarjeta] = useState<number | ''>('');
     const [monto, setMonto] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -49,6 +54,7 @@ const DetArqueoTransferencias: React.FC<DetArqueoTransferenciasProps> = ({
     useEffect(() => {
         if (idTerminalWeb) {
             cargarDetalles();
+            cargarTarjetas();
         }
     }, [idTerminalWeb]);
 
@@ -58,15 +64,26 @@ const DetArqueoTransferencias: React.FC<DetArqueoTransferenciasProps> = ({
         onTotalChange?.(total);
     }, [items, onTotalChange]);
 
+    const cargarTarjetas = async () => {
+        try {
+            const response = await cajaService.listarTarjetas();
+            if (response.success) {
+                setTarjetas(response.result);
+            }
+        } catch (error) {
+            console.error('Error al cargar tarjetas:', error);
+        }
+    };
+
     const cargarDetalles = async () => {
         setLoading(true);
         try {
-            const response = await cajaService.listarDetArqueoTransferenciaTmp(idTerminalWeb);
+            const response = await cajaService.listarDetArqueoTarjetaCreditoTmp(idTerminalWeb);
             if (response.success) {
                 setItems(response.result || []);
             }
         } catch (error) {
-            console.error('Error al cargar transferencias:', error);
+            console.error('Error al cargar detalles de tarjeta de crédito:', error);
         } finally {
             setLoading(false);
         }
@@ -74,44 +91,44 @@ const DetArqueoTransferencias: React.FC<DetArqueoTransferenciasProps> = ({
 
     const handleAgregar = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!concepto.trim() || !monto || parseFloat(monto) <= 0) return;
+        if (!selectedTarjeta || !monto || parseFloat(monto) <= 0) return;
 
         setSaving(true);
         try {
-            const response = await cajaService.agregarDetArqueoTransferenciaTmp(
+            const response = await cajaService.agregarDetArqueoTarjetaCreditoTmp(
                 idTerminalWeb,
-                concepto.trim(),
+                Number(selectedTarjeta),
                 parseFloat(monto)
             );
             if (response.success) {
-                setConcepto('');
+                setSelectedTarjeta('');
                 setMonto('');
                 await cargarDetalles();
             }
         } catch (error: any) {
-            console.error('Error al agregar transferencia:', error);
-            alert(error.response?.data?.message || 'Error al agregar transferencia');
+            console.error('Error al agregar detalle de tarjeta de crédito:', error);
+            alert(error.response?.data?.message || 'Error al agregar detalle');
         } finally {
             setSaving(false);
         }
     };
 
-    const handleEliminar = async (concepto: string) => {
+    const handleEliminar = async (idTarjetaDebito: number) => {
         setSaving(true);
         try {
-            const response = await cajaService.eliminarDetArqueoTransferenciaTmp(idTerminalWeb, concepto);
+            const response = await cajaService.eliminarDetArqueoTarjetaCreditoTmp(idTerminalWeb, idTarjetaDebito);
             if (response.success) {
                 await cargarDetalles();
             }
         } catch (error: any) {
-            console.error('Error al eliminar transferencia:', error);
-            alert(error.response?.data?.message || 'Error al eliminar transferencia');
+            console.error('Error al eliminar detalle de tarjeta de crédito:', error);
+            alert(error.response?.data?.message || 'Error al eliminar detalle');
         } finally {
             setSaving(false);
         }
     };
 
-    const totalTransferencias = items.reduce((sum, item) => sum + item.monto, 0);
+    const totalTarjetaCredito = items.reduce((sum, item) => sum + item.monto, 0);
 
     if (loading) {
         return (
@@ -128,15 +145,21 @@ const DetArqueoTransferencias: React.FC<DetArqueoTransferenciasProps> = ({
                 <Box component="form" onSubmit={handleAgregar} sx={{ mb: 3 }}>
                     <Grid container spacing={2} alignItems="center">
                         <Grid item xs={12} sm={5}>
-                            <TextField
-                                fullWidth
-                                label="Concepto (e.g. Banco Atlas)"
-                                size="small"
-                                required
-                                value={concepto}
-                                onChange={(e) => setConcepto(e.target.value)}
-                                inputProps={{ maxLength: 50 }}
-                            />
+                            <FormControl fullWidth size="small" required>
+                                <InputLabel id="tarjeta-credito-select-label">Tarjeta</InputLabel>
+                                <Select
+                                    labelId="tarjeta-credito-select-label"
+                                    value={selectedTarjeta}
+                                    label="Tarjeta"
+                                    onChange={(e) => setSelectedTarjeta(e.target.value as number)}
+                                >
+                                    {tarjetas.map((t) => (
+                                        <MenuItem key={t.idTarjetaDebito} value={t.idTarjetaDebito}>
+                                            {t.nombreTarjetaDebito}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
                         </Grid>
                         <Grid item xs={12} sm={4}>
                             <TextField
@@ -157,7 +180,7 @@ const DetArqueoTransferencias: React.FC<DetArqueoTransferenciasProps> = ({
                                 color="primary"
                                 type="submit"
                                 startIcon={<AddIcon />}
-                                disabled={saving || !concepto.trim() || !monto}
+                                disabled={saving || !selectedTarjeta || !monto}
                             >
                                 Registrar
                             </Button>
@@ -171,15 +194,15 @@ const DetArqueoTransferencias: React.FC<DetArqueoTransferenciasProps> = ({
                 <Table size="small" stickyHeader>
                     <TableHead>
                         <TableRow>
-                            <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Concepto</TableCell>
+                            <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Tarjeta</TableCell>
                             <TableCell align="right" sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>Monto</TableCell>
                             {!disabled && <TableCell align="center" sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5', width: 60 }}></TableCell>}
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {items.map((item, idx) => (
-                            <TableRow key={`${item.concepto}-${idx}`} hover>
-                                <TableCell>{item.concepto}</TableCell>
+                        {items.map((item) => (
+                            <TableRow key={item.idTarjetaDebito} hover>
+                                <TableCell>{item.nombreTarjetaDebito}</TableCell>
                                 <TableCell align="right">
                                     <Typography variant="body2" fontWeight="bold" color="primary.main">
                                         Gs. {formatCurrency(item.monto)}
@@ -190,7 +213,7 @@ const DetArqueoTransferencias: React.FC<DetArqueoTransferenciasProps> = ({
                                         <IconButton
                                             size="small"
                                             color="error"
-                                            onClick={() => handleEliminar(item.concepto)}
+                                            onClick={() => handleEliminar(item.idTarjetaDebito)}
                                             disabled={saving}
                                         >
                                             <DeleteIcon fontSize="small" />
@@ -203,7 +226,7 @@ const DetArqueoTransferencias: React.FC<DetArqueoTransferenciasProps> = ({
                             <TableRow>
                                 <TableCell colSpan={disabled ? 2 : 3} align="center" sx={{ py: 3 }}>
                                     <Typography color="text.secondary" variant="body2">
-                                        No se han registrado transferencias bancarias.
+                                        No se han registrado tarjetas de crédito.
                                     </Typography>
                                 </TableCell>
                             </TableRow>
@@ -214,13 +237,13 @@ const DetArqueoTransferencias: React.FC<DetArqueoTransferenciasProps> = ({
 
             {/* Total */}
             <Paper sx={{ p: 1.5, mt: 2, backgroundColor: '#e3f2fd', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="subtitle2" color="text.secondary">Total Transf.:</Typography>
+                <Typography variant="subtitle2" color="text.secondary">Total Crédito:</Typography>
                 <Typography variant="h6" fontWeight="bold" color="primary.dark">
-                    Gs. {formatCurrency(totalTransferencias)}
+                    Gs. {formatCurrency(totalTarjetaCredito)}
                 </Typography>
             </Paper>
         </Box>
     );
 };
 
-export default DetArqueoTransferencias;
+export default DetArqueoTarjetaCredito;

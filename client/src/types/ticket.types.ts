@@ -114,15 +114,36 @@ export interface DatosCierreCaja {
     totalVentas: number;
     totalCobranza: number;
     totalGastos: number;
+    totalMoneda?: number;
+    totalTarjetaDebito?: number;
+    totalTarjetaCredito?: number;
+    totalTransferencia?: number;
     saldoTeorico: number;
     saldoReal: number;
     diferencia: number;
     estadoCierre: string;
   };
   gastos: Array<{
-    fechaGasto: string;
+    fechaGasto?: string;
     concepto: string;
     montoGasto: number;
+  }>;
+  arqueoMoneda?: Array<{
+    nombre: string;
+    montoMoneda: number;
+    total: number;
+  }>;
+  tarjetasCredito?: Array<{
+    nombreTarjetaDebito: string;
+    monto: number;
+  }>;
+  tarjetasDebito?: Array<{
+    nombreTarjetaDebito: string;
+    monto: number;
+  }>;
+  transferencias?: Array<{
+    concepto: string;
+    monto: number;
   }>;
 }
 

@@ -31,6 +31,14 @@ interface ArqueoLocal extends ArqueoCajaTmpItem {
     isEditing?: boolean;
 }
 
+export const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('es-PY', {
+        style: 'decimal',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(value);
+};
+
 const DetArqueoEfectivo: React.FC<DetArqueoEfectivoProps> = ({
     idTerminalWeb,
     onTotalChange,
@@ -146,13 +154,6 @@ const DetArqueoEfectivo: React.FC<DetArqueoEfectivoProps> = ({
         }
     };
 
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('es-PY', {
-            style: 'decimal',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        }).format(value);
-    };
 
     const totalArqueo = items.reduce((sum, item) => sum + item.subtotal, 0);
 
@@ -224,7 +225,7 @@ const DetArqueoEfectivo: React.FC<DetArqueoEfectivoProps> = ({
                                 </TableCell>
                                 <TableCell align="right">
                                     <Typography variant="body1" fontWeight="bold" color="success.main">
-                                        Gs. {formatCurrency(item.subtotal)}
+                                        {formatCurrency(item.subtotal)}
                                     </Typography>
                                 </TableCell>
                                 <TableCell align="center">
@@ -253,9 +254,10 @@ const DetArqueoEfectivo: React.FC<DetArqueoEfectivoProps> = ({
             </TableContainer>
 
             {/* Total */}
-            <Paper sx={{ p: 2, mt: 2, backgroundColor: '#e8f5e9' }}>
-                <Typography variant="h5" align="right" fontWeight="bold">
-                    TOTAL: Gs. {formatCurrency(totalArqueo)}
+            <Paper sx={{ p: 1.5, mt: 2, backgroundColor: '#e3f2fd', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="subtitle2" color="text.secondary">Total Efectivo:</Typography>
+                <Typography variant="h6" fontWeight="bold" color="primary.dark">
+                    Gs. {formatCurrency(totalArqueo)}
                 </Typography>
             </Paper>
 
