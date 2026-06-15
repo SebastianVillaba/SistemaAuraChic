@@ -1,0 +1,32 @@
+name: Deploy Sistema Aura Chic
+
+on:
+  push:
+    branches:
+      - main  # Se dispara automáticamente al hacer push o merge a main
+
+jobs:
+  deploy:
+    runs-on: self-hosted  # Obliga a que se ejecute en la notebook del cliente
+
+    steps:
+      - name: Descargar último código de GitHub
+        uses: actions/checkout@v4
+
+      - name: Instalar y Compilar Frontend
+        run: |
+          cd client
+          npm install
+          npm run build
+
+      - name: Instalar y Compilar Backend
+        run: |
+          cd server
+          npm install
+          npm run build
+
+      - name: Reiniciar Servicio de Windows (NSSM)
+        shell: powershell
+        run: |
+          # Reinicia el servicio AuraChic para que Node levante los nuevos archivos de /dist
+          Restart-Service -Name "AuraChic"

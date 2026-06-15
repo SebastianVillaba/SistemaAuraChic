@@ -228,7 +228,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
           text: 'Oferta',
           icon: <LocalOffer />,
           subItems: [
-            { text: 'Crear Oferta', path: '/oferta/crear', icon: <Add /> },
+            { text: 'Crear Ofertas', path: '/oferta/crear', icon: <Add /> },
             { text: 'Ver Ofertas', path: '/oferta/ver', icon: <Visibility /> },
           ],
         },
