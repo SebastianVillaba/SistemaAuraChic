@@ -157,7 +157,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
     }));
   };
 
-  const menuSections: MenuSection[] = [
+  const menuSections = React.useMemo<MenuSection[]>(() => [
     // ──────────────── ABM ────────────────
     {
       label: 'ABM',
@@ -276,7 +276,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         },
       ],
     },
-  ];
+  ], []);
 
   const renderMenuItem = (item: MenuItem) => (
     <React.Fragment key={item.text}>

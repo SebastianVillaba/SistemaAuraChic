@@ -1,5 +1,5 @@
 import type { ItemFactura, DatosFactura, ItemTicket, DatosTicket, DatosTicketPedido, DatosCierreCaja, ItemTicketRemision, DatosTicketRemision, DatosTicketPedidosDia } from "../types/ticket.types";
-import jsPDF from "jspdf";
+import type jsPDF from "jspdf";
 
 
 class TicketService {
@@ -14,7 +14,8 @@ class TicketService {
 
 
     public async generarTicket(datos: DatosTicket): Promise<void> {
-        const doc = new jsPDF({
+        const jsPDFClass = (await import("jspdf")).default;
+        const doc = new jsPDFClass({
             orientation: 'portrait',
             unit: 'mm',
             format: [this.ANCHO_TICKET, 306.3]
@@ -54,7 +55,8 @@ class TicketService {
         // Pre-calcular altura total del contenido
         const alturaContenido = this.calcularAlturaPedido(datos);
 
-        const doc = new jsPDF({
+        const jsPDFClass = (await import("jspdf")).default;
+        const doc = new jsPDFClass({
             orientation: 'portrait',
             unit: 'mm',
             format: [this.ANCHO_TICKET, alturaContenido]
@@ -72,7 +74,8 @@ class TicketService {
 
     public async generarTicketCierreCaja(datos: DatosCierreCaja): Promise<void> {
         const alturaTicket = this.calcularAlturaCierreCaja(datos);
-        const doc = new jsPDF({
+        const jsPDFClass = (await import("jspdf")).default;
+        const doc = new jsPDFClass({
             orientation: 'portrait',
             unit: 'mm',
             format: [this.ANCHO_TICKET, alturaTicket]
@@ -94,7 +97,8 @@ class TicketService {
     }
 
     public async generarTicketRemision(datos: DatosTicketRemision): Promise<void> {
-        const doc = new jsPDF({
+        const jsPDFClass = (await import("jspdf")).default;
+        const doc = new jsPDFClass({
             orientation: 'portrait',
             unit: 'mm',
             format: [this.ANCHO_TICKET, 306.3]
@@ -119,7 +123,8 @@ class TicketService {
         alturaContent += datos.items.length * 6; // items
         alturaContent += 20; // footer
 
-        const doc = new jsPDF({
+        const jsPDFClass = (await import("jspdf")).default;
+        const doc = new jsPDFClass({
             orientation: 'portrait',
             unit: 'mm',
             format: [this.ANCHO_TICKET, Math.max(alturaContent, 100)]
@@ -945,7 +950,8 @@ class FacturaService {
 
 
     public async generarTicket(datos: DatosFactura): Promise<void> {
-        const doc = new jsPDF({
+        const jsPDFClass = (await import("jspdf")).default;
+        const doc = new jsPDFClass({
             orientation: 'portrait',
             unit: 'mm',
             format: [this.ANCHO_TICKET, 306.3]
