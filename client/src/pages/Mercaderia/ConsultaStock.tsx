@@ -32,7 +32,7 @@ const ConsultaStock: React.FC = () => {
 
   const handleBuscar = async () => {
     if (!busqueda.trim()) {
-      setError('Por favor, ingrese un código, código de barra o nombre para buscar.');
+      setError('Por favor, ingrese un código, código de barra o nombre para buscar!!!.');
       return;
     }
 

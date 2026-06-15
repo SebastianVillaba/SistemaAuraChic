@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Descargar último código de GitHub
         uses: actions/checkout@v4
+        with:
+          clean: false
 
       - name: Instalar y Compilar Frontend
         run: |
