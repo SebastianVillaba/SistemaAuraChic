@@ -350,7 +350,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
+      <AppBar position="fixed" open={open} sx={{ backgroundColor: '#000000' }}>
         <Toolbar>
           <IconButton
             color="inherit"

@@ -27,7 +27,7 @@ app.use('/api', routes);
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // 4. Servir archivos estáticos del frontend compilado (Vite build)
-const clientDistPath = path.join(__dirname, '../../client/dist');
+const clientDistPath = path.join(process.cwd(), '../client/dist');
 app.use(express.static(clientDistPath));
 
 // 5. Manejar cualquier otra ruta GET devolviendo el index.html de React
