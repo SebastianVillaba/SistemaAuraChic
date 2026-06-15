@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:4000/api/precobranza'; // Adjust base URL as needed
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:4001/api'}/precobranza`;
 
 export interface DetallePrecobranzaTmp {
     nro: number;

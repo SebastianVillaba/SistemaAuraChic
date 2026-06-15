@@ -15,7 +15,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z
     .string()
-    .default('4000')
+    .default('4001')
     .transform((val) => Number(val))
     .pipe(z.number().int().positive()),
   LOG_LEVEL: z.string().optional().default('info'),
