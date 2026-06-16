@@ -109,7 +109,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ open, onClose, onClienteSelec
       setDepartamentos(data);
 
       // Establecer Itapúa por defecto
-      const itapua = data.find(d => d.nombre.toUpperCase().includes('ITAP'));
+      const itapua = data.find(d => d.nombre.toUpperCase().includes('GUAIR'));
       if (itapua) {
         setIdDepartamento(itapua.idDepartamento);
       }
@@ -124,7 +124,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ open, onClose, onClienteSelec
       setDistritos(data);
 
       // Establecer Encarnación por defecto
-      const encarnacion = data.find(d => d.nombre.toUpperCase().includes('ENCARNA'));
+      const encarnacion = data.find(d => d.nombre.toUpperCase().includes('VILLAR'));
       if (encarnacion) {
         setIdDistrito(encarnacion.idDistrito);
       }
@@ -138,8 +138,8 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ open, onClose, onClienteSelec
       const data = await ubicacionService.obtenerCiudadesPorDistrito(idDist);
       setCiudades(data);
 
-      // Establecer Encarnación por defecto
-      const encarnacion = data.find(c => c.nombreCiudad.toUpperCase().includes('ENCARNA'));
+      // Establecer Villarica por defecto
+      const encarnacion = data.find(c => c.nombreCiudad.toUpperCase().includes('VILLAR'));
       if (encarnacion) {
         setIdCiudad(encarnacion.idCiudad.toString());
       }
@@ -290,7 +290,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ open, onClose, onClienteSelec
         email,
         fechaNacimiento,
       };
-
+      console.log(clienteData)
       onClienteSelected(clienteData);
       handleCancelar();
       onSuccess?.();

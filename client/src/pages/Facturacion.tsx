@@ -591,13 +591,21 @@ const Facturacion: React.FC = () => {
       return;
     }
 
+    let documento = clienteData.ruc || '';
+    let dv = clienteData.dv || '';
+    if (documento.includes('-')) {
+      const parts = documento.split('-');
+      documento = parts[0];
+      dv = parts[1] || dv;
+    }
+
     const nuevoCliente: Cliente = {
       idCliente: clienteData.idCliente,
       nombre: clienteData.nombreCliente,
       direccion: clienteData.direccion || '',
       telefono: clienteData.celular || '',
-      documento: clienteData.ruc || '',
-      dv: clienteData.dv || ''
+      documento,
+      dv
     };
     setCliente(nuevoCliente);
     setSuccess('Cliente seleccionado correctamente');

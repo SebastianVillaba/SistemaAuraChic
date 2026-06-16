@@ -55,6 +55,7 @@ const VendedorValidationModal: React.FC<VendedorValidationModalProps> = ({
 
     try {
       const response = await usuarioService.validarVendedor(password);
+      
       if (response.success && response.result) {
         onSuccess(response.result.idVendedor, response.result.nombre);
       } else {
