@@ -3,17 +3,26 @@ name: Deploy Sistema Aura Chic
 on:
   push:
     branches:
-      - main  # Se dispara automáticamente al hacer push o merge a main
+      - main
 
 jobs:
   deploy:
-    runs-on: self-hosted  # Obliga a que se ejecute en la notebook del cliente
+    runs-on: self-hosted
 
     steps:
       - name: Descargar último código de GitHub
         uses: actions/checkout@v4
         with:
           clean: false
+
+      - name: Detener Servicio de Windows (Para desbloquear archivos dist/)
+        shell: powershell
+        run: |
+          # Verifica si el servicio existe y está corriendo antes de intentar apagarlo
+          $service = Get-Service -Name "AuraChic" -ErrorAction SilentlyContinue
+          if ($service -and $service.Status -eq 'Running') {
+              Stop-Service -Name "AuraChic" -Force
+          }
 
       - name: Instalar y Compilar Frontend
         run: |
@@ -27,8 +36,7 @@ jobs:
           npm install
           npm run build
 
-      - name: Reiniciar Servicio de Windows (NSSM)
+      - name: Iniciar Servicio de Windows (NSSM con código nuevo)
         shell: powershell
         run: |
-          # Reinicia el servicio AuraChic para que Node levante los nuevos archivos de /dist
-          Restart-Service -Name "AuraChic"
+          Start-Service -Name "AuraChic"

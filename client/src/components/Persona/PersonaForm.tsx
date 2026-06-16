@@ -57,7 +57,7 @@ export default function PersonaForm({ formData, setFormData }: PersonaFormProps)
         // Establecer valores por defecto solo si es un nuevo registro
         if (!formData.idPersona && !valoresPorDefectoCargados) {
           // Buscar Itapúa en los departamentos
-          const itapua = data.find(d => d.nombre.toUpperCase().includes('ITAP'));
+          const itapua = data.find(d => d.nombre.toUpperCase().includes('GUAIRA'));
           if (itapua) {
             setFormData(prev => ({
               ...prev,
@@ -87,7 +87,7 @@ export default function PersonaForm({ formData, setFormData }: PersonaFormProps)
 
           // Establecer Encarnación por defecto solo si es un nuevo registro y no tiene distrito
           if (!formData.idPersona && !formData.idDistrito && valoresPorDefectoCargados) {
-            const encarnacion = data.find(d => d.nombre.toUpperCase().includes('ENCARNA'));
+            const encarnacion = data.find(d => d.nombre.toUpperCase().includes('VILLARI'));
             if (encarnacion) {
               setFormData(prev => ({
                 ...prev,
@@ -119,7 +119,7 @@ export default function PersonaForm({ formData, setFormData }: PersonaFormProps)
 
           // Establecer Encarnación por defecto solo si es un nuevo registro y no tiene ciudad
           if (!formData.idPersona && !formData.idCiudad && valoresPorDefectoCargados) {
-            const encarnacion = data.find(c => c.nombreCiudad.toUpperCase().includes('ENCARNA'));
+            const encarnacion = data.find(c => c.nombreCiudad.toUpperCase().includes('VILLARI'));
             if (encarnacion) {
               setFormData(prev => ({
                 ...prev,
@@ -138,6 +138,7 @@ export default function PersonaForm({ formData, setFormData }: PersonaFormProps)
     };
     cargarCiudades();
   }, [formData.idDistrito]);
+  
   const handleChange = (field: keyof Persona) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | any
   ) => {
