@@ -59,7 +59,7 @@ const CajaSelectorModal: React.FC<CajaSelectorModalProps> = ({
   const [montoMoneda, setMontoMoneda] = useState<string>('');
   const [cantidadBillete, setCantidadBillete] = useState<{ [key: number]: string }>({});
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+  const API_URL = import.meta.env.VITE_API_URL || '/api';
 
   // Cargar cajas cuando se abre el modal
   useEffect(() => {

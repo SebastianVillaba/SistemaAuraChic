@@ -2,7 +2,7 @@ import axios from 'axios';
 import type { Persona, GrupoCliente } from '../types/persona.types';
 
 // URL base del API - ajusta según tu configuración
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 /**
  * Interface para la respuesta del endpoint persona/info

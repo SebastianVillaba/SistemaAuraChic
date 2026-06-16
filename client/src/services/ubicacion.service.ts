@@ -2,7 +2,7 @@ import axios from 'axios';
 import type { Departamento, Distrito, Ciudad } from '../types/ubicacion.types';
 
 // URL base del API
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 /**
  * Servicio para manejar las ubicaciones (departamentos, distritos, ciudades)

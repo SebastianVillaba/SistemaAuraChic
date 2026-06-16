@@ -3,7 +3,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import axios from 'axios';
 import { useState } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001/api';
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const ReporteVentasTab = () => {
 
