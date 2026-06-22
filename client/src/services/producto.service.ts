@@ -272,6 +272,119 @@ export const productoService = {
   },
 
   /**
+   * Carga las referencias de un producto en la tabla temporal.
+   */
+  cargarReferenciasTmp: async (idTerminalWeb: number, idProductoRef: number): Promise<any> => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/producto/ref/cargar`, {
+        idTerminalWeb,
+        idProductoRef
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Error al cargar referencias tmp:', error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw new Error('Error al cargar referencias en la temporal');
+    }
+  },
+
+  /**
+   * Obtiene los detalles de la temporal de referencias de productos.
+   */
+  obtenerDetallesTmp: async (idTerminalWeb: number): Promise<any[]> => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/producto/ref/detalle`, {
+        params: { idTerminalWeb }
+      });
+      return response.data.result;
+    } catch (error: any) {
+      console.error('Error al obtener detalles tmp:', error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw new Error('Error al obtener detalles de referencias temporales');
+    }
+  },
+
+  /**
+   * Agrega un producto referenciado al detalle temporal.
+   */
+  agregarDetalleTmp: async (idTerminalWeb: number, idProducto: number, cantidad: number): Promise<any> => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/producto/ref/detalle`, {
+        idTerminalWeb,
+        idProducto,
+        cantidad
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Error al agregar detalle tmp:', error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw new Error('Error al agregar producto referenciado temporal');
+    }
+  },
+
+  /**
+   * Elimina un producto de la temporal por nro.
+   */
+  eliminarDetalleTmp: async (idTerminalWeb: number, nro: number): Promise<any> => {
+    try {
+      const response = await axios.delete(`${API_BASE_URL}/producto/ref/detalle/${nro}`, {
+        params: { idTerminalWeb }
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Error al eliminar detalle tmp:', error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw new Error('Error al eliminar producto referenciado temporal');
+    }
+  },
+
+  /**
+   * Guarda las referencias persistiendo los datos de la temporal.
+   */
+  guardarReferencias: async (idUsuarioAlta: number, idTerminalWeb: number, idProductoRef: number): Promise<any> => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/producto/ref/guardar`, {
+        idUsuarioAlta,
+        idTerminalWeb,
+        idProductoRef
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Error al guardar referencias:', error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw new Error('Error al guardar los productos referenciados');
+    }
+  },
+
+  /**
+   * Limpia la tabla temporal de referencias para una terminal.
+   */
+  limpiarTemporal: async (idTerminalWeb: number): Promise<any> => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/producto/ref/limpiar`, {
+        idTerminalWeb
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Error al limpiar temporal:', error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw new Error('Error al limpiar temporal de referencias');
+    }
+  },
+
+  /**
    * Obtiene la URL completa de una imagen
    * @param path - Ruta relativa de la imagen
    * @returns URL completa

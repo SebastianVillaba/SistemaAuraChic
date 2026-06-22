@@ -204,18 +204,15 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
           subItems: [
             { text: 'Ajustes', path: '/mercaderia/ajustes', icon: <InventoryIcon /> },
             { text: 'Stock Inicial', path: '/mercaderia/stock-inicial', icon: <InventoryIcon /> },
+            { text: 'Carga de Productos',path: '/mercaderia/carga-productos',icon: <InventoryIcon /> }
           ],
         },
         {
-          text: 'Carga de Productos',
-          path: '/mercaderia/carga-productos',
-          icon: <InventoryIcon />,
-        },
-        {
-          text: 'Mercaderia',
+          text: 'Mercadería',
           icon: <InventoryIcon />,
           subItems: [
-            { text: 'Consulta Stock', path: '/mercaderia/consulta-stock', icon: <InventoryIcon /> },
+            { text: 'Generación de Códigos', path: '/mercaderia/generacion-codigo-barra', icon: <InventoryIcon /> },
+            { text: 'Impresión de Códigos', path: '/mercaderia/impresion-codigo-barra', icon: <InventoryIcon /> },
           ],
         }
       ],
@@ -243,6 +240,13 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
           path: '/consultas/ventas',
           icon: <ReceiptLongIcon />,
         },
+        {
+          text: 'Mercaderia',
+          icon: <InventoryIcon />,
+          subItems: [
+            { text: 'Consulta Stock', path: '/mercaderia/consulta-stock', icon: <InventoryIcon /> }
+          ],
+        }
       ],
     },
     // ──────────────── REPORTES ────────────────

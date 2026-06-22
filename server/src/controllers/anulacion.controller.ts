@@ -19,7 +19,7 @@ export const verificarPermisoAnular = async (req: Request, res: Response): Promi
       return;
     }
 
-    const tiposValidos = ['FACTU', 'COMPRA', 'REMISION', 'RECEPCION', 'GASTO', 'AJUSTE'];
+    const tiposValidos = ['FACT', 'COMPRA', 'REMISION', 'RECEPCION', 'AJUSTE', 'CARGA'];
     if (!tiposValidos.includes(tipo.toUpperCase())) {
       res.status(400).json({
         success: false,

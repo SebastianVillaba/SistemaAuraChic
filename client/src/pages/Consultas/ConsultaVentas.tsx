@@ -22,10 +22,12 @@ import {
   RadioGroup,
   FormControlLabel,
   FormControl,
+  Checkbox,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import PrintIcon from '@mui/icons-material/Print';
 import BlockIcon from '@mui/icons-material/Block';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FirstPageIcon from '@mui/icons-material/FirstPage';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
@@ -35,6 +37,7 @@ import { consultaVentaService } from '../../services/consultaVenta.service';
 import { reporteService } from '../../services/reporte.service';
 import facturaService from '../../services/ticket.service';
 import type { DatosFactura } from '../../types/ticket.types';
+import AnulacionModal from '../../components/AnulacionModal';
 
 // ──────────────────────────────────────────────
 // Tipos (se completarán cuando lleguen los SPs)
@@ -78,6 +81,7 @@ const ConsultaVentas: React.FC = () => {
   );
   const [nroFactura, setNroFactura] = useState('');
   const [tipoBusqueda, setTipoBusqueda] = useState<'fecha' | 'factura'>('fecha');
+  const [imp, setImp] = useState<boolean>(true);
 
   // ── Resultados ─────────────────────────────
   const [ventas, setVentas] = useState<VentaCabecera[]>([]);
@@ -85,6 +89,8 @@ const ConsultaVentas: React.FC = () => {
   const [detalles, setDetalles] = useState<VentaDetalle[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const [isAnulacionOpen, setIsAnulacionOpen] = useState(false);
 
   // ── Navegación entre registros ──────────────
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
@@ -93,6 +99,7 @@ const ConsultaVentas: React.FC = () => {
   const handleBuscar = async () => {
     setIsLoading(true);
     setError('');
+    setSuccessMsg('');
     setSelectedVenta(null);
     setDetalles([]);
 
@@ -116,7 +123,7 @@ const ConsultaVentas: React.FC = () => {
 
         result = await consultaVentaService.consultaVentaNroFactura(dsuc, dcaja, dfactu);
       } else {
-        result = await consultaVentaService.consultaVentaFecha(fechaDesde, fechaHasta, 1);
+        result = await consultaVentaService.consultaVentaFecha(fechaDesde, fechaHasta, imp ? 1 : 0);
       }
 
       const mapped = result.map((v: any) => ({
@@ -150,6 +157,7 @@ const ConsultaVentas: React.FC = () => {
     setSelectedVenta(venta);
     setCurrentIndex(index);
     setError('');
+    setSuccessMsg('');
 
     try {
       const resp = await consultaVentaService.consultaInformacionVenta(venta.idVenta);
@@ -263,8 +271,17 @@ const ConsultaVentas: React.FC = () => {
     }
   };
 
+  const handleAnulacionSuccess = () => {
+    setIsAnulacionOpen(false);
+    setSuccessMsg('Facturación anulada correctamente.');
+    setError('');
+    handleBuscar();
+    setSelectedVenta(null);
+    setDetalles([]);
+  };
+
   // ── Helpers ─────────────────────────────────
-  const formatMoneda = (v: number) => `₲ ${v.toLocaleString('es-PY')}`;
+  const formatMoneda = (v: number) => `${v.toLocaleString('es-PY')}`;
   const chipColor = (estado: string): 'success' | 'error' => estado === 'ACTIVO' ? 'success' : 'error';
 
   // ── Totales del detalle ──────────────────────
@@ -292,6 +309,7 @@ const ConsultaVentas: React.FC = () => {
       </Box>
 
       {error && <Alert severity="error" onClose={() => setError('')}>{error}</Alert>}
+      {successMsg && <Alert severity="success" onClose={() => setSuccessMsg('')}>{successMsg}</Alert>}
 
       {/* ── Panel de filtros (Stack horizontal) ── */}
       <Paper sx={{ p: 2 }}>
@@ -337,6 +355,18 @@ const ConsultaVentas: React.FC = () => {
                   onKeyDown={handleKeyDown}
                   sx={{ minWidth: 155 }}
                 />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={imp}
+                      onChange={(e) => setImp(e.target.checked)}
+                      color="primary"
+                      size="small"
+                    />
+                  }
+                  label="Imp."
+                  sx={{ height: 40, display: 'flex', alignItems: 'center' }}
+                />
               </>
             ) : (
               <TextField
@@ -364,8 +394,9 @@ const ConsultaVentas: React.FC = () => {
       </Paper>
 
       {/* ── Lista de ventas ────────────────────── */}
-      <Paper sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <Box sx={{ p: 1.5, pb: 0.5 }}>
+      {selectedVenta === null ? (
+        <Paper sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', width: '100%', maxWidth: 1200, mx: 'auto' }}>
+          <Box sx={{ p: 1.5, pb: 0.5 }}>
           <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Resultados
             {ventas.length > 0 && (
@@ -429,10 +460,25 @@ const ConsultaVentas: React.FC = () => {
           </Table>
         </TableContainer>
       </Paper>
+      ) : (
+        /* ── Panel inferior: detalle + controles ── */
+        <Paper sx={{ flex: 1, p: 2, display: 'flex', flexDirection: 'column', gap: 2, overflow: 'auto' }}>
+          {/* Volver a la Lista arriba */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
+            <Button
+              variant="outlined"
+              startIcon={<ArrowBackIcon />}
+              onClick={() => {
+                setSelectedVenta(null);
+                setDetalles([]);
+                setCurrentIndex(-1);
+              }}
+            >
+              Volver a la Lista
+            </Button>
+          </Box>
 
-      {/* ── Panel inferior: detalle + controles ── */}
-      <Paper sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
 
           {/* Datos de la venta seleccionada */}
           <Box sx={{ minWidth: 240, flex: '0 0 auto' }}>
@@ -566,6 +612,19 @@ const ConsultaVentas: React.FC = () => {
             {/* Acciones */}
             <Stack spacing={1}>
               <Button
+                variant="contained"
+                startIcon={<ArrowBackIcon />}
+                size="small"
+                fullWidth
+                onClick={() => {
+                  setSelectedVenta(null);
+                  setDetalles([]);
+                  setCurrentIndex(-1);
+                }}
+              >
+                Volver
+              </Button>
+              <Button
                 variant="outlined"
                 startIcon={<PrintIcon />}
                 size="small"
@@ -582,9 +641,7 @@ const ConsultaVentas: React.FC = () => {
                 size="small"
                 disabled={!selectedVenta || selectedVenta?.estado === 'ANULADO'}
                 fullWidth
-                onClick={() => {
-                  // TODO: Conectar con sp_anularFacturacion
-                }}
+                onClick={() => setIsAnulacionOpen(true)}
               >
                 Anular
               </Button>
@@ -592,6 +649,17 @@ const ConsultaVentas: React.FC = () => {
           </Box>
         </Box>
       </Paper>
+      )}
+
+      {selectedVenta && (
+        <AnulacionModal
+          open={isAnulacionOpen}
+          onClose={() => setIsAnulacionOpen(false)}
+          idVenta={selectedVenta.idVenta}
+          tipoVenta={selectedVenta.tipoVenta}
+          onSuccess={handleAnulacionSuccess}
+        />
+      )}
     </Box>
   );
 };

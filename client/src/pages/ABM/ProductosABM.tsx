@@ -18,6 +18,8 @@ import {
   IconButton,
   Alert,
   CircularProgress,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import TextField from '../../components/UppercaseTextField';
 import SearchIcon from '@mui/icons-material/Search';
@@ -26,15 +28,21 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import type { Producto } from '../../types/producto.types';
 import ProductoForm from '../../components/Producto/ProductoForm';
+import { useTerminal } from '../../hooks/useTerminal';
+import ProductosReferenciadosTab from '../../components/Producto/ProductosReferenciadosTab';
+
 
 export default function ProductosABM(): JSX.Element {
+  const { idTerminalWeb } = useTerminal();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchBy, setSearchBy] = useState<1 | 2 | 3>(1);
   const [productos, setProductos] = useState<any[]>([]);
   const [selectedProducto, setSelectedProducto] = useState<Producto | null>(null);
   const [isNewMode, setIsNewMode] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<number>(0);
 
   const guardarRef = useRef<HTMLButtonElement>(null);
+
 
   const [formData, setFormData] = useState<Producto>({
     nombre: '',
@@ -76,6 +84,7 @@ export default function ProductosABM(): JSX.Element {
   const handleSelectProducto = async (producto: Producto) => {
     setLoading(true);
     setError('');
+    setActiveTab(0);
 
     try {
       // Obtener información detallada del producto seleccionado
@@ -112,7 +121,9 @@ export default function ProductosABM(): JSX.Element {
     }
   };
 
+
   const handleNew = () => {
+    setActiveTab(0);
     setIsNewMode(true);
     setSelectedProducto(null);
     setError('');
@@ -194,6 +205,12 @@ export default function ProductosABM(): JSX.Element {
   };
 
   const handleCancel = () => {
+    setActiveTab(0);
+    if (idTerminalWeb) {
+      productoService.limpiarTemporal(idTerminalWeb).catch(err => {
+        console.error('Error al limpiar temporal al cancelar:', err);
+      });
+    }
     setIsNewMode(false);
     setSelectedProducto(null);
     setError('');
@@ -212,6 +229,7 @@ export default function ProductosABM(): JSX.Element {
       imagenUrl: '',
     });
   };
+
 
   return (
     <Box sx={{ height: 'calc(100vh - 120px)', display: 'flex', gap: 2 }}>
@@ -293,7 +311,30 @@ export default function ProductosABM(): JSX.Element {
         )}
 
         {(isNewMode || selectedProducto) ? (
-          <ProductoForm formData={formData} setFormData={setFormData} guardarRef={guardarRef} />
+          <Box>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+              <Tabs value={activeTab} onChange={(_, nv) => setActiveTab(nv)}>
+                <Tab label="Datos Generales" />
+                <Tab 
+                  label="Productos Referenciados" 
+                  disabled={isNewMode}
+                />
+              </Tabs>
+            </Box>
+
+            <Box sx={{ display: activeTab === 0 ? 'block' : 'none' }}>
+              <ProductoForm formData={formData} setFormData={setFormData} guardarRef={guardarRef} />
+            </Box>
+            <Box sx={{ display: activeTab === 1 ? 'block' : 'none' }}>
+              {selectedProducto && idTerminalWeb && (
+                <ProductosReferenciadosTab 
+                  key={selectedProducto.idProducto}
+                  idProductoRef={selectedProducto.idProducto!} 
+                  idTerminalWeb={idTerminalWeb}
+                />
+              )}
+            </Box>
+          </Box>
         ) : (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '60%' }}>
             <Typography variant="h6" color="text.secondary">
@@ -311,7 +352,7 @@ export default function ProductosABM(): JSX.Element {
             Nuevo
           </Button>
 
-          {(isNewMode || selectedProducto) && (
+          {(isNewMode || selectedProducto) && activeTab === 0 && (
             <>
               <Button
                 ref={guardarRef}
@@ -333,7 +374,19 @@ export default function ProductosABM(): JSX.Element {
               </Button>
             </>
           )}
+
+          {(isNewMode || selectedProducto) && activeTab === 1 && (
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<CancelIcon />}
+              onClick={handleCancel}
+            >
+              Cancelar
+            </Button>
+          )}
         </Box>
+
       </Paper>
     </Box>
   );

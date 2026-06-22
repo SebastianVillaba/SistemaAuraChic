@@ -35,6 +35,9 @@ const Reportes = lazy(() => import('./pages/Reportes/Reportes'));
 const CrearOferta = lazy(() => import('./pages/Ofertas/CrearOferta'));
 const VerOfertas = lazy(() => import('./pages/Ofertas/VerOfertas'));
 const ConsultaStock = lazy(() => import('./pages/Mercaderia/ConsultaStock'));
+const ImpresionCodigoBarra = lazy(() => import('./pages/Mercaderia/ImpresionCodigoBarra'));
+const GeneracionCodigoBarra = lazy(() => import('./pages/Mercaderia/GeneracionCodigoBarra'));
+
 
 // Placeholder components for sub-routes
 const ClientesABM = () => <Container><h3>Submenú Clientes (ABM)</h3></Container>;
@@ -106,6 +109,8 @@ const AppRouter: React.FC = () => {
             <Route path="stock-inicial" element={<StockInicial />} />
             <Route path="carga-productos" element={<CargaProductos />} />
             <Route path="consulta-stock" element={<ConsultaStock />} />
+            <Route path="generacion-codigo-barra" element={<GeneracionCodigoBarra />} />
+            <Route path="impresion-codigo-barra" element={<ImpresionCodigoBarra />} />
           </Route>
           <Route path="sanatorio">
             <Route path="pacientes" element={<PlanillaPacientes />} />
