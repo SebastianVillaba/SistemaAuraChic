@@ -35,8 +35,8 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { consultaVentaService } from '../../services/consultaVenta.service';
 import { reporteService } from '../../services/reporte.service';
-import facturaService from '../../services/ticket.service';
-import type { DatosFactura } from '../../types/ticket.types';
+import facturaService, { ticketService } from '../../services/ticket.service';
+import type { DatosFactura, DatosTicket } from '../../types/ticket.types';
 import AnulacionModal from '../../components/AnulacionModal';
 
 // ──────────────────────────────────────────────
@@ -160,7 +160,7 @@ const ConsultaVentas: React.FC = () => {
     setSuccessMsg('');
 
     try {
-      const resp = await consultaVentaService.consultaInformacionVenta(venta.idVenta);
+      const resp = await consultaVentaService.consultaInformacionVenta(venta.idVenta,imp ? 1 : 0);
       
       // Extraemos la cabecera devuelta por el SP para actualizar los datos si es necesario
       if (resp.cabecera) {
@@ -190,6 +190,7 @@ const ConsultaVentas: React.FC = () => {
         iva5: 0,
         iva10: 0
       }));
+
       setDetalles(mappedDetalles);
     } catch (err: any) {
       setError(err.message || 'Error al obtener el detalle');
@@ -209,60 +210,105 @@ const ConsultaVentas: React.FC = () => {
     setError('');
 
     try {
-      const datosReporte = await reporteService.obtenerDatosFactura(selectedVenta.idVenta);
-      console.log(datosReporte);
-      
-      
-      const datosFactura: DatosFactura = {
-        // Datos de la empresa
-        nombreFantasia: datosReporte.cabecera.nombreFantasia,
-        nombre: datosReporte.cabecera.nombre || '',
-        rubro: datosReporte.cabecera.rubro || '',
-        ruc: datosReporte.cabecera.ruc || '',
-        direccion: datosReporte.cabecera.direccionEmpresa || '',
-        telefono: datosReporte.cabecera.telefonoEmpresa || '',
+      //Si es impreso
+      if (imp) {
+        //obtenemos los datos del reporte
+        const datosReporte = await reporteService.obtenerDatosFactura(selectedVenta.idVenta);
 
-        // Datos de la venta
-        fechaHora: new Date(datosReporte.cabecera.fechaHora),
-        nroFactura: selectedVenta.nroFactura,
-        total: datosReporte.cabecera.total,
+        // mapeamos los datos del reporte
+        const datosFactura: DatosFactura = {
+          // Datos de la empresa
+          nombreFantasia: datosReporte.cabecera.nombreFantasia,
+          nombre: datosReporte.cabecera.nombre || '',
+          rubro: datosReporte.cabecera.rubro || '',
+          ruc: datosReporte.cabecera.ruc || '',
+          direccion: datosReporte.cabecera.direccionEmpresa || '',
+          telefono: datosReporte.cabecera.telefonoEmpresa || '',
+  
+          // Datos de la venta
+          fechaHora: new Date(datosReporte.cabecera.fechaHora),
+          nroFactura: selectedVenta.nroFactura,
+          total: datosReporte.cabecera.total,
+  
+          // Datos de control fiscal
+          timbrado: datosReporte.cabecera.timbrado || '',
+          fechaInicioVigencia: new Date(datosReporte.cabecera.fechaInicioVigencia),
+          fechaFinVigencia: new Date(datosReporte.cabecera.fechaFinVigencia),
+  
+          // Datos del cliente
+          cliente: datosReporte.cabecera.cliente || '',
+          rucCliente: datosReporte.cabecera.rucCliente || '',
+          direccionCliente: datosReporte.cabecera.direccionCliente || '',
+          telefonoCliente: datosReporte.cabecera.telefonoCliente || '',
+  
+          // Información adicional
+          vendedor: selectedVenta.usuario || datosReporte.cabecera.vendedor || 'Sistema',
+          tipoFactura: datosReporte.cabecera.tipoFactura || '',
+          formaVenta: datosReporte.cabecera.formaVenta || '',
+  
+          // Liquidación IVA
+          gravada10: datosReporte.cabecera.gravada10 || 0,
+          gravada5: datosReporte.cabecera.gravada5 || 0,
+          exenta: datosReporte.cabecera.exenta || 0,
+          iva10: datosReporte.cabecera.iva10 || 0,
+          iva5: datosReporte.cabecera.iva5 || 0,
+          totalIva: datosReporte.cabecera.totalIva || 0,
+  
+          // Items
+          items: datosReporte.items.map((item: any) => ({
+            cantidad: item.cantidad,
+            codigo: item.codigo,
+            mercaderia: item.mercaderia,
+            precio: item.precio,
+            subtotal: item.subtotal,
+            porcentajeImpuesto: item.porcentajeImpuesto
+          }))
+        };
+        
+        // genereamos el reporte
+        await facturaService.generarTicket(datosFactura);
 
-        // Datos de control fiscal
-        timbrado: datosReporte.cabecera.timbrado || '',
-        fechaInicioVigencia: new Date(datosReporte.cabecera.fechaInicioVigencia),
-        fechaFinVigencia: new Date(datosReporte.cabecera.fechaFinVigencia),
+    }
+    //Si es que no es impreso 
+    else {
+        const datosReporte = await reporteService.obtenerDatosTicket(selectedVenta.idVenta);
 
-        // Datos del cliente
-        cliente: datosReporte.cabecera.cliente || '',
-        rucCliente: datosReporte.cabecera.rucCliente || '',
-        direccionCliente: datosReporte.cabecera.direccionCliente || '',
-        telefonoCliente: datosReporte.cabecera.telefonoCliente || '',
+        const datosTicket: DatosTicket = {
+          nombreFantasia: datosReporte.cabecera.nombreFantasia,
+          ruc: datosReporte.cabecera.ruc,
+          nombreSucursal: datosReporte.cabecera.nombreSucursal,
+          nombreTipoPago: datosReporte.cabecera.nombreTipoPago,
 
-        // Información adicional
-        vendedor: selectedVenta.usuario || datosReporte.cabecera.vendedor || 'Sistema',
-        tipoFactura: datosReporte.cabecera.tipoFactura || '',
-        formaVenta: datosReporte.cabecera.formaVenta || '',
+          // Datos de la venta
+          fechaHora: datosReporte.cabecera.fechaHora,
+          idVenta: datosReporte.cabecera.idVenta,
+          total: datosReporte.cabecera.total,
 
-        // Liquidación IVA
-        gravada10: datosReporte.cabecera.gravada10 || 0,
-        gravada5: datosReporte.cabecera.gravada5 || 0,
-        exenta: datosReporte.cabecera.exenta || 0,
-        iva10: datosReporte.cabecera.iva10 || 0,
-        iva5: datosReporte.cabecera.iva5 || 0,
-        totalIva: datosReporte.cabecera.totalIva || 0,
+          // Datos del cliente
+          cliente: datosReporte.cabecera.cliente,
+          rucCliente: datosReporte.cabecera.rucCliente,
 
-        // Items
-        items: datosReporte.items.map((item: any) => ({
-          cantidad: item.cantidad,
-          codigo: item.codigo,
-          mercaderia: item.mercaderia,
-          precio: item.precio,
-          subtotal: item.subtotal,
-          porcentajeImpuesto: item.porcentajeImpuesto
-        }))
-      };
+          // Información adicional
+          vendedor: datosReporte.cabecera.vendedor,
+          totalLetra: datosReporte.cabecera.totalLetra,
 
-      await facturaService.generarTicket(datosFactura);
+          // Footer de la factura
+          leyenda: datosReporte.cabecera.leyenda,
+
+          // Items
+          items: datosReporte.items.map((item: any) => ({
+            cantidad: item.cantidad,
+            codigo: item.codigo,
+            mercaderia: item.mercaderia,
+            precio: item.precio,
+            subtotal: item.subtotal,
+          }))
+        };
+
+        //genereamos el ticket
+        await ticketService.generarTicket(datosTicket);
+        
+      }
     } catch (err: any) {
       console.error('Error al imprimir factura:', err);
       setError(err.message || 'Error al imprimir la factura');
@@ -395,7 +441,7 @@ const ConsultaVentas: React.FC = () => {
 
       {/* ── Lista de ventas ────────────────────── */}
       {selectedVenta === null ? (
-        <Paper sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', width: '100%', maxWidth: 1200, mx: 'auto' }}>
+        <Paper sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', width: '100%', mx: 'auto' }}>
           <Box sx={{ p: 1.5, pb: 0.5 }}>
           <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Resultados

@@ -36,10 +36,10 @@ export const consultaVentaService = {
   /**
    * Consulta información detallada (cabecera y detalle)
    */
-  consultaInformacionVenta: async (idVenta: number): Promise<any> => {
+  consultaInformacionVenta: async (idVenta: number, imp: number = 1): Promise<any> => {
     try {
       const response = await axios.get(`${API_BASE_URL}/consulta-venta/informacion`, {
-        params: { idVenta }
+        params: { idVenta, imp }
       });
       return response.data; // { success, cabecera, detalle }
     } catch (error: any) {

@@ -160,7 +160,7 @@ const AnulacionModal: React.FC<AnulacionModalProps> = ({
             Confirmar Anulación
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Esta acción revertirá la facturación seleccionada (Venta ID: {idVenta}).
+            Esta acción revertirá el movimiento seleccionado (ID Mov: {idVenta}).
           </Typography>
         </Box>
       </DialogTitle>

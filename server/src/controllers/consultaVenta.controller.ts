@@ -114,18 +114,21 @@ export const consultaVentaFecha = async (req: Request, res: Response): Promise<v
  */
 export const consultaInformacionVenta = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { idVenta } = req.query as { idVenta: string };
+    const { idVenta, imp } = req.query as { idVenta?: string; imp?: string };
 
-    if (!idVenta) {
+    if (!idVenta || imp === undefined || imp === null) {
       res.status(400).json({
         success: false,
-        message: "El parámetro 'idVenta' es obligatorio"
+        message: "Los parámetros 'idVenta' e 'imp' son obligatorios"
       });
       return;
     }
 
+    const isImp = imp === 'true' || imp === '1';
+
     const inputs = [
-      { name: 'idVenta', type: sql.Int, value: parseInt(idVenta) }
+      { name: 'idVenta', type: sql.Int, value: parseInt(idVenta) },
+      { name: 'imp', type: sql.Bit, value: isImp }
     ];
 
     const result = await executeRequest({
@@ -133,7 +136,7 @@ export const consultaInformacionVenta = async (req: Request, res: Response): Pro
       inputs: inputs as any,
       isStoredProcedure: true
     });
-
+    
     // El SP retorna 2 recordsets: [0] = cabecera, [1] = detalle de productos
     const recordsets = result.recordsets as any[];
     const cabecera = recordsets[0] || [];

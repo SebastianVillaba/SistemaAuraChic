@@ -29,6 +29,7 @@ import consultaVentaRoutes from './consultaVenta.routes';
 import ofertaRoutes from './oferta.routes';
 import cargaProductosRoutes from './cargaProductos.routes';
 import barcodeRoutes from './barcode.routes';
+import consultaCargaProductosRoutes from './consultaCargaProductos.routes';
 
 const router = Router();
 
@@ -62,5 +63,6 @@ router.use('/consulta-venta', consultaVentaRoutes);
 router.use('/ofertas', ofertaRoutes);
 router.use('/carga-productos', cargaProductosRoutes);
 router.use('/barcode', barcodeRoutes);
+router.use('/consulta-carga-productos', consultaCargaProductosRoutes);
 
 export default router;
