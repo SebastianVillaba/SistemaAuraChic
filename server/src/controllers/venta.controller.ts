@@ -287,3 +287,26 @@ export const consultaFacturaCorrelativa = async (req: Request, res: Response): P
   }
 }
 
+/**
+ * Controller para obtener la lista de vendedores de la vista v_vendedor.
+ */
+export const obtenerVendedores = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await executeRequest({
+      query: 'select idVendedor, nombre from v_vendedor',
+      isStoredProcedure: false
+    });
+
+    res.status(200).json({
+      success: true,
+      data: result.recordset
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error al obtener vendedores'
+    });
+  }
+};
+
+

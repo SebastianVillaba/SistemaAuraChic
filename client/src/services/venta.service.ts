@@ -109,5 +109,18 @@ export const ventaService = {
       console.error('Error al consultar factura actual:', error);
       throw new Error(error.response?.data?.message || 'Error al consultar factura actual');
     }
+  },
+
+  /**
+   * Obtiene la lista de vendedores de la base de datos
+   */
+  obtenerVendedores: async (): Promise<any> => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/venta/vendedores`);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error al obtener vendedores:', error);
+      throw new Error(error.response?.data?.message || 'Error al obtener vendedores');
+    }
   }
-};
+};

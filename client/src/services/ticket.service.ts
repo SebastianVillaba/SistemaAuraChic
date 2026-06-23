@@ -8,6 +8,40 @@ class TicketService {
     private readonly MARGEN_IZQ = 2;
     private posY = 10; // Posición Y inicial
 
+    private imprimirEnIframeOculto(doc: jsPDF): void {
+        const blobUrl = doc.output('bloburl');
+        const iframe = document.createElement('iframe');
+
+        // Estilo para ocultar el iframe del usuario pero mantenerlo visible para la impresión
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = 'none';
+
+        iframe.src = blobUrl;
+
+        iframe.onload = () => {
+            try {
+                iframe.contentWindow?.focus();
+                iframe.contentWindow?.print();
+            } catch (error) {
+                console.error("Error al intentar imprimir desde el iframe oculto:", error);
+            }
+
+            // Remover el iframe y revocar el blob URL después de un pequeño setTimeout de seguridad
+            setTimeout(() => {
+                if (document.body.contains(iframe)) {
+                    document.body.removeChild(iframe);
+                }
+                URL.revokeObjectURL(blobUrl);
+            }, 5000);
+        };
+
+        document.body.appendChild(iframe);
+    }
+
     /**
      * Generar el ticket e imprime automaticamente
      */
@@ -48,7 +82,7 @@ class TicketService {
 
         // Abrir el PDF en una nueva ventana para imprimir
         doc.autoPrint();
-        window.open(doc.output('bloburl'), '_blank');
+        this.imprimirEnIframeOculto(doc);
     }
 
     public async generarTicketPedido(datos: DatosTicketPedido): Promise<void> {
@@ -93,7 +127,7 @@ class TicketService {
         this.dibujarFooterCierreCaja(doc);
 
         doc.autoPrint();
-        window.open(doc.output('bloburl'), '_blank');
+        this.imprimirEnIframeOculto(doc);
     }
 
     public async generarTicketRemision(datos: DatosTicketRemision): Promise<void> {
@@ -943,12 +977,44 @@ class FacturaService {
     private readonly MARGEN_IZQ = 2;
     private posY = 10; // Posición Y inicial
 
+    private imprimirEnIframeOculto(doc: jsPDF): void {
+        const blobUrl = doc.output('bloburl');
+        const iframe = document.createElement('iframe');
+
+        // Estilo para ocultar el iframe del usuario pero mantenerlo visible para la impresión
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = 'none';
+
+        iframe.src = blobUrl;
+
+        iframe.onload = () => {
+            try {
+                iframe.contentWindow?.focus();
+                iframe.contentWindow?.print();
+            } catch (error) {
+                console.error("Error al intentar imprimir desde el iframe oculto:", error);
+            }
+
+            // Remover el iframe y revocar el blob URL después de un pequeño setTimeout de seguridad
+            setTimeout(() => {
+                if (document.body.contains(iframe)) {
+                    document.body.removeChild(iframe);
+                }
+                URL.revokeObjectURL(blobUrl);
+            }, 5000);
+        };
+
+        document.body.appendChild(iframe);
+    }
+
 
     /**
      * Generar el ticket e imprime automaticamente
      */
-
-
     public async generarTicket(datos: DatosFactura): Promise<void> {
         const jsPDFClass = (await import("jspdf")).default;
         const doc = new jsPDFClass({
@@ -990,7 +1056,7 @@ class FacturaService {
 
         // Abrir el PDF en una nueva ventana para imprimir
         doc.autoPrint();
-        window.open(doc.output('bloburl'), '_blank');
+        this.imprimirEnIframeOculto(doc);
     }
 
 

@@ -389,9 +389,14 @@ const Facturacion: React.FC = () => {
   };
 
   // Cuando se confirma el pago, abrir modal de tipo de comprobante
-  const handleConfirmarPago = () => {
+  const handleConfirmarPago = (idVendedor: number | null) => {
+    if (idVendedor) {
+      setVendedorAutorizado({ idVendedor, nombre: '' });
+    } else {
+      setVendedorAutorizado(null);
+    }
     setOpenPagoModal(false);
-    setOpenVendedorModal(true);
+    setOpenTipoComprobanteModal(true);
   };
 
   const handleVendedorAutenticado= (idVendedor: number, nombre: string) => {
