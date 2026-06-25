@@ -44,9 +44,11 @@ const calculateEan13Checksum = (base: string): number => {
   return rem === 0 ? 0 : 10 - rem;
 };
 
-// Generates EAN-13 barcode: Deposito (2 digits) + '00000' + Producto (5 digits) + Checksum
+// Generates EAN-13 barcode: Deposito (2 digits, prefixed with 2 if < 10) + '00000' + Producto (5 digits) + Checksum
 const generateEan13 = (idDeposito: number, idProducto: number): string => {
-  const depStr = String(idDeposito).padStart(2, '0').slice(-2);
+  const depStr = idDeposito < 10 
+    ? '2' + String(idDeposito) 
+    : String(idDeposito).slice(-2);
   const prodStr = String(idProducto).padStart(5, '0').slice(-5);
   const base = depStr + '00000' + prodStr;
   const checksum = calculateEan13Checksum(base);

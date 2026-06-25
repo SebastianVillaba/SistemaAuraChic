@@ -135,9 +135,14 @@ const Facturacion: React.FC = () => {
 
     try {
       // Buscar productos primero
+      console.log(busqueda);
       const results = await productoService.consultarPrecioProducto(busqueda, idTerminalWeb);
+      console.log('Estoy antes de results.length');
+      console.log(results);
+      console.log(results.length);
 
       if (results.length === 1) {
+        console.log('Estoy en el results.length');
         // Si hay un solo resultado, seleccionarlo
         handleSeleccionarProducto(results[0]);
       } else if (results.length > 1) {
