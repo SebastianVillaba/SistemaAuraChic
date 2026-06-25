@@ -241,6 +241,11 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
           icon: <ReceiptLongIcon />,
         },
         {
+          text: 'Consulta Arqueo de Caja',
+          path: '/consultas/arqueo-caja',
+          icon: <PointOfSale />,
+        },
+        {
           text: 'Mercaderia',
           icon: <InventoryIcon />,
           subItems: [

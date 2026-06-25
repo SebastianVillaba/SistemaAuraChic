@@ -31,6 +31,7 @@ const StockInicial = lazy(() => import('./pages/Mercaderia/StockInicial'));
 const CargaProductos = lazy(() => import('./pages/Mercaderia/CargaProductos'));
 const ArqueoCaja = lazy(() => import('./pages/Caja/ArqueoCaja'));
 const ConsultaVentas = lazy(() => import('./pages/Consultas/ConsultaVentas'));
+const ConsultaArqueCaja = lazy(() => import('./pages/Consultas/ConsultaArqueCaja'));
 const ConsultaCargaProductos = lazy(() => import('./pages/Consultas/ConsultaCargaProductos'));
 const Reportes = lazy(() => import('./pages/Reportes/Reportes'));
 const CrearOferta = lazy(() => import('./pages/Ofertas/CrearOferta'));
@@ -124,6 +125,7 @@ const AppRouter: React.FC = () => {
           <Route path="auditoria" element={<Auditoria />} />
           <Route path="consultas">
             <Route path="ventas" element={<ConsultaVentas />} />
+            <Route path="arqueo-caja" element={<ConsultaArqueCaja />} />
             <Route path="carga-productos" element={<ConsultaCargaProductos />} />
           </Route>
           <Route path="reportes" element={<Reportes />} />
