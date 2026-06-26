@@ -10,7 +10,18 @@ import { logger } from './utils/logger';
 const app = express();
 
 app.use(cors());
-app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        'frame-src': ["'self'", 'blob:'],
+        'child-src': ["'self'", 'blob:'],
+      },
+    },
+  })
+);
 app.use(compression());
 app.use(express.json());
 app.use(morgan('dev'));
