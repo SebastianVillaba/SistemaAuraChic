@@ -41,6 +41,7 @@ interface SearchProductModalProps {
   onSelectProduct: (producto: ProductoResultado) => void;
   busqueda?: string;
   useComprasSearch?: boolean;
+  disableRestoreFocus?: boolean;
 }
 
 const SearchProductModal: React.FC<SearchProductModalProps> = ({
@@ -50,6 +51,7 @@ const SearchProductModal: React.FC<SearchProductModalProps> = ({
   onSelectProduct,
   busqueda,
   useComprasSearch = false,
+  disableRestoreFocus = true,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [productos, setProductos] = useState<ProductoResultado[]>([]);
@@ -245,6 +247,7 @@ const SearchProductModal: React.FC<SearchProductModalProps> = ({
       open={open}
       onClose={onClose}
       onKeyDown={handleKeyDown}
+      disableRestoreFocus={disableRestoreFocus}
       maxWidth="lg"
       fullWidth
       PaperProps={{

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
-import { generateVentasProductoPdf } from '../utils/pdfGenerator';
+import { generateVentasProductoPdf, generateVentasResumidoPdf, generateVentasVendedorPdf } from '../utils/pdfGenerator';
 
 
 /**
@@ -309,18 +309,18 @@ export const reportePedidoDelivery = async (req: Request, res: Response): Promis
 };
 
 /**
- * Controller para obtener el reporte de venta de producto por día
- * @param req - Request con el parámetro fecha y opcionalmente format (ej. format=pdf)
+ * Controller para obtener el reporte de venta de productos en un rango de fechas.
+ * @param req - Request con los parámetros desde, hasta, idTipoProducto y opcionalmente format (ej. format=pdf)
  * @param res - Response con los datos del reporte o el archivo PDF
  */
 export const reporteVentaProductoDia = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { fecha, format } = req.query;
+    const { desde, hasta, idTipoProducto, format } = req.query;
 
-    if (!fecha) {
+    if (!desde || !hasta) {
       res.status(400).json({
         success: false,
-        message: 'El parámetro fecha es requerido'
+        message: 'Los parámetros desde y hasta son requeridos'
       });
       return;
     }
@@ -330,9 +330,105 @@ export const reporteVentaProductoDia = async (req: Request, res: Response): Prom
       isStoredProcedure: true,
       inputs: [
         {
-          name: 'fecha',
-          type: sql.Date,
-          value: new Date(fecha as string)
+          name: 'desde',
+          type: sql.DateTime,
+          value: new Date(desde as string)
+        },
+        {
+          name: 'hasta',
+          type: sql.DateTime,
+          value: new Date(hasta as string)
+        }
+      ]
+    });
+
+    const recordsets = (result as typeof result & { recordsets?: any[] }).recordsets;
+    let data = recordsets?.[0] ?? [];
+
+    // Mapear idTipoProducto obteniendo los tipos desde la tabla de productos
+    try {
+      const prodTypesRes = await executeRequest({
+        query: 'SELECT nombre, idTipoProducto FROM producto',
+        isStoredProcedure: false
+      });
+      const prodTypeMap = new Map<string, number>();
+      prodTypesRes.recordset.forEach((p: any) => {
+        if (p.nombre) {
+          prodTypeMap.set(p.nombre.trim().toLowerCase(), p.idTipoProducto);
+        }
+      });
+      data = data.map((item: any) => {
+        const itemNombre = item.nombre ? item.nombre.trim().toLowerCase() : '';
+        return {
+          ...item,
+          idTipoProducto: prodTypeMap.get(itemNombre) || 0
+        };
+      });
+    } catch (err) {
+      console.error('Error mapping product types:', err);
+    }
+
+    // Filtrar si se requiere un tipo específico
+    if (idTipoProducto && idTipoProducto !== 'TODOS' && idTipoProducto !== '0') {
+      const filterId = parseInt(idTipoProducto as string, 10);
+      data = data.filter((item: any) => item.idTipoProducto === filterId);
+    }
+
+    if (format === 'pdf') {
+      return generateVentasProductoPdf(res, data, desde as string, hasta as string);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Reporte de venta de producto generado exitosamente',
+      data: data
+    });
+  } catch (error) {
+    console.error('Error al generar reporte de venta de producto:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al generar reporte de venta de producto',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+};
+
+/**
+ * Controller para obtener el reporte resumido de ventas en un rango de fechas y sucursal.
+ * @param req - Request con desde, hasta, idSucursal y opcionalmente format (ej. format=pdf)
+ */
+export const reporteVentaResumidoFecha = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { desde, hasta, idSucursal, format } = req.query;
+
+    if (!desde || !hasta || idSucursal === undefined) {
+      res.status(400).json({
+        success: false,
+        message: 'Los parámetros desde, hasta e idSucursal son requeridos'
+      });
+      return;
+    }
+
+    const parsedSucursalId = parseInt(idSucursal as string, 10);
+
+    const result = await executeRequest({
+      query: 'sp_reporteVentaResumidoFecha',
+      isStoredProcedure: true,
+      inputs: [
+        {
+          name: 'desde',
+          type: sql.DateTime,
+          value: new Date(desde as string)
+        },
+        {
+          name: 'hasta',
+          type: sql.DateTime,
+          value: new Date(hasta as string)
+        },
+        {
+          name: 'idSucursal',
+          type: sql.Int,
+          value: parsedSucursalId
         }
       ]
     });
@@ -341,19 +437,84 @@ export const reporteVentaProductoDia = async (req: Request, res: Response): Prom
     const data = recordsets?.[0] ?? [];
 
     if (format === 'pdf') {
-      return generateVentasProductoPdf(res, data, fecha as string);
+      let sucursalNombre = 'Todas las Sucursales';
+      if (parsedSucursalId > 0) {
+        const sucResult = await executeRequest({
+          query: `SELECT nombreSucursal FROM Sucursal WHERE idSucursal = ${parsedSucursalId}`,
+          isStoredProcedure: false
+        });
+        if (sucResult.recordset?.[0]?.nombreSucursal) {
+          sucursalNombre = sucResult.recordset[0].nombreSucursal;
+        }
+      }
+      return generateVentasResumidoPdf(res, data, desde as string, hasta as string, sucursalNombre);
     }
 
     res.status(200).json({
       success: true,
-      message: 'Reporte de venta de producto por día generado exitosamente',
+      message: 'Reporte de ventas resumido generado exitosamente',
       data: data
     });
   } catch (error) {
-    console.error('Error al generar reporte de venta de producto por día:', error);
+    console.error('Error al generar reporte de ventas resumido:', error);
     res.status(500).json({
       success: false,
-      message: 'Error al generar reporte de venta de producto por día',
+      message: 'Error al generar reporte de ventas resumido',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
+};
+
+/**
+ * Controller para obtener el reporte de ventas por vendedor en un rango de fechas.
+ * @param req - Request con desde, hasta y opcionalmente format (ej. format=pdf)
+ */
+export const reporteVentasVendedorFecha = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { desde, hasta, format } = req.query;
+
+    if (!desde || !hasta) {
+      res.status(400).json({
+        success: false,
+        message: 'Los parámetros desde y hasta son requeridos'
+      });
+      return;
+    }
+
+    const result = await executeRequest({
+      query: 'sp_reporteVentasVendedorFecha',
+      isStoredProcedure: true,
+      inputs: [
+        {
+          name: 'desde',
+          type: sql.DateTime,
+          value: new Date(desde as string)
+        },
+        {
+          name: 'hasta',
+          type: sql.DateTime,
+          value: new Date(hasta as string)
+        }
+      ]
+    });
+
+    const recordsets = (result as typeof result & { recordsets?: any[] }).recordsets;
+    const data = recordsets?.[0] ?? [];
+
+    if (format === 'pdf') {
+      return generateVentasVendedorPdf(res, data, desde as string, hasta as string);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Reporte de ventas por vendedor generado exitosamente',
+      data: data
+    });
+  } catch (error) {
+    console.error('Error al generar reporte de ventas por vendedor:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al generar reporte de ventas por vendedor',
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
   }

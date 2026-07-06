@@ -376,11 +376,25 @@ class TicketService {
 
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(9);
-        doc.text(`Cajero Apertura: ${datos.resumen.cajeroApertura || ''}`, this.MARGEN_IZQ, this.posY);
-        this.posY += 5;
+        const lineasCajeroApertura = this.dividirTexto(datos.resumen.cajeroApertura || '', 25);
+        lineasCajeroApertura.forEach((linea, index) => {
+            if (index === 0) {
+                doc.text(`Cajero Apertura: ${linea}`, this.MARGEN_IZQ, this.posY);
+            } else {
+                doc.text(linea, this.MARGEN_IZQ, this.posY);
+            }
+            this.posY += 4;
+        });
 
-        doc.text(`Cajero Cierre: ${datos.resumen.cajeroCierre || ''}`, this.MARGEN_IZQ, this.posY);
-        this.posY += 5;
+        const lineasCajeroCierre = this.dividirTexto(datos.resumen.cajeroCierre || '', 25);
+        lineasCajeroCierre.forEach((linea, index) => {
+            if (index === 0) {
+                doc.text(`Cajero Cierre: ${linea}`, this.MARGEN_IZQ, this.posY);
+            } else {
+                doc.text(linea, this.MARGEN_IZQ, this.posY);
+            }
+            this.posY += 4;
+        });
 
         const fechaApertura = datos.resumen.fechaApertura ? this.formatearFecha(new Date(datos.resumen.fechaApertura)) : '';
         doc.text(`Apertura: ${fechaApertura}`, this.MARGEN_IZQ, this.posY);
@@ -742,10 +756,12 @@ class TicketService {
         this.posY += 5;
     }
 
-
     /**
-     * Dibuja el encabezado del reporte
+     * 
+     * ESTOS ES PARA EL TICKET NO IMP 
+     *  
      */
+
     private dibujarEncabezado(doc: jsPDF, datos: DatosTicket): void {
         // Nombre fantasia - negrita y centrado
         doc.setFont("helvetica", "bold");
@@ -770,17 +786,12 @@ class TicketService {
 
         // TIPO PAGO
         doc.text(`Forma de Pago: ${datos.nombreTipoPago}`, this.MARGEN_IZQ, this.posY);
-        this.posY += 5;
+        this.posY += 3;
 
         // Línea separadora
         this.dibujarLinea(doc);
     }
 
-
-
-    /**
-     * Dibuja la información del cliente
-    */
     private dibujarInfoCliente(doc: jsPDF, datos: DatosTicket): void {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(9);
@@ -813,15 +824,21 @@ class TicketService {
         this.posY += 5;
 
         // Vendedor
-        doc.text(`Vendedor/a: ${datos.vendedor}`, this.MARGEN_IZQ, this.posY);
-        this.posY += 6;
+        const lineasVendedor = this.dividirTexto(datos.vendedor, 25);
+        for (let linea = 0; linea < lineasVendedor.length; linea++) {
+            if (linea === 0) {
+                doc.text(`Vendedor/a: ${lineasVendedor[linea]}`, this.MARGEN_IZQ, this.posY);
+                this.posY += 5;
+            }
+            else {
+                doc.text(lineasVendedor[linea], this.MARGEN_IZQ, this.posY);
+                this.posY += 5;
+            }
+        }
 
         this.dibujarLinea(doc);
     }
 
-    /**
-     * Dibuja el encabezado de la tabla de items
-    */
     private dibujarEncabezadoTabla(doc: jsPDF): void {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(8);
@@ -830,53 +847,48 @@ class TicketService {
         doc.text('Cant.', this.MARGEN_IZQ, this.posY);
         doc.text('Mercaderia', this.MARGEN_IZQ + 12, this.posY);
         doc.text('Prec.Unit.', this.MARGEN_IZQ + 40, this.posY);
-        doc.text('SubtTotal', this.MARGEN_IZQ + 60, this.posY);
+        doc.text('Sub', this.MARGEN_IZQ + 60, this.posY - 1);
+        doc.text('Total', this.MARGEN_IZQ + 59.5, this.posY + 2);
         this.posY += 5;
 
         this.dibujarLinea(doc);
     }
 
-    /**
-     * Dibuja los items de la factura
-    */
     private dibujarItems(doc: jsPDF, items: ItemTicket[]): void {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
 
         items.forEach(item => {
-            // Código
-            doc.text(item.codigo.toString(), this.MARGEN_IZQ, this.posY);
-            this.posY += 4;
+            // Guardamos la coordenada Y inicial de este item para alinear todo en la misma base
+            const posYItemBase = this.posY;
 
-            // Cantidad, Mercadería y Precio
-            doc.text(item.cantidad.toString(), this.MARGEN_IZQ, this.posY);
-            this.posY -= 4;
+            // Cantidad
+            doc.text(item.cantidad.toString(), this.MARGEN_IZQ, posYItemBase);
 
             // Dividir mercadería si es muy larga
             const lineasMercaderia = this.dividirTexto(item.mercaderia, 14);
             lineasMercaderia.forEach((linea, index) => {
                 if (index === 0) {
-                    doc.text(linea, this.MARGEN_IZQ + 12, this.posY);
-                    doc.text(this.formatearNumero(item.precio, 0), this.MARGEN_IZQ + 41, this.posY);
+                    // Primera línea: alineada con la base del item
+                    doc.text(linea, this.MARGEN_IZQ + 12, posYItemBase);
+                    doc.text(this.formatearNumero(item.precio, 0), this.MARGEN_IZQ + 41, posYItemBase);
                 } else {
+                    // Siguientes líneas: aumentamos la Y global para el texto extra
                     this.posY += 4;
                     doc.text(linea, this.MARGEN_IZQ + 12, this.posY);
                 }
             });
 
-            this.posY -= 4;
-            // Subtotal - alineado a la derecha
+            // Subtotal - Lo pintamos usando la Y base original (así no le afecta cuántas líneas tenga la mercadería)
             const subtotalStr = this.formatearNumero(item.subtotal, 0);
-            doc.text(subtotalStr, this.ANCHO_TICKET - this.MARGEN_IZQ, this.posY, { align: 'right' });
-            this.posY += 9;
+            doc.text(subtotalStr, this.ANCHO_TICKET - this.MARGEN_IZQ, posYItemBase, { align: 'right' });
+
+            // Dejamos un espacio prudencial para el siguiente ítem basándonos en la última Y alcanzada
+            this.posY += 9; 
         });
 
         this.dibujarLinea(doc);
     }
-
-    /**
-     * Dibuja los totales
-     */
     private dibujarTotales(doc: jsPDF, datos: DatosTicket): void {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(11);
@@ -922,10 +934,13 @@ class TicketService {
      * Dibuja una línea separadora
      */
     private dibujarLinea(doc: jsPDF): void {
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        doc.text('------------------------------------------------------------------------', this.MARGEN_IZQ, this.posY);
-        this.posY += 5;
+        // Calculamos el punto final derecho restando el margen
+        const xFinal = this.ANCHO_TICKET - this.MARGEN_IZQ;
+
+        doc.setLineWidth(0.3); // Define el grosor de la línea en mm
+        doc.line(this.MARGEN_IZQ, this.posY, xFinal, this.posY);
+
+        this.posY += 5; // Espaciado después de la línea
     }
 
     /**
@@ -1226,7 +1241,8 @@ class FacturaService {
         doc.text('Cant.', this.MARGEN_IZQ, this.posY);
         doc.text('Mercaderia', this.MARGEN_IZQ + 12, this.posY);
         doc.text('Prec.Unit.', this.MARGEN_IZQ + 40, this.posY);
-        doc.text('SubtTotal', this.MARGEN_IZQ + 60, this.posY);
+        doc.text('Sub', this.MARGEN_IZQ + 60, this.posY - 1);
+        doc.text('Total', this.MARGEN_IZQ + 59.5, this.posY + 2);
         this.posY += 5;
 
         this.dibujarLinea(doc);
@@ -1357,10 +1373,13 @@ class FacturaService {
      * Dibuja una línea separadora
      */
     private dibujarLinea(doc: jsPDF): void {
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        doc.text('------------------------------------------------------------------------', this.MARGEN_IZQ, this.posY);
-        this.posY += 5;
+        // Calculamos el punto final derecho restando el margen
+        const xFinal = this.ANCHO_TICKET - this.MARGEN_IZQ;
+
+        doc.setLineWidth(0.3); // Define el grosor de la línea en mm
+        doc.line(this.MARGEN_IZQ, this.posY, xFinal, this.posY);
+
+        this.posY += 5; // Espaciado después de la línea
     }
 
     /**
