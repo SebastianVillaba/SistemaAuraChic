@@ -189,3 +189,48 @@ export const limpiarTemporal = async (req: Request, res: Response): Promise<void
         res.status(500).json({ success: false, message: 'Error al limpiar temporal', error: error.message });
     }
 };
+
+/**
+ * Obtiene el costo y precio sugerido de un producto de referencia (combo)
+ * sumando los costos y precios de sus componentes.
+ */
+export const obtenerSugeridosProductoRef = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { idProductoRef } = req.params;
+
+        if (!idProductoRef) {
+            res.status(400).json({ success: false, message: 'El idProductoRef es obligatorio' });
+            return;
+        }
+
+        const result = await executeRequest({
+            query: `
+                SELECT 
+                    ISNULL(SUM(d.cantidad * p.costo), 0) AS costoSugerido,
+                    ISNULL(SUM(d.cantidad * p.precio), 0) AS precioSugerido,
+                    COUNT(1) AS cantidadComponentes
+                FROM dbo.detProductoRef d
+                INNER JOIN dbo.producto p ON d.idProducto = p.idProducto
+                WHERE d.idProductoRef = @idProductoRef
+            `,
+            isStoredProcedure: false,
+            inputs: [
+                { name: 'idProductoRef', type: sql.Int, value: Number(idProductoRef) }
+            ]
+        });
+
+        const record = result.recordset[0];
+        const existe = record && record.cantidadComponentes > 0;
+
+        res.status(200).json({
+            success: true,
+            existe,
+            costoSugerido: existe ? record.costoSugerido : 0,
+            precioSugerido: existe ? record.precioSugerido : 0
+        });
+    } catch (error: any) {
+        console.error('Error en obtenerSugeridosProductoRef:', error);
+        res.status(500).json({ success: false, message: 'Error al obtener costos sugeridos', error: error.message });
+    }
+};
+

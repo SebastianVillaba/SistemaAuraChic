@@ -3,7 +3,7 @@ import multer from 'multer'
 import path from 'path';
 
 import { insertarProducto, buscarProductos, obtenerInfoProducto, obtenerTiposProducto, consultarPrecioProducto, modificarProducto, obtenerPrecioDescuento, insertarTipoProducto, consultarStockProducto } from '../controllers/producto.controller';
-import { cargarReferenciasTmp, obtenerDetallesTmp, agregarDetalleTmp, eliminarDetalleTmp, guardarReferencias, limpiarTemporal } from '../controllers/productoRef.controller';
+import { cargarReferenciasTmp, obtenerDetallesTmp, agregarDetalleTmp, eliminarDetalleTmp, guardarReferencias, limpiarTemporal, obtenerSugeridosProductoRef } from '../controllers/productoRef.controller';
 
 const router = express.Router();
 
@@ -48,5 +48,6 @@ router.post('/ref/detalle', agregarDetalleTmp);
 router.delete('/ref/detalle/:nro', eliminarDetalleTmp);
 router.post('/ref/guardar', guardarReferencias);
 router.post('/ref/limpiar', limpiarTemporal);
+router.get('/ref/sugeridos/:idProductoRef', obtenerSugeridosProductoRef);
 
 export default router;

@@ -92,7 +92,7 @@ export const generateVentasResumidoPdf = (res: Response, data: any[], desde: str
     totalNetoSum += tNeto;
 
     return {
-      factura: item.factura || 'CVE / Sin Factura',
+      factura: item.factura || '',
       cliente: item.cliente || '',
       vendedor: item.nombre || '',
       totalVenta: tVenta.toLocaleString('es-PY', formatOptions),

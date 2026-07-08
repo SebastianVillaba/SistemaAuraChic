@@ -77,8 +77,8 @@ const CargaProductos: React.FC = () => {
         setSelectedProduct(product);
         setProductoSearchTerm('');
         setSearchModalOpen(false);
-
         setSelectedProductImg(null);
+        
         if (product.imagenUrl) {
             setSelectedProductImg(product.imagenUrl);
         } else if (product.idProducto) {
@@ -100,6 +100,21 @@ const CargaProductos: React.FC = () => {
         
         // Cargar costo y precio sugerido si el producto lo tiene
         setPrecio(product.precio !== undefined && product.precio !== null ? String(product.precio) : '');
+        setCosto(''); // Por defecto costo vacío si no es producto referenciado
+
+        // Consultar sugeridos en la DB de forma asíncrona si es un producto referenciado (combo)
+        if (product.idProducto) {
+            productoService.obtenerSugeridosProductoRef(product.idProducto)
+                .then((sugeridosRes) => {
+                    if (sugeridosRes.existe) {
+                        setCosto(String(sugeridosRes.costoSugerido));
+                        setPrecio(String(sugeridosRes.precioSugerido));
+                    }
+                })
+                .catch((err) => {
+                    console.error('Error al obtener costos sugeridos:', err);
+                });
+        }
         
         // Flujo de focos 1: Al seleccionar, mover a Cantidad
         setTimeout(() => {

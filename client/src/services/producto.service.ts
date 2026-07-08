@@ -385,6 +385,22 @@ export const productoService = {
   },
 
   /**
+   * Obtiene costo y precio sugeridos para un producto de referencia
+   */
+  obtenerSugeridosProductoRef: async (idProductoRef: number): Promise<{ existe: boolean; costoSugerido: number; precioSugerido: number }> => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/producto/ref/sugeridos/${idProductoRef}`);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error al obtener sugeridos de producto ref:', error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw new Error('Error al obtener valores sugeridos del producto referenciado');
+    }
+  },
+
+  /**
    * Obtiene la URL completa de una imagen
    * @param path - Ruta relativa de la imagen
    * @returns URL completa
