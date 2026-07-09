@@ -267,7 +267,6 @@ const ConsultaVentas: React.FC = () => {
         
         // genereamos el reporte
         await facturaService.generarTicket(datosFactura);
-
     }
     //Si es que no es impreso 
     else {

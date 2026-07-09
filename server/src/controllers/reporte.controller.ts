@@ -32,11 +32,8 @@ export const reporteFacturaVenta = async (req: Request, res: Response): Promise<
       ]
     });
 
-    // El SP devuelve 2 recordsets:
-    // recordset[0] = Cabecera y liquidación
-    // recordset[1] = Detalle de items
-
     const recordsets = (result as typeof result & { recordsets?: any[] }).recordsets;
+    console.log(recordsets);
 
     res.status(200).json({
       success: true,

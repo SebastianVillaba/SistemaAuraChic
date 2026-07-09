@@ -137,12 +137,8 @@ const Facturacion: React.FC = () => {
       // Buscar productos primero
       console.log(busqueda);
       const results = await productoService.consultarPrecioProducto(busqueda, idTerminalWeb);
-      console.log('Estoy antes de results.length');
-      console.log(results);
-      console.log(results.length);
 
       if (results.length === 1) {
-        console.log('Estoy en el results.length');
         // Si hay un solo resultado, seleccionarlo
         handleSeleccionarProducto(results[0]);
       } else if (results.length > 1) {
@@ -431,7 +427,7 @@ const Facturacion: React.FC = () => {
         idMovimientoCaja: parseInt(idMovimientoCaja),
         idTipoPago: 1, // TODO: Obtener del formulario
         idTipoVenta: 1, // TODO: Obtener del formulario
-        idCliente: cliente?.idCliente || 1, // 8 = Cliente SIN NOMBRE
+        idCliente: cliente?.idCliente || 1, // 1 = Cliente SIN NOMBRE
         ruc: cliente?.documento || 'XXXXXXX',
         nombreCliente: cliente?.nombre || 'SIN NOMBRE',
         totalVenta: total,
@@ -491,53 +487,53 @@ const Facturacion: React.FC = () => {
               const datosReporte = await reporteService.obtenerDatosFactura(response.idVenta);
 
               const datosFactura: DatosFactura = {
-                // Datos de la empresa
-                nombreFantasia: datosReporte.cabecera.nombreFantasia,
-                empresaContable: datosReporte.cabecera.empresaContable,
-                rubro: datosReporte.cabecera.rubro,
-                ruc: datosReporte.cabecera.ruc,
-                direccion: datosReporte.cabecera.direccionEmpresa,
-                telefono: datosReporte.cabecera.telefonoEmpresa,
-
-                // Datos de la venta
-                fechaHora: new Date(datosReporte.cabecera.fechaHora),
-                nroFactura: `${numeroFactura}`,
-                total: datosReporte.cabecera.total,
-
-                // Datos de control fiscal
-                timbrado: datosReporte.cabecera.timbrado,
-                fechaInicioVigencia: new Date(datosReporte.cabecera.fechaInicioVigencia),
-                fechaFinVigencia: new Date(datosReporte.cabecera.fechaFinVigencia),
-
-                // Datos del cliente
-                cliente: datosReporte.cabecera.cliente,
-                rucCliente: datosReporte.cabecera.rucCliente,
-                direccionCliente: cliente?.direccion || '',
-                telefonoCliente: cliente?.telefono || '',
-
-                // Información adicional
-                vendedor: 'Sistema', // TODO: Obtener del usuario logueado
-                tipoFactura: datosReporte.cabecera.tipoFactura,
-                formaVenta: datosReporte.cabecera.formaVenta,
-
-                // Liquidación IVA
-                gravada10: datosReporte.cabecera.gravada10,
-                gravada5: datosReporte.cabecera.gravada5,
-                exenta: datosReporte.cabecera.exenta,
-                iva10: datosReporte.cabecera.iva10,
-                iva5: datosReporte.cabecera.iva5,
-                totalIva: datosReporte.cabecera.totalIva,
-
-                // Items
-                items: datosReporte.items.map((item: any) => ({
-                  cantidad: item.cantidad,
-                  codigo: item.codigo,
-                  mercaderia: item.mercaderia,
-                  precio: item.precio,
-                  subtotal: item.subtotal,
-                  porcentajeImpuesto: item.porcentajeImpuesto
-                }))
-              };
+                        // Datos de la empresa
+                        nombreFantasia: datosReporte.cabecera.nombreFantasia,
+                        nombre: datosReporte.cabecera.nombre || '',
+                        rubro: datosReporte.cabecera.rubro || '',
+                        ruc: datosReporte.cabecera.ruc || '',
+                        direccion: datosReporte.cabecera.direccionEmpresa || '',
+                        telefono: datosReporte.cabecera.telefonoEmpresa || '',
+                
+                        // Datos de la venta
+                        fechaHora: new Date(datosReporte.cabecera.fechaHora),
+                        nroFactura: `${numeroFactura}`,
+                        total: datosReporte.cabecera.total,
+                
+                        // Datos de control fiscal
+                        timbrado: datosReporte.cabecera.timbrado || '',
+                        fechaInicioVigencia: new Date(datosReporte.cabecera.fechaInicioVigencia),
+                        fechaFinVigencia: new Date(datosReporte.cabecera.fechaFinVigencia),
+                
+                        // Datos del cliente
+                        cliente: datosReporte.cabecera.cliente || '',
+                        rucCliente: datosReporte.cabecera.rucCliente || '',
+                        direccionCliente: datosReporte.cabecera.direccionCliente || '',
+                        telefonoCliente: datosReporte.cabecera.telefonoCliente || '',
+                
+                        // Información adicional
+                        vendedor:  datosReporte.cabecera.vendedor || 'Sistema',
+                        tipoFactura: datosReporte.cabecera.tipoFactura || '',
+                        formaVenta: datosReporte.cabecera.formaVenta || '',
+                
+                        // Liquidación IVA
+                        gravada10: datosReporte.cabecera.gravada10 || 0,
+                        gravada5: datosReporte.cabecera.gravada5 || 0,
+                        exenta: datosReporte.cabecera.exenta || 0,
+                        iva10: datosReporte.cabecera.iva10 || 0,
+                        iva5: datosReporte.cabecera.iva5 || 0,
+                        totalIva: datosReporte.cabecera.totalIva || 0,
+                
+                        // Items
+                        items: datosReporte.items.map((item: any) => ({
+                          cantidad: item.cantidad,
+                          codigo: item.codigo,
+                          mercaderia: item.mercaderia,
+                          precio: item.precio,
+                          subtotal: item.subtotal,
+                          porcentajeImpuesto: item.porcentajeImpuesto
+                        }))
+                      };
 
               await facturaService.generarTicket(datosFactura);
             }

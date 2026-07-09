@@ -1120,9 +1120,17 @@ class FacturaService {
         // Teléfono y Rubro
         doc.text(`Telef.: ${datos.telefono}`, this.MARGEN_IZQ, this.posY);
         this.posY += 5;
-        doc.text(datos.rubro, this.MARGEN_IZQ, this.posY);
-        this.posY += 6;
-
+        const lineasRubro = this.dividirTexto(datos.rubro, 40);
+        for (let linea = 0; linea < lineasRubro.length; linea++) {
+            if (linea === 0) {
+                doc.text(`${lineasRubro[linea]}`, this.MARGEN_IZQ, this.posY);
+                this.posY += 5;
+            }
+            else {
+                doc.text(lineasRubro[linea], this.MARGEN_IZQ, this.posY);
+                this.posY += 5;
+            }
+        }
 
         // Línea separadora
         this.dibujarLinea(doc);
@@ -1257,7 +1265,7 @@ class FacturaService {
 
         items.forEach(item => {
             // Código
-            doc.text(item.codigo.toString(), this.MARGEN_IZQ, this.posY);
+            // doc.text(item.codigo.toString(), this.MARGEN_IZQ, this.posY);
             this.posY += 4;
 
             // Cantidad, Mercadería y Precio
