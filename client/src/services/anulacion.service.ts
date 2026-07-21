@@ -11,6 +11,14 @@ export interface AnularFacturacionRequest {
   tipo: number;
 }
 
+export interface AnularCargaProductoRequest {
+  idCargaProducto: number;
+  idTerminalWeb: number;
+  idSucursal: number;
+  idUsuarioAlta: number;
+  explica: string;
+}
+
 export const anulacionService = {
   /**
    * Verifica si un usuario tiene permiso para anular según el tipo indicado.
@@ -41,5 +49,20 @@ export const anulacionService = {
       console.error('Error al anular la facturación:', error);
       throw new Error(error.response?.data?.message || 'Error al anular la facturación');
     }
+  },
+
+  /**
+   * Anula una carga de productos.
+   * Llama a POST /api/anulacion/carga-producto
+   */
+  anularCargaProducto: async (data: AnularCargaProductoRequest): Promise<any> => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/anulacion/carga-producto`, data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error al anular la carga de producto:', error);
+      throw new Error(error.response?.data?.message || 'Error al anular la carga de producto');
+    }
   }
 };
+

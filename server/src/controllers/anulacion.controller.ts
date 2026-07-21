@@ -125,3 +125,62 @@ export const anularFacturacion = async (req: Request, res: Response): Promise<vo
     }
   }
 };
+
+/**
+ * Anula una carga de productos.
+ * Llama a sp_anularCargaProducto.
+ * 
+ * Body: { idCargaProducto, idTerminalWeb, idSucursal, idUsuarioAlta, explica }
+ */
+export const anularCargaProducto = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {
+      idCargaProducto,
+      idTerminalWeb,
+      idSucursal,
+      idUsuarioAlta,
+      explica
+    } = req.body;
+
+    if (!idCargaProducto || !idTerminalWeb || !idSucursal || !idUsuarioAlta || !explica) {
+      res.status(400).json({
+        success: false,
+        message: "Faltan parámetros requeridos: idCargaProducto, idTerminalWeb, idSucursal, idUsuarioAlta, explica"
+      });
+      return;
+    }
+
+    await executeRequest({
+      query: 'sp_anularCargaProducto',
+      inputs: [
+        { name: 'idCargaProducto', type: sql.Int,                 value: idCargaProducto },
+        { name: 'idTerminalWeb',   type: sql.Int,                 value: idTerminalWeb   },
+        { name: 'idSucursal',      type: sql.Int,                 value: idSucursal      },
+        { name: 'idUsuarioAlta',   type: sql.Int,                 value: idUsuarioAlta   },
+        { name: 'explica',         type: sql.VarChar(sql.MAX),    value: explica        }
+      ] as any,
+      isStoredProcedure: true
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Carga de producto anulada correctamente'
+    });
+
+  } catch (error: any) {
+    console.error('Error al anular carga de producto:', error);
+    if (error.number >= 50000) {
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Error al anular la carga de producto',
+        error: error.message
+      });
+    }
+  }
+};
+

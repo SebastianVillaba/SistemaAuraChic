@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { verificarPermisoAnular, anularFacturacion } from '../controllers/anulacion.controller';
+import { verificarPermisoAnular, anularFacturacion, anularCargaProducto } from '../controllers/anulacion.controller';
 
 const router = Router();
 
@@ -11,4 +11,9 @@ router.get('/permiso', verificarPermisoAnular);
 // POST /api/anulacion/facturacion
 router.post('/facturacion', anularFacturacion);
 
+// Anula una carga de productos
+// POST /api/anulacion/carga-producto
+router.post('/carga-producto', anularCargaProducto);
+
 export default router;
+

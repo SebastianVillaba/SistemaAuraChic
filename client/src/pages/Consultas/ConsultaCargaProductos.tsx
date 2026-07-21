@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import PrintIcon from '@mui/icons-material/Print';
+import BlockIcon from '@mui/icons-material/Block';
 import FirstPageIcon from '@mui/icons-material/FirstPage';
 import LastPageIcon from '@mui/icons-material/LastPage';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
@@ -30,6 +31,7 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { consultaCargaProductosService } from '../../services/consultaCargaProductos.service';
 import type { CargaCabecera, CargaDetalle, CargaNavigation } from '../../services/consultaCargaProductos.service';
 import SearchCargaProductoModal from '../../components/SearchCargaProductoModal';
+import AnulacionModal from '../../components/AnulacionModal';
 import { useTerminal } from '../../hooks/useTerminal';
 
 const ConsultaCargaProductos: React.FC = () => {
@@ -51,6 +53,8 @@ const ConsultaCargaProductos: React.FC = () => {
   const [error, setError] = useState('');
   const [infoMsg, setInfoMsg] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isAnulacionOpen, setIsAnulacionOpen] = useState(false);
+
 
   // Cargar información de la carga de producto
   const cargarCarga = async (idCargaProducto?: number) => {
@@ -239,6 +243,15 @@ const ConsultaCargaProductos: React.FC = () => {
               >
                 Imprimir
               </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                startIcon={<BlockIcon />}
+                disabled={!cabecera || isAnulado}
+                onClick={() => setIsAnulacionOpen(true)}
+              >
+                Anular
+              </Button>
             </Stack>
           </Box>
 
@@ -309,8 +322,24 @@ const ConsultaCargaProductos: React.FC = () => {
         onSelectCarga={(id) => cargarCarga(id)}
       />
 
+      {/* Modal de Anulación */}
+      {cabecera && (
+        <AnulacionModal
+          open={isAnulacionOpen}
+          onClose={() => setIsAnulacionOpen(false)}
+          idCargaProducto={cabecera.idCargaProducto}
+          tipoMovimiento="CARGA"
+          onSuccess={() => {
+            setIsAnulacionOpen(false);
+            setInfoMsg('Carga de productos anulada correctamente.');
+            cargarCarga(cabecera.idCargaProducto);
+          }}
+        />
+      )}
+
     </Box>
   );
 };
 
 export default ConsultaCargaProductos;
+

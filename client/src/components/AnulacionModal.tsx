@@ -20,17 +20,23 @@ import axios from 'axios';
 interface AnulacionModalProps {
   open: boolean;
   onClose: () => void;
-  idVenta: number;
-  tipoVenta: string;
+  idVenta?: number;
+  idCargaProducto?: number;
+  tipoVenta?: string;
   onSuccess: () => void;
+  imp?: boolean;
+  tipoMovimiento?: 'VENTA' | 'CARGA';
 }
 
 const AnulacionModal: React.FC<AnulacionModalProps> = ({
   open,
   onClose,
   idVenta,
+  idCargaProducto,
   tipoVenta,
   onSuccess,
+  imp = true,
+  tipoMovimiento = 'VENTA'
 }) => {
   const { idTerminalWeb, idSucursal } = useTerminal();
 
@@ -41,6 +47,8 @@ const AnulacionModal: React.FC<AnulacionModalProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
 
   const reasonInputRef = useRef<HTMLInputElement>(null);
+
+  const idMovimientoActual = tipoMovimiento === 'CARGA' ? idCargaProducto : idVenta;
 
   // Reset state when opening modal
   useEffect(() => {
@@ -77,6 +85,10 @@ const AnulacionModal: React.FC<AnulacionModalProps> = ({
     setError('');
 
     try {
+      if (!idTerminalWeb || !idSucursal) {
+        throw new Error('La terminal o sucursal no están configuradas correctamente.');
+      }
+
       // 1. Validar usuario y contraseña (misma validación que el login)
       const loginResponse = await axios.post('/api/auth/login', {
         username: username.trim(),
@@ -89,36 +101,57 @@ const AnulacionModal: React.FC<AnulacionModalProps> = ({
 
       const idUsuario = loginResponse.data.user.idUsuario;
 
-      // 2. Validar permiso de anulación (sp_permisoAnular)
-      // Pasamos el idUsuario obtenido y el tipo 'FACT'
-      const tienePermiso = await anulacionService.verificarPermisoAnular(idUsuario, 'FACT');
+      if (tipoMovimiento === 'CARGA') {
+        if (!idCargaProducto) {
+          throw new Error('ID de Carga de Producto no especificado.');
+        }
 
-      if (!tienePermiso) {
-        // "el validarAnulacion si es que el usuario no está validado para anular eso devuelve un 0 y debe avisar el sistema que el usuario no esta validado"
-        setError('El usuario ingresado no está validado para realizar anulaciones.');
-        setLoading(false);
-        return;
+        // 2. Validar permiso de anulación para Carga (sp_permisoAnular tipo 'CARGA')
+        const tienePermiso = await anulacionService.verificarPermisoAnular(idUsuario, 'CARGA');
+        if (!tienePermiso) {
+          setError('El usuario ingresado no está validado para realizar anulaciones de carga de producto.');
+          setLoading(false);
+          return;
+        }
+
+        // 3. Proceder con la anulación de la carga de producto
+        await anulacionService.anularCargaProducto({
+          idCargaProducto,
+          idTerminalWeb,
+          idSucursal,
+          idUsuarioAlta: idUsuario,
+          explica: reason.trim(),
+        });
+      } else {
+        if (!idVenta) {
+          throw new Error('ID de Venta no especificado.');
+        }
+
+        // 2. Validar permiso de anulación para Venta (FACT si imp=true, REMISION si imp=false)
+        const permTipo = imp ? 'FACT' : 'REMISION';
+        const tienePermiso = await anulacionService.verificarPermisoAnular(idUsuario, permTipo);
+
+        if (!tienePermiso) {
+          setError('El usuario ingresado no está validado para realizar anulaciones.');
+          setLoading(false);
+          return;
+        }
+
+        // 3. Determinar tipo de anulación (1 = Factura impresa, 2 = Remito/CVE)
+        const tipoAnulacion = imp ? 1 : 2;
+
+        // 4. Proceder con la anulación de facturación
+        await anulacionService.anularFacturacion({
+          idVenta,
+          idTerminalWeb,
+          idSucursal,
+          idUsuarioAlta: idUsuario,
+          explica: reason.trim(),
+          tipo: tipoAnulacion,
+        });
       }
 
-      // 3. Determinar tipo de anulación (1 = Factura impresa, 2 = Remito/CVE)
-      // Si el nombre de tipo de venta tiene remito, CVE o similar, enviamos 2
-      const tipoAnulacion = tipoVenta?.toUpperCase().includes('REMITO') || tipoVenta?.toUpperCase().includes('CVE') ? 2 : 1;
-
-      if (!idTerminalWeb || !idSucursal) {
-        throw new Error('La terminal o sucursal no están configuradas correctamente.');
-      }
-
-      // 4. Proceder con la anulación
-      await anulacionService.anularFacturacion({
-        idVenta,
-        idTerminalWeb,
-        idSucursal,
-        idUsuarioAlta: idUsuario,
-        explica: reason.trim(),
-        tipo: tipoAnulacion,
-      });
-
-      // 5. Éxito
+      // Éxito
       onSuccess();
     } catch (err: any) {
       console.error('Error durante el flujo de anulación:', err);
@@ -160,10 +193,11 @@ const AnulacionModal: React.FC<AnulacionModalProps> = ({
             Confirmar Anulación
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Esta acción revertirá el movimiento seleccionado (ID Mov: {idVenta}).
+            Esta acción revertirá el movimiento seleccionado (ID Mov: {idMovimientoActual ?? '—'}).
           </Typography>
         </Box>
       </DialogTitle>
+
 
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, pt: 1.5 }}>

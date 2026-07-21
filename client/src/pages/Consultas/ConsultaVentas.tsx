@@ -703,6 +703,7 @@ const ConsultaVentas: React.FC = () => {
           idVenta={selectedVenta.idVenta}
           tipoVenta={selectedVenta.tipoVenta}
           onSuccess={handleAnulacionSuccess}
+          imp={imp}
         />
       )}
     </Box>
