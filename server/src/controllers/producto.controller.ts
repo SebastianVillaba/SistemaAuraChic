@@ -311,7 +311,7 @@ export const modificarProducto = async (req: Request, res: Response): Promise<vo
 
     const inputs = [
       { name: 'idProducto', type: sql.Int, value: idProducto },
-      { name: 'nombre', type: sql.VarChar(30), value: nombre },
+      { name: 'nombre', type: sql.VarChar(100), value: nombre },
       { name: 'presentacion', type: sql.VarChar(30), value: presentacion || '' },
       { name: 'codigo', type: sql.Int, value: codigo || 0 },
       { name: 'codigoBarra', type: sql.VarChar(30), value: codigoBarra || '' },
