@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getErrorMessage } from './httpError';
 import type { Persona, GrupoCliente } from '../types/persona.types';
 
 // URL base del API - ajusta según tu configuración
@@ -89,7 +90,7 @@ export const personaService = {
       if (error.response?.data) {
         throw new Error(error.response.data.message || 'Error al insertar la persona');
       }
-      throw new Error('Error de conexión con el servidor');
+      throw new Error(getErrorMessage(error, 'Error de conexión con el servidor'));
     }
   },
 
@@ -109,7 +110,7 @@ export const personaService = {
       if (error.response?.data) {
         throw new Error(error.response.data.message || 'Error al modificar la persona');
       }
-      throw new Error('Error de conexión con el servidor');
+      throw new Error(getErrorMessage(error, 'Error de conexión con el servidor'));
     }
   },
 
@@ -139,7 +140,7 @@ export const personaService = {
       return response.data;
     } catch (error: any) {
       console.error('Error al buscar personas:', error);
-      throw new Error('Error al buscar personas');
+      throw new Error(getErrorMessage(error, 'Error al buscar personas'));
     }
   },
 
@@ -161,7 +162,7 @@ export const personaService = {
       return response.data.result;
     } catch (error: any) {
       console.error('Error al obtener información de la persona:', error);
-      throw new Error('Error al obtener información de la persona');
+      throw new Error(getErrorMessage(error, 'Error al obtener información de la persona'));
     }
   },
 
@@ -186,7 +187,7 @@ export const personaService = {
       return response.data.result;
     } catch (error: any) {
       console.error('Error al buscar cliente por RUC:', error);
-      throw new Error('Error al buscar cliente por RUC');
+      throw new Error(getErrorMessage(error, 'Error al buscar cliente por RUC'));
     }
   },
 

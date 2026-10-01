@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import path from 'path';
 import routes from './routes';
 import { logger } from './utils/logger';
+import { sendError } from './utils/errorResponse';
 
 const app = express();
 
@@ -54,8 +55,7 @@ app.use((req: Request, res: Response) => {
 // 7. Error handler global
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: unknown, req: Request, res: Response, _next: NextFunction) => {
-  logger.error({ err }, 'Error no controlado');
-  res.status(500).json({ message: 'Error interno del servidor' });
+  sendError(res, err, 'Error interno del servidor');
 });
 
 export default app;

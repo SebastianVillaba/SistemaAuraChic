@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
-import { logger } from '../utils/logger';
+import { sendError } from '../utils/errorResponse';
 import { CrearTerminalWebRequest, ModificarTerminalWebRequest } from '../types/terminalWeb.type';
 
 export const crearTerminalWeb = async (req: Request, res: Response) => {
@@ -24,8 +24,7 @@ export const crearTerminalWeb = async (req: Request, res: Response) => {
 
         res.json({ success: true, message: 'Terminal Web creada exitosamente' });
     } catch (error: any) {
-        logger.error('Error al crear terminal web:', error);
-        res.status(500).json({ success: false, message: error.message });
+        sendError(res, error, 'Error al crear terminal web');
     }
 };
 
@@ -52,8 +51,7 @@ export const modificarTerminalWeb = async (req: Request, res: Response) => {
 
         res.json({ success: true, message: 'Terminal Web modificada exitosamente' });
     } catch (error: any) {
-        logger.error('Error al modificar terminal web:', error);
-        res.status(500).json({ success: false, message: error.message });
+        sendError(res, error, 'Error al modificar terminal web');
     }
 };
 
@@ -71,8 +69,7 @@ export const buscarTerminalWeb = async (req: Request, res: Response) => {
 
         res.json(result.recordset);
     } catch (error: any) {
-        logger.error('Error al buscar terminales web:', error);
-        res.status(500).json({ success: false, message: error.message });
+        sendError(res, error, 'Error al buscar terminales web');
     }
 };
 
@@ -94,7 +91,6 @@ export const obtenerTerminalWeb = async (req: Request, res: Response) => {
             res.status(404).json({ success: false, message: 'Terminal Web no encontrada' });
         }
     } catch (error: any) {
-        logger.error('Error al obtener terminal web:', error);
-        res.status(500).json({ success: false, message: error.message });
+        sendError(res, error, 'Error al obtener terminal web');
     }
 };

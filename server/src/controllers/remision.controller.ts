@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 // Interfaces
 export interface IAgregarDetalleRemisionDTO {
@@ -38,8 +39,7 @@ export const consultarStock = async (req: Request, res: Response) => {
         });
         res.status(200).json(result.recordset);
     } catch (error: any) {
-        console.error('Error al consultar stock para remisión:', error);
-        res.status(500).json({ message: 'Error al consultar stock', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al consultar stock');
     }
 };
 
@@ -60,11 +60,7 @@ export const consultaDetalleRemisionTmp = async (req: Request, res: Response) =>
 
         res.status(200).json(result.recordset);
     } catch (error: any) {
-        console.error('Error al consultar detalle de remisión:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al consultar detalle de remisión', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al consultar detalle de remisión');
     }
 }
 
@@ -89,11 +85,7 @@ export const agregarDetalleRemision = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Detalle de remisión agregado correctamente.' });
     } catch (error: any) {
-        console.error('Error al agregar detalle de remisión:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al agregar detalle', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al agregar detalle');
     }
 };
 
@@ -125,11 +117,7 @@ export const guardarRemision = async (req: Request, res: Response) => {
         
         res.status(200).json({ message: 'Remisión guardada correctamente.', data: result.recordset });
     } catch (error: any) {
-        console.error('Error al guardar remisión:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al guardar remisión', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al guardar remisión');
     }
 };
 
@@ -149,11 +137,7 @@ export const consultaRemisionesEntrantes = async (req: Request, res: Response) =
         })
         res.status(200).json(result.recordset);
     } catch (error: any) {
-        console.error('Error al consultar remisiones pendientes:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al consultar remisiones pendientes', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al consultar remisiones pendientes');
     }
 }
 
@@ -168,11 +152,7 @@ export const consultaDetRemisionEntrante = async (req: Request, res: Response) =
         })
         res.status(200).json(result.recordset);
     } catch (error: any) {
-        console.error('Error al consultar detalle de remisiones pendientes:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al consultar detalle de remisiones pendientes', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al consultar detalle de remisiones pendientes');
     }
 }
 
@@ -193,11 +173,7 @@ export const recibirRemision = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Remisión recibida correctamente.' });
     } catch (error: any) {
-        console.error('Error al recibir remisión:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al recibir remisión', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al recibir remisión');
     }
 };
 
@@ -214,11 +190,7 @@ export const eliminarDetRemisionTmp = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Detalle de remisión eliminado correctamente.' });
     } catch (error: any) {
-        console.error('Error al eliminar detalle de remisión:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al eliminar detalle de remisión', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al eliminar detalle de remisión');
     }
 }
 
@@ -237,11 +209,7 @@ export const importarPedidoInterno = async (req: Request, res: Response) => {
         })
         res.status(200).json(result.recordset);
     } catch (error: any) {
-        console.error('Error al importar pedido interno:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al importar pedido interno', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al importar pedido interno');
     }
 }
 
@@ -254,10 +222,6 @@ export const consultaDepositos = async (Req: Request, res: Response) => {
         })
         res.status(200).json(result.recordset);
     } catch (error: any) {
-        console.error('Error al consultar depositos:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al consultar depositos', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al consultar depositos');
     }
 }

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getErrorMessage } from './httpError';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -34,7 +35,7 @@ export const auditoriaService = {
             return response.data.result;
         } catch (error: any) {
             console.error('Error al consultar auditoría:', error);
-            throw new Error('Error al consultar auditoría');
+            throw new Error(getErrorMessage(error, 'Error al consultar auditoría'));
         }
     }
 };

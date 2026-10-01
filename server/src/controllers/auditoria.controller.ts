@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { executeRequest, sql } from "../utils/dbHandler";
+import { sendError } from '../utils/errorResponse';
 import { ConsultarAuditoriaRequest } from "../types/auditoria.type";
 
 /**
@@ -26,10 +27,6 @@ export const consultarAuditoria = async (req: Request, res: Response): Promise<v
             result: result.recordset
         });
     } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            message: "Error al consultar la auditoría",
-            error: error.message
-        });
+        sendError(res, error, 'Error al consultar la auditoría');
     }
 };

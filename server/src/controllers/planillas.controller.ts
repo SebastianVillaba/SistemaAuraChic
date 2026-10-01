@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 
 /**
@@ -27,8 +28,7 @@ export const agregarDetPlanillaPacienteTmp = async (req: Request, res: Response)
         });
         res.status(200).json({ message: 'Detalle de planilla paciente tmp agregado exitosamente', result });
     } catch (error: any) {
-        console.error('Error al agregar detalle de planilla paciente tmp', error);
-        res.status(500).json({ error: 'Error al agregar detalle de planilla paciente tmp' });
+        sendError(res, error, 'Error al agregar detalle de planilla paciente tmp');
     }
 }
 
@@ -43,8 +43,7 @@ export const consultaDetPlanillaPacienteTmp = async (req: Request, res: Response
         });
         res.status(200).json({ message: 'Detalle de planilla paciente tmp consultado exitosamente', result });
     } catch (error: any) {
-        console.error('Error al consultar detalle de planilla paciente tmp', error);
-        res.status(500).json({ error: 'Error al consultar detalle de planilla paciente tmp' });
+        sendError(res, error, 'Error al consultar detalle de planilla paciente tmp');
     }
 }
 
@@ -61,6 +60,7 @@ export const eliminarDetPlanillaPacienteTmp = async (req: Request, res: Response
         });
         res.status(200).json({ message: 'Detalle de planilla paciente tmp eliminado exitosamente', result });
     } catch (error: any) {
+        sendError(res, error, 'Error al eliminar detalle de planilla paciente tmp');
     }
 }
 
@@ -72,8 +72,7 @@ export const obtenerTipoPlanillaPac = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Tipo de planilla paciente consultado exitosamente', result });
     } catch (error: any) {
-        console.error('Error al consultar tipo de planilla paciente', error);
-        res.status(500).json({ error: 'Error al consultar tipo de planilla paciente' });
+        sendError(res, error, 'Error al consultar tipo de planilla paciente');
     }
 }
 
@@ -92,8 +91,7 @@ export const guardarPlanillaPaciente = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Planilla paciente guardada exitosamente', result });
     } catch (error: any) {
-        console.error('Error al guardar planilla paciente', error);
-        res.status(500).json({ error: 'Error al guardar planilla paciente' });
+        sendError(res, error, 'Error al guardar planilla paciente');
     }
 }
 
@@ -121,8 +119,7 @@ export const guardarPlanillaFuncionario = async (req: Request, res: Response) =>
         });
         res.status(200).json({ message: 'Planilla funcionario guardada exitosamente', result });
     } catch (error: any) {
-        console.error('Error al guardar planilla funcionario', error);
-        res.status(500).json({ error: 'Error al guardar planilla funcionario' });
+        sendError(res, error, 'Error al guardar planilla funcionario');
     }
 }
 
@@ -139,8 +136,7 @@ export const agregarDetPlanillaFunTmp = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Detalle de planilla funcionario tmp agregado exitosamente', result });
     } catch (error: any) {
-        console.error('Error al agregar detalle de planilla funcionario tmp', error);
-        res.status(500).json({ error: 'Error al agregar detalle de planilla funcionario tmp' });
+        sendError(res, error, 'Error al agregar detalle de planilla funcionario tmp');
     }
 }
 
@@ -152,8 +148,7 @@ export const obtenerTipoPlanillaFun = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Tipo de planilla funcionario consultado exitosamente', result });
     } catch (error: any) {
-        console.error('Error al consultar tipo de planilla funcionario', error);
-        res.status(500).json({ error: 'Error al consultar tipo de planilla funcionario' });
+        sendError(res, error, 'Error al consultar tipo de planilla funcionario');
     }
 }
 
@@ -169,8 +164,7 @@ export const consultaDetPlanillaFunTmp = async (req: Request, res: Response) => 
         });
         res.status(200).json({ message: 'Funcionarios activos consultados exitosamente', result });
     } catch (error: any) {
-        console.error('Error al consultar funcionarios activos', error);
-        res.status(500).json({ error: 'Error al consultar funcionarios activos' });
+        sendError(res, error, 'Error al consultar funcionarios activos');
     }
 }
 
@@ -182,8 +176,7 @@ export const consultaFuncionariosActivos = async (req: Request, res: Response) =
         })
         res.status(200).json({ message: 'Funcionarios activos consultados exitosamente', result });
     } catch (error: any) {
-        console.error('Error al consultar funcionarios activos', error);
-        res.status(500).json({ error: 'Error al consultar funcionarios activos' });
+        sendError(res, error, 'Error al consultar funcionarios activos');
     }
 }
 
@@ -200,7 +193,6 @@ export const eliminarDetPlanillaFunTmp = async (req: Request, res: Response) => 
         })
         res.status(200).json({ message: 'Detalle de planilla funcionario tmp eliminado exitosamente', result });
     } catch (error: any) {
-        console.error('Error al eliminar detalle de planilla funcionario tmp', error);
-        res.status(500).json({ error: 'Error al eliminar detalle de planilla funcionario tmp' });
+        sendError(res, error, 'Error al eliminar detalle de planilla funcionario tmp');
     }
 }

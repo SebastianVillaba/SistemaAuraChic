@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { executeRequest, sql } from "../utils/dbHandler";
+import { sendError } from '../utils/errorResponse';
 
 interface Usuario {
   idUsuario: number;
@@ -40,8 +41,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     res.status(201).json({ message: "Usuario creado exitosamente" });
   } catch (error) {
-    console.error("Error en register:", error);
-    res.status(500).json({ message: "Error en el servidor" });
+    sendError(res, error, 'Error en el servidor');
   }
 };
 
@@ -91,7 +91,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     console.log(user);
     
   } catch (error) {
-    console.error("Error en login:", error);
-    res.status(500).json({ message: "Error en el servidor" });
+    sendError(res, error, 'Error en el servidor');
   }
 };

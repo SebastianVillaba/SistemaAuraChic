@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 /**
  * Consulta ventas por número de factura.
@@ -37,19 +38,7 @@ export const consultaVentaNroFactura = async (req: Request, res: Response): Prom
     });
 
   } catch (error: any) {
-    console.error('Error al consultar venta por nro factura:', error);
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: 'Error al consultar la venta por número de factura',
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al consultar la venta por número de factura');
   }
 };
 
@@ -89,19 +78,7 @@ export const consultaVentaFecha = async (req: Request, res: Response): Promise<v
     });
 
   } catch (error: any) {
-    console.error('Error al consultar ventas por fecha:', error);
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: 'Error al consultar ventas por fecha',
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al consultar ventas por fecha');
   }
 };
 
@@ -149,18 +126,6 @@ export const consultaInformacionVenta = async (req: Request, res: Response): Pro
     });
 
   } catch (error: any) {
-    console.error('Error al consultar información de venta:', error);
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: 'Error al consultar la información de la venta',
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al consultar la información de la venta');
   }
 };

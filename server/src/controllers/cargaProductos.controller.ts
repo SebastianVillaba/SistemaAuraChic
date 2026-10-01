@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 export const agregarDetalle = async (req: Request, res: Response) => {
     try {
@@ -25,8 +26,7 @@ export const agregarDetalle = async (req: Request, res: Response) => {
 
         return res.status(200).json({ message: 'Detalle agregado correctamente' });
     } catch (error: any) {
-        console.error('Error en agregarDetalle:', error);
-        return res.status(500).json({ message: error.message || 'Error al agregar detalle' });
+        sendError(res, error, 'Error al agregar detalle');
     }
 };
 
@@ -48,8 +48,7 @@ export const consultarDetalle = async (req: Request, res: Response) => {
 
         return res.status(200).json(result.recordset);
     } catch (error: any) {
-        console.error('Error en consultarDetalle:', error);
-        return res.status(500).json({ message: error.message || 'Error al consultar detalles' });
+        sendError(res, error, 'Error al consultar detalles');
     }
 };
 
@@ -73,8 +72,7 @@ export const eliminarDetalle = async (req: Request, res: Response) => {
 
         return res.status(200).json({ message: 'Detalle eliminado correctamente' });
     } catch (error: any) {
-        console.error('Error en eliminarDetalle:', error);
-        return res.status(500).json({ message: error.message || 'Error al eliminar detalle' });
+        sendError(res, error, 'Error al eliminar detalle');
     }
 };
 
@@ -100,7 +98,6 @@ export const guardarCarga = async (req: Request, res: Response) => {
             result: result.recordset
         });
     } catch (error: any) {
-        console.error('Error en guardarCarga:', error);
-        return res.status(500).json({ message: error.message || 'Error al guardar la carga' });
+        sendError(res, error, 'Error al guardar la carga');
     }
 };

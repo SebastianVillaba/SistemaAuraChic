@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 
 /**
@@ -54,18 +55,7 @@ export const agregarDetalleVenta = async (req: Request, res: Response): Promise<
     });
 
   } catch (error: any) {
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al agregar producto al detalle de venta",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al agregar producto al detalle de venta');
   }
 };
 
@@ -111,11 +101,7 @@ export const consultarDetalleVenta = async (req: Request, res: Response): Promis
     });
 
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al consultar el detalle de la venta",
-      error: error.message
-    });
+    sendError(res, error, 'Error al consultar el detalle de la venta');
   }
 };
 
@@ -159,11 +145,7 @@ export const eliminarDetalleVenta = async (req: Request, res: Response): Promise
     });
 
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al eliminar producto del detalle de venta",
-      error: error.message
-    });
+    sendError(res, error, 'Error al eliminar producto del detalle de venta');
   }
 };
 
@@ -230,18 +212,7 @@ export const guardarVenta = async (req: Request, res: Response): Promise<void> =
     });
 
   } catch (error: any) {
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al guardar la venta",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al guardar la venta');
   }
 };
 
@@ -272,18 +243,7 @@ export const consultaFacturaCorrelativa = async (req: Request, res: Response): P
       result: result.recordset
     });
   } catch (error: any) {
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al consultar la factura actual",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al consultar la factura actual');
   }
 }
 
@@ -302,10 +262,7 @@ export const obtenerVendedores = async (req: Request, res: Response): Promise<vo
       data: result.recordset
     });
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Error al obtener vendedores'
-    });
+    sendError(res, error, 'Error al obtener vendedores');
   }
 };
 

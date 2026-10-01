@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 export const agregarDetPedidoTmp = async (req: Request, res: Response) => {
     const { idTerminalWeb, idProducto, idStock, cantidad, precio } = req.body;
@@ -18,12 +19,7 @@ export const agregarDetPedidoTmp = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Detalle de pedido agregado correctamente.' });
     } catch (error) {
-        console.error('Error al agregar detalle de pedido temporal:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al agregar detalle de pedido temporal', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al agregar detalle de pedido temporal', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al agregar detalle de pedido temporal');
     }
 };
 
@@ -40,12 +36,7 @@ export const consultarDetallePedido = async (req: Request, res: Response) => {
         });
         res.status(200).json(result.recordset);
     } catch (error) {
-        console.error('Error al consultar el detalle del pedido:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al consultar el detalle del pedido', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al consultar el detalle del pedido', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al consultar el detalle del pedido');
     }
 };
 
@@ -63,12 +54,7 @@ export const eliminarDetallePedido = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Detalle de pedido eliminado correctamente.' });
     } catch (error) {
-        console.error('Error al eliminar detalle de pedido temporal:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al eliminar detalle de pedido temporal', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al eliminar detalle de pedido temporal', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al eliminar detalle de pedido temporal');
     }
 };
 
@@ -93,12 +79,7 @@ export const guardarPedidoFinal = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Pedido guardado correctamente.', idPedido: result.recordset[0].idPedido });
     } catch (error) {
-        console.error('Error al guardar el pedido final:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al guardar el pedido final', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al guardar el pedido final', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al guardar el pedido final');
     }
 };
 
@@ -110,12 +91,7 @@ export const consultaPedidosDia = async (req: Request, res: Response) => {
         });
         res.status(200).json(result.recordset);
     } catch (error) {
-        console.error('Error al consultar los pedidos del día:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al consultar los pedidos del día', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al consultar los pedidos del día', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al consultar los pedidos del día');
     }
 };
 
@@ -127,8 +103,7 @@ export const consultaTipoCobro = async (req: Request, res: Response) => {
         });
         res.status(200).json(result.recordset);
     } catch (error: any) {
-        console.error('Error al consultar los tipos de cobro:', error);
-        res.status(500).json({ message: 'Error al consultar los tipos de cobro', error: error.message });
+        sendError(res, error, 'Error al consultar los tipos de cobro');
     }
 }
 
@@ -147,12 +122,7 @@ export const obtenerDatosPedido = async (req: Request, res: Response) => {
         });
         res.status(200).json(result.recordset[0] || null);
     } catch (error) {
-        console.error('Error al obtener datos del pedido:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al obtener datos del pedido', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al obtener datos del pedido', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al obtener datos del pedido');
     }
 };
 
@@ -170,12 +140,7 @@ export const facturarPedidosPendientesCliente = async (req: Request, res: Respon
         });
         res.status(200).json(result.recordset[0] || null);
     } catch (error) {
-        console.error('Error al facturar pedidos pendientes del cliente:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al facturar pedidos pendientes del cliente', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al facturar pedidos pendientes del cliente', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al facturar pedidos pendientes del cliente');
     }
 };
 
@@ -193,12 +158,7 @@ export const pedidoClienteFacturacion = async (req: Request, res: Response) => {
         });
         res.status(200).json(result.recordset[0] || null);
     } catch (error) {
-        console.error('Error al enviar pedido a facturación:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al enviar pedido a facturación', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al enviar pedido a facturación', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al enviar pedido a facturación');
     }
 };
 
@@ -215,12 +175,7 @@ export const pedidosClienteMasivoAFacturacion = async (req: Request, res: Respon
         });
         res.status(200).json(result.recordset[0] || null);
     } catch (error) {
-        console.error('Error al procesar facturación masiva de pedidos:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al procesar facturación masiva de pedidos', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al procesar facturación masiva de pedidos', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al procesar facturación masiva de pedidos');
     }
 };
 
@@ -238,12 +193,7 @@ export const agregarDetPedidoFacturacionTmp = async (req: Request, res: Response
         });
         res.status(200).json({ message: 'Pedido agregado a la selección de facturación.' });
     } catch (error) {
-        console.error('Error al agregar pedido a facturación temporal:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al agregar pedido a facturación temporal', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al agregar pedido a facturación temporal', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al agregar pedido a facturación temporal');
     }
 };
 
@@ -261,12 +211,7 @@ export const eliminarDetPedidoFacturacionTmp = async (req: Request, res: Respons
         });
         res.status(200).json({ message: 'Pedido eliminado de la selección de facturación.' });
     } catch (error) {
-        console.error('Error al eliminar pedido de facturación temporal:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al eliminar pedido de facturación temporal', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al eliminar pedido de facturación temporal', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al eliminar pedido de facturación temporal');
     }
 };
 
@@ -283,12 +228,7 @@ export const consultaPedidoFecha = async (req: Request, res: Response) => {
         });
         res.status(200).json(result.recordset);
     } catch (error) {
-        console.error('Error al consultar pedidos por fecha:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al consultar pedidos por fecha', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al consultar pedidos por fecha', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al consultar pedidos por fecha');
     }
 };
 
@@ -308,12 +248,7 @@ export const consultaPedidoFiltro = async (req: Request, res: Response) => {
         });
         res.status(200).json(result.recordset);
     } catch (error) {
-        console.error('Error al consultar pedidos con filtro:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al consultar pedidos con filtro', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al consultar pedidos con filtro', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al consultar pedidos con filtro');
     }
 };
 
@@ -326,12 +261,7 @@ export const limpiarDetPedidoTmp = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Detalles del pedido eliminados correctamente.' });
     } catch (error) {
-        console.error('Error al eliminar detalles del pedido:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al eliminar detalles del pedido', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al eliminar detalles del pedido', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al eliminar detalles del pedido');
     }
 }
 
@@ -344,11 +274,6 @@ export const anularPedido = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Pedido anulado correctamente.' });
     } catch (error) {
-        console.error('Error al anular el pedido:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al anular el pedido', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al anular el pedido', error: 'Un error desconocido ha ocurrido.' });
-        }
+        sendError(res, error, 'Error al anular el pedido');
     }
 }

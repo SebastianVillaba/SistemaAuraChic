@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
 import { generateVentasProductoPdf, generateVentasResumidoPdf, generateVentasVendedorPdf } from '../utils/pdfGenerator';
+import { sendError } from '../utils/errorResponse';
 
 
 /**
@@ -42,12 +43,7 @@ export const reporteFacturaVenta = async (req: Request, res: Response): Promise<
       items: recordsets?.[1] ?? []
     });
   } catch (error) {
-    console.error('Error al generar reporte de factura:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al generar reporte de factura',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    sendError(res, error, 'Error al generar reporte de factura');
   }
 };
 
@@ -84,12 +80,7 @@ export const reporteTicketPedidoDia = async (req: Request, res: Response): Promi
       items: recordsets?.[1] ?? []
     });
   } catch (error) {
-    console.error('Error al generar reporte de ticket de pedido:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al generar el ticket del pedido',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    sendError(res, error, 'Error al generar el ticket del pedido');
   }
 };
 
@@ -135,12 +126,7 @@ export const reporteTicketVenta = async (req: Request, res: Response): Promise<v
       items: recordsets?.[1] ?? []
     });
   } catch (error) {
-    console.error('Error al generar reporte de ticket:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al generar reporte de ticket',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    sendError(res, error, 'Error al generar reporte de ticket');
   }
 };
 
@@ -194,12 +180,7 @@ export const reporteCierreCaja = async (req: Request, res: Response): Promise<vo
       transferencias: recordsets?.[5] ?? []
     });
   } catch (error) {
-    console.error('Error al generar reporte de cierre de caja:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al generar reporte de cierre de caja',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    sendError(res, error, 'Error al generar reporte de cierre de caja');
   }
 };
 
@@ -245,12 +226,7 @@ export const reporteTicketRemision = async (req: Request, res: Response): Promis
       items: recordsets?.[1] ?? []
     });
   } catch (error) {
-    console.error('Error al generar reporte de ticket de remisión:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al generar reporte de ticket de remisión',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    sendError(res, error, 'Error al generar reporte de ticket de remisión');
   }
 };
 
@@ -296,12 +272,7 @@ export const reportePedidoDelivery = async (req: Request, res: Response): Promis
       data: recordsets?.[0] ?? []
     });
   } catch (error) {
-    console.error('Error al generar reporte de pedido por delivery:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al generar reporte de pedido por delivery',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    sendError(res, error, 'Error al generar reporte de pedido por delivery');
   }
 };
 
@@ -381,12 +352,7 @@ export const reporteVentaProductoDia = async (req: Request, res: Response): Prom
       data: data
     });
   } catch (error) {
-    console.error('Error al generar reporte de venta de producto:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al generar reporte de venta de producto',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    sendError(res, error, 'Error al generar reporte de venta de producto');
   }
 };
 
@@ -453,12 +419,7 @@ export const reporteVentaResumidoFecha = async (req: Request, res: Response): Pr
       data: data
     });
   } catch (error) {
-    console.error('Error al generar reporte de ventas resumido:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al generar reporte de ventas resumido',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    sendError(res, error, 'Error al generar reporte de ventas resumido');
   }
 };
 
@@ -508,11 +469,6 @@ export const reporteVentasVendedorFecha = async (req: Request, res: Response): P
       data: data
     });
   } catch (error) {
-    console.error('Error al generar reporte de ventas por vendedor:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al generar reporte de ventas por vendedor',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    sendError(res, error, 'Error al generar reporte de ventas por vendedor');
   }
 };

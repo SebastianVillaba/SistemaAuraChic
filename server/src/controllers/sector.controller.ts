@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 export const consultaSectoresActivos = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -9,7 +10,6 @@ export const consultaSectoresActivos = async (req: Request, res: Response): Prom
         });
         res.status(200).json(result);
     } catch (error) {
-        console.error('Error al consultar sectores activos:', error);
-        res.status(500).json({ error: 'Error al consultar sectores activos' });
+        sendError(res, error, 'Error al consultar sectores activos');
     }
 };

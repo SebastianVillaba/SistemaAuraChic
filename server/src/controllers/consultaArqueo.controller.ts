@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 /**
  * Consulta arqueos (movimientos de caja cerrados) por rango de fechas.
@@ -58,12 +59,7 @@ export const consultaArqueoFecha = async (req: Request, res: Response): Promise<
     });
 
   } catch (error: any) {
-    console.error('Error al consultar arqueos por fecha:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al consultar arqueos por fecha',
-      error: error.message
-    });
+    sendError(res, error, 'Error al consultar arqueos por fecha');
   }
 };
 
@@ -123,12 +119,7 @@ export const consultaArqueoNroCaja = async (req: Request, res: Response): Promis
     });
 
   } catch (error: any) {
-    console.error('Error al consultar arqueos por nro de caja:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al consultar arqueos por número de caja',
-      error: error.message
-    });
+    sendError(res, error, 'Error al consultar arqueos por número de caja');
   }
 };
 
@@ -172,11 +163,6 @@ export const consultaInformacionArqueo = async (req: Request, res: Response): Pr
     });
 
   } catch (error: any) {
-    console.error('Error al consultar información del arqueo:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al consultar la información del arqueo',
-      error: error.message
-    });
+    sendError(res, error, 'Error al consultar la información del arqueo');
   }
 };

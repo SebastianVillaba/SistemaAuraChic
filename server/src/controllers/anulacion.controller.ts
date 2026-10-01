@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 /**
  * Verifica si un usuario tiene permiso para anular según el tipo indicado.
@@ -46,12 +47,7 @@ export const verificarPermisoAnular = async (req: Request, res: Response): Promi
     });
 
   } catch (error: any) {
-    console.error('Error al verificar permiso de anulación:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al verificar el permiso de anulación',
-      error: error.message
-    });
+    sendError(res, error, 'Error al verificar el permiso de anulación');
   }
 };
 
@@ -109,20 +105,7 @@ export const anularFacturacion = async (req: Request, res: Response): Promise<vo
     });
 
   } catch (error: any) {
-    console.error('Error al anular facturación:', error);
-    // Errores de lógica de negocio del SP (raiserror)
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: 'Error al anular la facturación',
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al anular la facturación');
   }
 };
 
@@ -168,19 +151,7 @@ export const anularCargaProducto = async (req: Request, res: Response): Promise<
     });
 
   } catch (error: any) {
-    console.error('Error al anular carga de producto:', error);
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: 'Error al anular la carga de producto',
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al anular la carga de producto');
   }
 };
 

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { executeRequest, sql } from "../utils/dbHandler";
+import { sendError } from '../utils/errorResponse';
 
 export const consultaImpuesto = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -14,10 +15,6 @@ export const consultaImpuesto = async (req: Request, res: Response): Promise<voi
             result: result.recordset
         });
     } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            message: "Error al obtener información del impuesto",
-            error: error.message
-        });
+        sendError(res, error, 'Error al obtener información del impuesto');
     }
 };

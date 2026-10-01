@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 interface IAgregarDetallePedidoInternoDTO {
     idTerminalWeb: number;
@@ -34,11 +35,7 @@ export const agregarDetPedidoInternoTmp = async (req: Request,res: Response) => 
         });
         res.status(200).json({ message: 'Detalle de pedido interno agregado correctamente.' });
     } catch (error: any) {
-        console.error('Error al agregar detalle de pedido interno:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al agregar detalle', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al agregar detalle');
     }
 }
 
@@ -58,11 +55,7 @@ export const eliminarDetPedidoInternoTmp = async (req: Request,res: Response) =>
         });
         res.status(200).json({ message: 'Detalle de pedido interno eliminado correctamente.' });
     } catch (error: any) {
-        console.error('Error al eliminar detalle de pedido interno:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al eliminar detalle', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al eliminar detalle');
     }
 }
 
@@ -88,11 +81,7 @@ export const guardarPedidoInterno = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Pedido interno guardado correctamente.', data: result.recordset });
     } catch (error: any) {
-        console.error('Error al guardar pedido interno:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al guardar pedido interno', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al guardar pedido interno');
     }
 }
 
@@ -107,11 +96,7 @@ export const consultaPedidosInternosRecibidos = async (req: Request, res: Respon
         })
         res.status(200).json(result.recordset);
     } catch (error: any) {
-        console.error('Error al consultar pedidos internos recibidos:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al consultar pedidos internos pendientes', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al consultar pedidos internos pendientes');
     }
 }
 
@@ -126,11 +111,7 @@ export const consultaDetPedidoInternoTmp = async (req: Request, res: Response) =
         })
         res.status(200).json(result.recordset);
     } catch (error: any) {
-        console.error('Error al consultar detalles de pedido interno temporal:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al consultar detalles de pedido interno temporal', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al consultar detalles de pedido interno temporal');
     }
 }
 
@@ -145,11 +126,7 @@ export const consultaDetPedidoInternoEntrante = async (req: Request, res: Respon
         })
         res.status(200).json(result.recordset);
     } catch (error: any) {
-        console.error('Error al consultar detalles de pedido interno entrante:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al consultar detalles de pedido interno entrante', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al consultar detalles de pedido interno entrante');
     }
 }
 
@@ -162,10 +139,6 @@ export const consultaSucursales = async (req: Request, res: Response) => {
         })
         res.status(200).json(result.recordset);
     } catch (error: any) {
-        console.error('Error al consultar sucursales:', error);
-        if (error.number >= 50000) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al consultar sucursales', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al consultar sucursales');
     }
 }

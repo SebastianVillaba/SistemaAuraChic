@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
-import { logger } from '../utils/logger';
+import { sendError } from '../utils/errorResponse';
 
 export const agregarAlTemp = async (req: Request, res: Response): Promise<void> => {
   const { idTerminalWeb, idStock, cantidad } = req.body;
@@ -23,8 +23,7 @@ export const agregarAlTemp = async (req: Request, res: Response): Promise<void> 
 
     res.status(201).json({ success: true, message: 'Producto agregado a la cola de impresión', result: result.rowsAffected[0] });
   } catch (error: any) {
-    logger.error('Error en agregarAlTemp:', error);
-    res.status(500).json({ success: false, message: error.message || 'Error al agregar a la cola' });
+    sendError(res, error, 'Error al agregar a la cola');
   }
 };
 
@@ -47,8 +46,7 @@ export const consultarTemp = async (req: Request, res: Response): Promise<void> 
 
     res.status(200).json({ success: true, result: result.recordset });
   } catch (error: any) {
-    logger.error('Error en consultarTemp:', error);
-    res.status(500).json({ success: false, message: error.message || 'Error al consultar la cola' });
+    sendError(res, error, 'Error al consultar la cola');
   }
 };
 
@@ -73,8 +71,7 @@ export const actualizarCantidadTemp = async (req: Request, res: Response): Promi
 
     res.status(200).json({ success: true, message: 'Cantidad actualizada correctamente' });
   } catch (error: any) {
-    logger.error('Error en actualizarCantidadTemp:', error);
-    res.status(500).json({ success: false, message: error.message || 'Error al actualizar cantidad' });
+    sendError(res, error, 'Error al actualizar cantidad');
   }
 };
 
@@ -99,8 +96,7 @@ export const eliminarDelTemp = async (req: Request, res: Response): Promise<void
 
     res.status(200).json({ success: true, message: 'Producto eliminado de la cola' });
   } catch (error: any) {
-    logger.error('Error en eliminarDelTemp:', error);
-    res.status(500).json({ success: false, message: error.message || 'Error al eliminar de la cola' });
+    sendError(res, error, 'Error al eliminar de la cola');
   }
 };
 
@@ -123,8 +119,7 @@ export const limpiarTemp = async (req: Request, res: Response): Promise<void> =>
 
     res.status(200).json({ success: true, message: 'Cola de impresión vaciada' });
   } catch (error: any) {
-    logger.error('Error en limpiarTemp:', error);
-    res.status(500).json({ success: false, message: error.message || 'Error al vaciar la cola' });
+    sendError(res, error, 'Error al vaciar la cola');
   }
 };
 
@@ -155,8 +150,7 @@ export const guardarCodigosGenerados = async (req: Request, res: Response): Prom
 
     res.status(200).json({ success: true, message: 'Códigos de barra asignados correctamente a los productos' });
   } catch (error: any) {
-    logger.error('Error en guardarCodigosGenerados:', error);
-    res.status(500).json({ success: false, message: error.message || 'Error al guardar los códigos' });
+    sendError(res, error, 'Error al guardar los códigos');
   }
 };
 

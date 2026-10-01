@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { executeRequest, sql } from "../utils/dbHandler";
+import { sendError } from '../utils/errorResponse';
 import { BuscarPersonaRequest, InsertarPersonaRequest, InsertarPersonaResponse, ModificarPersonaRequest } from "../types/Persona/persona.type";
 
 /**
@@ -145,25 +146,7 @@ export const insertarPersona = async (req: Request, res: Response): Promise<void
     } as InsertarPersonaResponse);
 
   } catch (error: any) {
-    // PASO 8: Manejo de errores
-    console.error("Error en insertarPersona:", error);
-
-    // Verificar si es un error personalizado del stored procedure
-    // Los errores 50000 y 50001 son errores de validación del SP
-    if (error.number === 50000 || error.number === 50001) {
-      // Error de validación (RUC duplicado o código duplicado)
-      res.status(400).json({
-        success: false,
-        message: error.message || "Error de validación en los datos"
-      });
-    } else {
-      // Error genérico del servidor
-      res.status(500).json({
-        success: false,
-        message: "Error al insertar la persona en el servidor",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al insertar la persona en el servidor');
   }
 };
 
@@ -220,11 +203,7 @@ export const buscarPersona = async (req: Request, res: Response): Promise<void> 
     })
 
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error al buscar persona',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    sendError(res, error, 'Error al buscar persona');
   }
 }
 
@@ -262,11 +241,7 @@ export const buscarInfoPersona = async (req: Request, res: Response): Promise<vo
       rowsAffected: rowsAffected
     })
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error al buscar persona',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    sendError(res, error, 'Error al buscar persona');
   }
 }
 
@@ -323,11 +298,7 @@ export const buscarClientePorRuc = async (req: Request, res: Response): Promise<
       rowsAffected: rowsAffected
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error al buscar cliente por RUC',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    sendError(res, error, 'Error al buscar cliente por RUC');
   }
 };
 
@@ -383,11 +354,7 @@ export const agregarClienteRapido = async (req: Request, res: Response): Promise
       result: result.recordset[0]
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error al agregar cliente',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    sendError(res, error, 'Error al agregar cliente');
   }
 };
 
@@ -430,11 +397,7 @@ export const consultaCliente = async (req: Request, res: Response): Promise<void
       rowsAffected: rowsAffected
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error al consultar cliente',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    sendError(res, error, 'Error al consultar cliente');
   }
 };
 
@@ -527,26 +490,7 @@ export const modificarPersona = async (req: Request, res: Response): Promise<voi
     });
 
   } catch (error: any) {
-    console.error("Error en modificarPersona:", error);
-
-    // Manejo de errores personalizados del SP
-    if (error.number === 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message || "El RUC ingresado ya pertenece a otra persona."
-      });
-    } else if (error.number === 50005) {
-      res.status(400).json({
-        success: false,
-        message: error.message || "El Sector seleccionado no existe."
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al modificar la persona en el servidor",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al modificar la persona en el servidor');
   }
 };
 
@@ -561,12 +505,7 @@ export const obtenerGruposCliente = async (req: Request, res: Response): Promise
       result: result.recordset
     });
   } catch (error: any) {
-    console.error('Error al obtener grupos de clientes:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al obtener grupos de clientes',
-      error: error.message
-    });
+    sendError(res, error, 'Error al obtener grupos de clientes');
   }
 };
 

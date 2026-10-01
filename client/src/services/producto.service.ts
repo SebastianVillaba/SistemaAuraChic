@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getErrorMessage } from './httpError';
 import type { Producto, TipoProducto } from '../types/producto.types';
 
 // URL base del API - ajusta según tu configuración
@@ -60,7 +61,7 @@ export const productoService = {
       if (error.response?.data) {
         throw new Error(error.response.data.message || 'Error al insertar el producto');
       }
-      throw new Error('Error de conexión con el servidor');
+      throw new Error(getErrorMessage(error, 'Error de conexión con el servidor'));
     }
   },
 
@@ -80,7 +81,7 @@ export const productoService = {
       if (error.response?.data) {
         throw new Error(error.response.data.message || 'Error al modificar el producto');
       }
-      throw new Error('Error de conexión con el servidor');
+      throw new Error(getErrorMessage(error, 'Error de conexión con el servidor'));
     }
   },
 
@@ -108,7 +109,7 @@ export const productoService = {
       return response.data;
     } catch (error: any) {
       console.error('Error al buscar productos:', error);
-      throw new Error('Error al buscar productos');
+      throw new Error(getErrorMessage(error, 'Error al buscar productos'));
     }
   },
 
@@ -130,7 +131,7 @@ export const productoService = {
       return response.data.result;
     } catch (error: any) {
       console.error('Error al obtener información del producto:', error);
-      throw new Error('Error al obtener información del producto');
+      throw new Error(getErrorMessage(error, 'Error al obtener información del producto'));
     }
   },
 
@@ -146,7 +147,7 @@ export const productoService = {
       return response.data;
     } catch (error: any) {
       console.error('Error al obtener tipos de producto:', error);
-      throw new Error('Error al obtener tipos de producto');
+      throw new Error(getErrorMessage(error, 'Error al obtener tipos de producto'));
     }
   },
 
@@ -167,7 +168,7 @@ export const productoService = {
       if (error.response?.data) {
         throw new Error(error.response.data.message || 'Error al insertar el tipo de producto');
       }
-      throw new Error('Error de conexión con el servidor');
+      throw new Error(getErrorMessage(error, 'Error de conexión con el servidor'));
     }
   },
 
@@ -190,7 +191,7 @@ export const productoService = {
       return response.data.result;
     } catch (error: any) {
       console.error('Error al consultar precio del producto:', error);
-      throw new Error('Error al consultar precio del producto');
+      throw new Error(getErrorMessage(error, 'Error al consultar precio del producto'));
     }
   },
 
@@ -217,7 +218,7 @@ export const productoService = {
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }
-      throw new Error('Error al consultar stock del producto');
+      throw new Error(getErrorMessage(error, 'Error al consultar stock del producto'));
     }
   },
 
@@ -239,7 +240,7 @@ export const productoService = {
       return response.data;
     } catch (error: any) {
       console.error('Error al obtener precio de descuento:', error);
-      throw new Error('Error al obtener precio de descuento');
+      throw new Error(getErrorMessage(error, 'Error al obtener precio de descuento'));
     }
   },
 
@@ -267,7 +268,7 @@ export const productoService = {
       if (error.response?.data) {
         throw new Error(error.response.data.message || 'Error al subir la imagen');
       }
-      throw new Error('Error de conexión al subir la imagen');
+      throw new Error(getErrorMessage(error, 'Error de conexión al subir la imagen'));
     }
   },
 
@@ -286,7 +287,7 @@ export const productoService = {
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }
-      throw new Error('Error al cargar referencias en la temporal');
+      throw new Error(getErrorMessage(error, 'Error al cargar referencias en la temporal'));
     }
   },
 
@@ -304,7 +305,7 @@ export const productoService = {
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }
-      throw new Error('Error al obtener detalles de referencias temporales');
+      throw new Error(getErrorMessage(error, 'Error al obtener detalles de referencias temporales'));
     }
   },
 
@@ -324,7 +325,7 @@ export const productoService = {
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }
-      throw new Error('Error al agregar producto referenciado temporal');
+      throw new Error(getErrorMessage(error, 'Error al agregar producto referenciado temporal'));
     }
   },
 
@@ -342,7 +343,7 @@ export const productoService = {
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }
-      throw new Error('Error al eliminar producto referenciado temporal');
+      throw new Error(getErrorMessage(error, 'Error al eliminar producto referenciado temporal'));
     }
   },
 
@@ -362,7 +363,7 @@ export const productoService = {
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }
-      throw new Error('Error al guardar los productos referenciados');
+      throw new Error(getErrorMessage(error, 'Error al guardar los productos referenciados'));
     }
   },
 
@@ -380,7 +381,7 @@ export const productoService = {
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }
-      throw new Error('Error al limpiar temporal de referencias');
+      throw new Error(getErrorMessage(error, 'Error al limpiar temporal de referencias'));
     }
   },
 
@@ -396,7 +397,7 @@ export const productoService = {
       if (error.response?.data?.message) {
         throw new Error(error.response.data.message);
       }
-      throw new Error('Error al obtener valores sugeridos del producto referenciado');
+      throw new Error(getErrorMessage(error, 'Error al obtener valores sugeridos del producto referenciado'));
     }
   },
 

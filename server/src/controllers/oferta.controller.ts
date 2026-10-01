@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
-import { logger } from '../utils/logger';
+import { sendError } from '../utils/errorResponse';
 
 /**
  * Consulta el detalle temporal de oferta para una terminal web
@@ -26,8 +26,7 @@ export const consultaDetOfertaTmp = async (req: Request, res: Response): Promise
             result: result.recordset
         });
     } catch (error: any) {
-        logger.error('Error al consultar detalle temporal de oferta:', error);
-        res.status(500).json({ success: false, message: 'Error al consultar detalle temporal de oferta', error: error.message });
+        sendError(res, error, 'Error al consultar detalle temporal de oferta');
     }
 };
 
@@ -60,13 +59,7 @@ export const agregarDetOfertaTmp = async (req: Request, res: Response): Promise<
             message: 'Producto agregado a la oferta temporal'
         });
     } catch (error: any) {
-        logger.error('Error al agregar detalle temporal de oferta:', error);
-        // Si es un error arrojado por RAISERROR del SP (como precio menor al costo)
-        if (error.number >= 50000) {
-            res.status(400).json({ success: false, message: error.message });
-        } else {
-            res.status(500).json({ success: false, message: 'Error al agregar detalle temporal de oferta', error: error.message });
-        }
+        sendError(res, error, 'Error al agregar detalle temporal de oferta');
     }
 };
 
@@ -97,8 +90,7 @@ export const eliminarDetOfertaTmp = async (req: Request, res: Response): Promise
             message: 'Producto eliminado de la oferta temporal'
         });
     } catch (error: any) {
-        logger.error('Error al eliminar producto de la oferta temporal:', error);
-        res.status(500).json({ success: false, message: 'Error al eliminar de la oferta temporal', error: error.message });
+        sendError(res, error, 'Error al eliminar de la oferta temporal');
     }
 };
 
@@ -129,12 +121,7 @@ export const guardarOferta = async (req: Request, res: Response): Promise<void> 
             message: 'Oferta guardada exitosamente'
         });
     } catch (error: any) {
-        logger.error('Error al guardar la oferta:', error);
-        if (error.number >= 50000) {
-            res.status(400).json({ success: false, message: error.message });
-        } else {
-            res.status(500).json({ success: false, message: 'Error al guardar la oferta', error: error.message });
-        }
+        sendError(res, error, 'Error al guardar la oferta');
     }
 };
 
@@ -179,8 +166,7 @@ export const listarOfertas = async (req: Request, res: Response): Promise<void> 
             result: result.recordset
         });
     } catch (error: any) {
-        logger.error('Error al listar ofertas:', error);
-        res.status(500).json({ success: false, message: 'Error al listar ofertas', error: error.message });
+        sendError(res, error, 'Error al listar ofertas');
     }
 };
 
@@ -220,8 +206,7 @@ export const obtenerDetalleOferta = async (req: Request, res: Response): Promise
             result: result.recordset
         });
     } catch (error: any) {
-        logger.error('Error al obtener detalles de la oferta:', error);
-        res.status(500).json({ success: false, message: 'Error al obtener detalles de la oferta', error: error.message });
+        sendError(res, error, 'Error al obtener detalles de la oferta');
     }
 };
 
@@ -256,7 +241,6 @@ export const desactivarOferta = async (req: Request, res: Response): Promise<voi
             message: 'Oferta desactivada exitosamente'
         });
     } catch (error: any) {
-        logger.error('Error al desactivar la oferta:', error);
-        res.status(500).json({ success: false, message: 'Error al desactivar la oferta', error: error.message });
+        sendError(res, error, 'Error al desactivar la oferta');
     }
 };

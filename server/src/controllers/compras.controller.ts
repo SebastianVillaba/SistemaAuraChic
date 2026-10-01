@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 // Interfaces
 export interface IAgregarDetalleDTO {
@@ -76,12 +77,7 @@ export const agregarDetalleCompra = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Detalle de compra agregado correctamente.' });
     } catch (error: any) {
-        console.error('Error al agregar detalle de compra:', error);
-        // Manejo de errores específicos de SQL Server (50001, 50003)
-        if (error.number === 50001 || error.number === 50003) {
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al agregar detalle de compra', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al agregar detalle de compra');
     }
 };
 
@@ -98,8 +94,7 @@ export const consultarDetalleTemporal = async (req: Request, res: Response) => {
         });
         res.status(200).json(result.recordset);
     } catch (error: any) {
-        console.error('Error al consultar detalle temporal:', error);
-        res.status(500).json({ message: 'Error al consultar detalle temporal', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al consultar detalle temporal');
     }
 };
 
@@ -117,8 +112,7 @@ export const eliminarItemTemporal = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Item eliminado correctamente.' });
     } catch (error: any) {
-        console.error('Error al eliminar item temporal:', error);
-        res.status(500).json({ message: 'Error al eliminar item temporal', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al eliminar item temporal');
     }
 };
 
@@ -135,8 +129,7 @@ export const limpiarTemporal = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Temporal limpiado correctamente.' });
     } catch (error: any) {
-        console.error('Error al limpiar temporal:', error);
-        res.status(500).json({ message: 'Error al limpiar temporal', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al limpiar temporal');
     }
 };
 
@@ -191,12 +184,7 @@ export const guardarCompra = async (req: Request, res: Response) => {
         // Asumimos éxito si no hay error.
         res.status(200).json({ message: 'Compra guardada correctamente.', data: result.recordset });
     } catch (error: any) {
-        console.error('Error al guardar compra:', error);
-        // Capturar errores de lógica de negocio (RAISERROR)
-        if (error.number >= 50000) { // Errores de usuario en SQL Server suelen ser > 50000
-            return res.status(400).json({ message: error.message });
-        }
-        res.status(500).json({ message: 'Error al guardar compra', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al guardar compra');
     }
 };
 
@@ -215,8 +203,7 @@ export const buscarProducto = async (req: Request, res: Response) => {
         console.log(result.recordset);
         
     } catch (error: any) {
-        console.error('Error al buscar producto:', error);
-        res.status(500).json({ message: 'Error al buscar producto', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al buscar producto');
     }
 };
 
@@ -230,7 +217,6 @@ export const buscarProveedor = async (req: Request, res: Response) => {
         });
         res.status(200).json(result.recordset);
     } catch (error: any) {
-        console.error('Error al buscar proveedores:', error);
-        res.status(500).json({ message: 'Error al buscar los proveedores', error: error.message || 'Error desconocido' });
+        sendError(res, error, 'Error al buscar los proveedores');
     }
 };

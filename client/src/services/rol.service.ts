@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getErrorMessage } from './httpError';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -27,7 +28,7 @@ export const rolService = {
             return response.data.result;
         } catch (error) {
             console.error('Error al obtener roles:', error);
-            throw new Error('Error al obtener roles');
+            throw new Error(getErrorMessage(error, 'Error al obtener roles'));
         }
     },
 
@@ -37,7 +38,7 @@ export const rolService = {
             return response.data.result;
         } catch (error) {
             console.error('Error al obtener configuración del rol:', error);
-            throw new Error('Error al obtener configuración del rol');
+            throw new Error(getErrorMessage(error, 'Error al obtener configuración del rol'));
         }
     },
 
@@ -46,7 +47,7 @@ export const rolService = {
             await axios.post(`${API_BASE_URL}/rol/configuracion`, data);
         } catch (error) {
             console.error('Error al guardar configuración del rol:', error);
-            throw new Error('Error al guardar configuración del rol');
+            throw new Error(getErrorMessage(error, 'Error al guardar configuración del rol'));
         }
     },
 

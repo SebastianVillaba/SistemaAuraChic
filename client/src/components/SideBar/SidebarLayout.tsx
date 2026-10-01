@@ -35,6 +35,7 @@ import { useNavigate } from 'react-router-dom';
 import { LocalHospital, PointOfSale, LocalOffer, Add, Visibility } from '@mui/icons-material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import HistoryIcon from '@mui/icons-material/History';
+import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import ListSubheader from '@mui/material/ListSubheader';
 import ApiIcon from '@mui/icons-material/Api';
 
@@ -244,6 +245,11 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
           text: 'Consulta Arqueo de Caja',
           path: '/consultas/arqueo-caja',
           icon: <PointOfSale />,
+        },
+        {
+          text: 'Historial de Cliente',
+          path: '/consultas/historial-cliente',
+          icon: <PersonSearchIcon />,
         },
         {
           text: 'Mercaderia',

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
-import { logger } from '../utils/logger';
+import { sendError } from '../utils/errorResponse';
 import { CrearUsuarioRequest, ModificarUsuarioRequest } from '../types/usuario.type';
 import bcrypt from 'bcryptjs';
 
@@ -43,8 +43,7 @@ export const crearUsuario = async (req: Request, res: Response) => {
 
         res.json({ success: true, message: 'Usuario creado exitosamente' });
     } catch (error: any) {
-        logger.error('Error al crear usuario:', error);
-        res.status(500).json({ success: false, message: error.message });
+        sendError(res, error, 'Error al crear usuario');
     }
 };
 
@@ -90,8 +89,7 @@ export const modificarUsuario = async (req: Request, res: Response) => {
 
         res.json({ success: true, message: 'Usuario modificado exitosamente' });
     } catch (error: any) {
-        logger.error('Error al modificar usuario:', error);
-        res.status(500).json({ success: false, message: error.message });
+        sendError(res, error, 'Error al modificar usuario');
     }
 };
 
@@ -109,8 +107,7 @@ export const buscarUsuario = async (req: Request, res: Response) => {
 
         res.json(result.recordset);
     } catch (error: any) {
-        logger.error('Error al buscar usuarios:', error);
-        res.status(500).json({ success: false, message: error.message });
+        sendError(res, error, 'Error al buscar usuarios');
     }
 };
 
@@ -132,8 +129,7 @@ export const obtenerUsuario = async (req: Request, res: Response) => {
             res.status(404).json({ success: false, message: 'Usuario no encontrado' });
         }
     } catch (error: any) {
-        logger.error('Error al obtener usuario:', error);
-        res.status(500).json({ success: false, message: error.message });
+        sendError(res, error, 'Error al obtener usuario');
     }
 };
 
@@ -151,8 +147,7 @@ export const buscarPersonaParaUsuario = async (req: Request, res: Response) => {
 
         res.json(result.recordset);
     } catch (error: any) {
-        logger.error('Error al buscar persona para usuario:', error);
-        res.status(500).json({ success: false, message: error.message });
+        sendError(res, error, 'Error al buscar persona para usuario');
     }
 };
 
@@ -210,8 +205,7 @@ export const validarVendedor = async (req: Request, res: Response): Promise<void
         }
 
     } catch (error: any) {
-        logger.error('Error al validar vendedor:', error);
-        res.status(500).json({ success: false, message: error.message });
+        sendError(res, error, 'Error al validar vendedor');
     }
 };
 
@@ -241,8 +235,7 @@ export const obtenerPersonalesSinUsuario = async (req: Request, res: Response): 
 
         res.json(result.recordset);
     } catch (error: any) {
-        logger.error('Error al obtener personales sin usuario:', error);
-        res.status(500).json({ success: false, message: error.message });
+        sendError(res, error, 'Error al obtener personales sin usuario');
     }
 };
 

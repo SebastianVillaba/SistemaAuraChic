@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 /**
  * Consulta información detallada de una carga de producto (cabecera + detalle).
@@ -78,12 +79,7 @@ export const consultaInformacionCarga = async (req: Request, res: Response): Pro
     });
 
   } catch (error: any) {
-    console.error('Error al consultar información de carga de producto:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al consultar la información de la carga de producto',
-      error: error.message
-    });
+    sendError(res, error, 'Error al consultar la información de la carga de producto');
   }
 };
 
@@ -167,11 +163,6 @@ export const buscarCargas = async (req: Request, res: Response): Promise<void> =
     });
 
   } catch (error: any) {
-    console.error('Error al buscar cargas de productos:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al buscar cargas de productos',
-      error: error.message
-    });
+    sendError(res, error, 'Error al buscar cargas de productos');
   }
 };

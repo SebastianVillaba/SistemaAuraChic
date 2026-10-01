@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 /**
  * Carga las referencias de un producto existente en la tabla temporal.
@@ -24,8 +25,7 @@ export const cargarReferenciasTmp = async (req: Request, res: Response): Promise
 
         res.status(200).json({ success: true, message: 'Referencias cargadas en la tabla temporal correctamente' });
     } catch (error: any) {
-        console.error('Error en cargarReferenciasTmp:', error);
-        res.status(500).json({ success: false, message: 'Error al cargar referencias en la temporal', error: error.message });
+        sendError(res, error, 'Error al cargar referencias en la temporal');
     }
 };
 
@@ -54,8 +54,7 @@ export const obtenerDetallesTmp = async (req: Request, res: Response): Promise<v
             result: result.recordset
         });
     } catch (error: any) {
-        console.error('Error en obtenerDetallesTmp:', error);
-        res.status(500).json({ success: false, message: 'Error al consultar detalles de la temporal', error: error.message });
+        sendError(res, error, 'Error al consultar detalles de la temporal');
     }
 };
 
@@ -86,8 +85,7 @@ export const agregarDetalleTmp = async (req: Request, res: Response): Promise<vo
             message: 'Producto agregado a referencias temporales'
         });
     } catch (error: any) {
-        console.error('Error en agregarDetalleTmp:', error);
-        res.status(500).json({ success: false, message: 'Error al agregar producto a la temporal', error: error.message });
+        sendError(res, error, 'Error al agregar producto a la temporal');
     }
 };
 
@@ -118,8 +116,7 @@ export const eliminarDetalleTmp = async (req: Request, res: Response): Promise<v
             message: 'Producto eliminado de referencias temporales'
         });
     } catch (error: any) {
-        console.error('Error en eliminarDetalleTmp:', error);
-        res.status(500).json({ success: false, message: 'Error al eliminar producto de la temporal', error: error.message });
+        sendError(res, error, 'Error al eliminar producto de la temporal');
     }
 };
 
@@ -151,12 +148,7 @@ export const guardarReferencias = async (req: Request, res: Response): Promise<v
             result: result.recordset
         });
     } catch (error: any) {
-        console.error('Error en guardarReferencias:', error);
-        if (error.number >= 50000) {
-            res.status(400).json({ success: false, message: error.message });
-        } else {
-            res.status(500).json({ success: false, message: 'Error al guardar referencias en la base de datos', error: error.message });
-        }
+        sendError(res, error, 'Error al guardar referencias en la base de datos');
     }
 };
 
@@ -185,8 +177,7 @@ export const limpiarTemporal = async (req: Request, res: Response): Promise<void
             message: 'Temporal de productos referenciados limpiada correctamente'
         });
     } catch (error: any) {
-        console.error('Error en limpiarTemporal:', error);
-        res.status(500).json({ success: false, message: 'Error al limpiar temporal', error: error.message });
+        sendError(res, error, 'Error al limpiar temporal');
     }
 };
 
@@ -229,8 +220,7 @@ export const obtenerSugeridosProductoRef = async (req: Request, res: Response): 
             precioSugerido: existe ? record.precioSugerido : 0
         });
     } catch (error: any) {
-        console.error('Error en obtenerSugeridosProductoRef:', error);
-        res.status(500).json({ success: false, message: 'Error al obtener costos sugeridos', error: error.message });
+        sendError(res, error, 'Error al obtener costos sugeridos');
     }
 };
 

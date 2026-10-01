@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 export const agregarDetalle = async (req: Request, res: Response) => {
     try {
@@ -22,8 +23,7 @@ export const agregarDetalle = async (req: Request, res: Response) => {
 
         return res.status(200).json({ message: 'Item agregado correctamente' });
     } catch (error: any) {
-        console.error('Error en agregarDetalle:', error);
-        return res.status(500).json({ message: error.message || 'Error al agregar item' });
+        sendError(res, error, 'Error al agregar item');
     }
 };
 
@@ -46,8 +46,7 @@ export const eliminarDetalle = async (req: Request, res: Response) => {
 
         return res.status(200).json({ message: 'Item eliminado correctamente' });
     } catch (error: any) {
-        console.error('Error en eliminarDetalle:', error);
-        return res.status(500).json({ message: error.message || 'Error al eliminar item' });
+        sendError(res, error, 'Error al eliminar item');
     }
 };
 
@@ -69,8 +68,7 @@ export const consultarDetalle = async (req: Request, res: Response) => {
 
         return res.status(200).json(result.recordset);
     } catch (error: any) {
-        console.error('Error en consultarDetalle:', error);
-        return res.status(500).json({ message: error.message || 'Error al consultar detalle' });
+        sendError(res, error, 'Error al consultar detalle');
     }
 };
 
@@ -97,7 +95,6 @@ export const guardarStockInicial = async (req: Request, res: Response) => {
             idGenerado: result.recordset[0]?.idGenerado
         });
     } catch (error: any) {
-        console.error('Error en guardarStockInicial:', error);
-        return res.status(500).json({ message: error.message || 'Error al guardar stock inicial' });
+        sendError(res, error, 'Error al guardar stock inicial');
     }
 };

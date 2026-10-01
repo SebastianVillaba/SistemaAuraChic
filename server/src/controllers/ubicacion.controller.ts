@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { executeRequest, sql } from "../utils/dbHandler";
+import { sendError } from '../utils/errorResponse';
 import {
   DepartamentosResponse,
   DistritosResponse,
@@ -23,12 +24,7 @@ export const obtenerDepartamentos = async (req: Request, res: Response): Promise
     } as DepartamentosResponse);
 
   } catch (error: any) {
-    console.error("Error en obtenerDepartamentos:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error al obtener departamentos",
-      error: error.message
-    });
+    sendError(res, error, 'Error al obtener departamentos');
   }
 };
 
@@ -80,12 +76,7 @@ export const obtenerDistritosPorDepartamento = async (req: Request, res: Respons
     } as DistritosResponse);
 
   } catch (error: any) {
-    console.error("Error en obtenerDistritosPorDepartamento:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error al obtener distritos",
-      error: error.message
-    });
+    sendError(res, error, 'Error al obtener distritos');
   }
 };
 
@@ -137,11 +128,6 @@ export const obtenerCiudadesPorDistrito = async (req: Request, res: Response): P
     } as CiudadesResponse);
 
   } catch (error: any) {
-    console.error("Error en obtenerCiudadesPorDistrito:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error al obtener ciudades",
-      error: error.message
-    });
+    sendError(res, error, 'Error al obtener ciudades');
   }
 };

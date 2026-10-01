@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 import { logger } from '../utils/logger';
 
 export const validarTerminal = async (req: Request, res: Response) => {
@@ -42,8 +43,7 @@ export const validarTerminal = async (req: Request, res: Response) => {
       });
     }
   } catch (error: any) {
-    logger.error('Error al validar la terminal:', error);
-    return res.status(500).json({ success: false, message: 'Error interno del servidor', error: error.message });
+    sendError(res, error, 'Error interno del servidor');
   }
 };
 
@@ -70,6 +70,6 @@ export const obtenerTerminalInfo = async (req: Request, res: Response) => {
       });
     }
   } catch (error) {
-
+    sendError(res, error, 'Error al obtener información de la terminal');
   }
 }

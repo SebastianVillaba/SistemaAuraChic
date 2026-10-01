@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { executeRequest, sql } from "../utils/dbHandler";
+import { sendError } from '../utils/errorResponse';
 import { GuardarPermisosRequest, ValidarPermisoRequest } from "../types/rol.type";
 
 /**
@@ -24,11 +25,7 @@ export const obtenerConfiguracionRol = async (req: Request, res: Response): Prom
             result: result.recordset
         });
     } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            message: "Error al obtener la configuración del rol",
-            error: error.message
-        });
+        sendError(res, error, 'Error al obtener la configuración del rol');
     }
 };
 
@@ -72,11 +69,7 @@ export const guardarConfiguracionRol = async (req: Request, res: Response): Prom
         });
 
     } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            message: "Error al guardar la configuración del rol",
-            error: error.message
-        });
+        sendError(res, error, 'Error al guardar la configuración del rol');
     }
 };
 
@@ -108,11 +101,7 @@ export const validarPermiso = async (req: Request, res: Response): Promise<void>
         });
 
     } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            message: "Error al validar permiso",
-            error: error.message
-        });
+        sendError(res, error, 'Error al validar permiso');
     }
 };
 
@@ -130,10 +119,6 @@ export const obtenerRoles = async (req: Request, res: Response): Promise<void> =
         console.log(result);
         
     } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            message: "Error al obtener roles",
-            error: error.message
-        });
+        sendError(res, error, 'Error al obtener roles');
     }
 };

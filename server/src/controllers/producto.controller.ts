@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { executeRequest, sql } from "../utils/dbHandler";
 import { InsertarProductoRequest, InsertarProductoResponse, BuscarProductoRequest, ModificarProductoRequest, InsertarTipoProductoRequest } from "../types/producto/producto.type";
 import { flattenError } from "zod";
+import { sendError } from '../utils/errorResponse';
 
 /**
  * Controller para insertar una nueva persona en el sistema.
@@ -72,24 +73,8 @@ res.status(201).json({
 } as InsertarProductoResponse);
 
   } catch (error: any) {
-  // Lista de códigos de error de validación del SP
-  const validationErrorCodes = [50000, 50001, 50002, 50003, 50004];
-  // Verificar si es un error personalizado de validación del stored procedure
-  if (validationErrorCodes.includes(error.number)) {
-    // Devolver HTTP 400 Bad Request con el mensaje exacto del RAISERROR
-    res.status(400).json({
-      success: false,
-      message: error.message || "Error de validación en los datos del producto."
-    });
-  } else {
-    // Error genérico del servidor o de la base de datos
-    res.status(500).json({
-      success: false,
-      message: "Error interno del servidor al insertar el producto.",
-      error: error.message
-    });
+    sendError(res, error, 'Error interno del servidor al insertar el producto');
   }
-}
 };
 
 /**
@@ -115,11 +100,7 @@ export const buscarProductos = async (req: Request, res: Response): Promise<void
       result: result.recordset
     });
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al buscar productos",
-      error: error.message
-    });
+    sendError(res, error, 'Error al buscar productos');
   }
 };
 
@@ -146,11 +127,7 @@ export const obtenerInfoProducto = async (req: Request, res: Response): Promise<
       result: result.recordset
     });
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al obtener información del producto",
-      error: error.message
-    });
+    sendError(res, error, 'Error al obtener información del producto');
   }
 };
 
@@ -166,11 +143,7 @@ export const obtenerTiposProducto = async (req: Request, res: Response): Promise
 
     res.status(200).json(result.recordset);
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al obtener tipos de producto",
-      error: error.message
-    });
+    sendError(res, error, 'Error al obtener tipos de producto');
   }
 };
 
@@ -214,19 +187,7 @@ export const consultarPrecioProducto = async (req: Request, res: Response): Prom
       result: result.recordset
     });
   } catch (error: any) {
-    // Captura el RAISERROR del SP si la terminal no tiene depósito
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al consultar precio del producto",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al consultar precio del producto');
   }
 }
 
@@ -264,18 +225,7 @@ export const consultarStockProducto = async (req: Request, res: Response): Promi
       result: result.recordset
     });
   } catch (error: any) {
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al consultar stock del producto",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al consultar stock del producto');
   }
 }
 
@@ -341,21 +291,7 @@ export const modificarProducto = async (req: Request, res: Response): Promise<vo
     });
 
   } catch (error: any) {
-    // Lista de códigos de error de validación del SP
-    const validationErrorCodes = [50000, 50001, 50002, 50003, 50004];
-
-    if (validationErrorCodes.includes(error.number)) {
-      res.status(400).json({
-        success: false,
-        message: error.message || "Error de validación en los datos del producto."
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error interno del servidor al modificar el producto.",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error interno del servidor al modificar el producto');
   }
 }
 
@@ -368,10 +304,7 @@ export const obtenerPrecioDescuento = async (req: Request, res: Response): Promi
     })
     res.status(200).json(result.recordset);
   } catch (error: any) {
-    res.status(500).json({
-      message: "Error al obtener el precio de descuento!",
-      error: error.message
-    });
+    sendError(res, error, 'Error al obtener el precio de descuento');
   }
 };
 
@@ -416,19 +349,6 @@ export const insertarTipoProducto = async (req: Request, res: Response): Promise
     });
 
   } catch (error: any) {
-    const validationErrorCodes = [50000, 50001, 50002, 50003, 50004];
-
-    if (validationErrorCodes.includes(error.number)) {
-      res.status(400).json({
-        success: false,
-        message: error.message || "Error de validación en los datos del tipo de producto."
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error interno del servidor al insertar el tipo de producto.",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error interno del servidor al insertar el tipo de producto');
   }
 };

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 /**
  * Controller para consultar las cajas disponibles
@@ -32,11 +33,7 @@ export const consultarCajas = async (req: Request, res: Response): Promise<void>
     });
 
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al consultar las cajas",
-      error: error.message
-    });
+    sendError(res, error, 'Error al consultar las cajas');
   }
 };
 
@@ -76,18 +73,7 @@ export const abrirCaja = async (req: Request, res: Response): Promise<void> => {
     });
 
   } catch (error: any) {
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al abrir la caja",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al abrir la caja');
   }
 };
 
@@ -128,18 +114,7 @@ export const cerrarCaja = async (req: Request, res: Response): Promise<void> => 
     });
 
   } catch (error: any) {
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al cerrar la caja",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al cerrar la caja');
   }
 };
 
@@ -179,18 +154,7 @@ export const agregarGastoCaja = async (req: Request, res: Response): Promise<voi
     });
 
   } catch (error: any) {
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al agregar el gasto",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al agregar el gasto');
   }
 };
 
@@ -231,18 +195,7 @@ export const listarGastoCajaTmp = async (req: Request, res: Response): Promise<v
     });
 
   } catch (error: any) {
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al listar el gasto",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al listar el gasto');
   }
 };
 
@@ -278,18 +231,7 @@ export const eliminarGastoCajaTmp = async (req: Request, res: Response): Promise
     });
 
   } catch (error: any) {
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al eliminar el gasto",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al eliminar el gasto');
   }
 }
 
@@ -326,18 +268,7 @@ export const agregarArqueoCajaTmp = async (req: Request, res: Response): Promise
     });
 
   } catch (error: any) {
-    if (error.number >= 50000) {
-      res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al agregar el arqueo",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al agregar el arqueo');
   }
 }
 
@@ -372,11 +303,7 @@ export const listarArqueoCajaTmp = async (req: Request, res: Response): Promise<
     });
 
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al listar el arqueo",
-      error: error.message
-    });
+    sendError(res, error, 'Error al listar el arqueo');
   }
 }
 
@@ -412,11 +339,7 @@ export const eliminarArqueoCajaTmp = async (req: Request, res: Response): Promis
     });
 
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al eliminar el arqueo",
-      error: error.message
-    });
+    sendError(res, error, 'Error al eliminar el arqueo');
   }
 }
 
@@ -453,15 +376,7 @@ export const agregarDetArqueoTarjetaCreditoTmp = async (req: Request, res: Respo
     });
 
   } catch (error: any) {
-    if (error.number >= 50000) {
-      res.status(400).json({ success: false, message: error.message });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al agregar detalle de tarjeta de crédito",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al agregar detalle de tarjeta de crédito');
   }
 };
 
@@ -501,11 +416,7 @@ export const listarDetArqueoTarjetaCreditoTmp = async (req: Request, res: Respon
     });
 
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al listar detalles de tarjeta de crédito",
-      error: error.message
-    });
+    sendError(res, error, 'Error al listar detalles de tarjeta de crédito');
   }
 };
 
@@ -541,11 +452,7 @@ export const eliminarDetArqueoTarjetaCreditoTmp = async (req: Request, res: Resp
     });
 
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al eliminar detalle de tarjeta de crédito",
-      error: error.message
-    });
+    sendError(res, error, 'Error al eliminar detalle de tarjeta de crédito');
   }
 };
 
@@ -582,15 +489,7 @@ export const agregarDetArqueoTarjetaDebitoTmp = async (req: Request, res: Respon
     });
 
   } catch (error: any) {
-    if (error.number >= 50000) {
-      res.status(400).json({ success: false, message: error.message });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al agregar detalle de tarjeta de débito",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al agregar detalle de tarjeta de débito');
   }
 };
 
@@ -630,11 +529,7 @@ export const listarDetArqueoTarjetaDebitoTmp = async (req: Request, res: Respons
     });
 
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al listar detalles de tarjeta de débito",
-      error: error.message
-    });
+    sendError(res, error, 'Error al listar detalles de tarjeta de débito');
   }
 };
 
@@ -670,11 +565,7 @@ export const eliminarDetArqueoTarjetaDebitoTmp = async (req: Request, res: Respo
     });
 
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al eliminar detalle de tarjeta de débito",
-      error: error.message
-    });
+    sendError(res, error, 'Error al eliminar detalle de tarjeta de débito');
   }
 };
 
@@ -711,15 +602,7 @@ export const agregarDetArqueoTransferenciaTmp = async (req: Request, res: Respon
     });
 
   } catch (error: any) {
-    if (error.number >= 50000) {
-      res.status(400).json({ success: false, message: error.message });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al agregar detalle de transferencia",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al agregar detalle de transferencia');
   }
 };
 
@@ -759,11 +642,7 @@ export const listarDetArqueoTransferenciaTmp = async (req: Request, res: Respons
     });
 
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al listar detalles de transferencia",
-      error: error.message
-    });
+    sendError(res, error, 'Error al listar detalles de transferencia');
   }
 };
 
@@ -799,11 +678,7 @@ export const eliminarDetArqueoTransferenciaTmp = async (req: Request, res: Respo
     });
 
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al eliminar detalle de transferencia",
-      error: error.message
-    });
+    sendError(res, error, 'Error al eliminar detalle de transferencia');
   }
 };
 
@@ -841,15 +716,7 @@ export const agregarDetArqueoMonedaTmp = async (req: Request, res: Response): Pr
     });
 
   } catch (error: any) {
-    if (error.number >= 50000) {
-      res.status(400).json({ success: false, message: error.message });
-    } else {
-      res.status(500).json({
-        success: false,
-        message: "Error al agregar detalle de moneda",
-        error: error.message
-      });
-    }
+    sendError(res, error, 'Error al agregar detalle de moneda');
   }
 };
 
@@ -889,11 +756,7 @@ export const listarDetArqueoMonedaTmp = async (req: Request, res: Response): Pro
     });
 
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al listar detalles de moneda",
-      error: error.message
-    });
+    sendError(res, error, 'Error al listar detalles de moneda');
   }
 };
 
@@ -929,11 +792,7 @@ export const eliminarDetArqueoMonedaTmp = async (req: Request, res: Response): P
     });
 
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al eliminar detalle de moneda",
-      error: error.message
-    });
+    sendError(res, error, 'Error al eliminar detalle de moneda');
   }
 };
 
@@ -952,11 +811,7 @@ export const listarTarjetas = async (req: Request, res: Response): Promise<void>
       result: result.recordset
     });
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al listar tarjetas",
-      error: error.message
-    });
+    sendError(res, error, 'Error al listar tarjetas');
   }
 };
 
@@ -975,11 +830,7 @@ export const listarMonedas = async (req: Request, res: Response): Promise<void> 
       result: result.recordset
     });
   } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error al listar monedas",
-      error: error.message
-    });
+    sendError(res, error, 'Error al listar monedas');
   }
 };
 

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 export const getDenominacionActivo = async (req: Request, res: Response) => {
     try {
@@ -9,11 +10,6 @@ export const getDenominacionActivo = async (req: Request, res: Response) => {
         });
         res.status(200).json(result.recordset);
     } catch (error) {
-        console.error('Error al consultar denominacion activo:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al consultar denominacion activo', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al consultar denominacion activo', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al consultar denominacion activo');
     }
 };  

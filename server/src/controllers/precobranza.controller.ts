@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { executeRequest, sql } from '../utils/dbHandler';
+import { sendError } from '../utils/errorResponse';
 
 export const getCobranzasPendientes = async (req: Request, res: Response) => {
     const { idCliente } = req.query;
@@ -14,12 +15,7 @@ export const getCobranzasPendientes = async (req: Request, res: Response) => {
         });
         res.status(200).json(result.recordset);
     } catch (error) {
-        console.error('Error al consultar cobranzas pendientes:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al consultar cobranzas pendientes', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al consultar cobranzas pendientes', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al consultar cobranzas pendientes');
     }
 };
 
@@ -37,12 +33,7 @@ export const agregarDetPrecobranzaTmp = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Detalle de precobranza agregado correctamente.' });
     } catch (error) {
-        console.error('Error al agregar detalle de precobranza temporal:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al agregar detalle de precobranza temporal', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al agregar detalle de precobranza temporal', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al agregar detalle de precobranza temporal');
     }
 };
 
@@ -59,12 +50,7 @@ export const consultarDetPrecobranzaTmp = async (req: Request, res: Response) =>
         });
         res.status(200).json(result.recordset);
     } catch (error) {
-        console.error('Error al consultar detalle de precobranza temporal:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al consultar detalle de precobranza temporal', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al consultar detalle de precobranza temporal', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al consultar detalle de precobranza temporal');
     }
 };
 
@@ -82,12 +68,7 @@ export const eliminarDetPrecobranzaTmp = async (req: Request, res: Response) => 
         });
         res.status(200).json({ message: 'Detalle de precobranza eliminado correctamente.' });
     } catch (error) {
-        console.error('Error al eliminar detalle de precobranza temporal:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al eliminar detalle de precobranza temporal', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al eliminar detalle de precobranza temporal', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al eliminar detalle de precobranza temporal');
     }
 };
 
@@ -107,11 +88,6 @@ export const guardarPrecobranza = async (req: Request, res: Response) => {
         });
         res.status(200).json({ message: 'Precobranza guardada correctamente.', idPrecobranza: result.recordset[0].idPrecobranza });
     } catch (error) {
-        console.error('Error al guardar precobranza:', error);
-        if (error instanceof Error) {
-            res.status(500).json({ message: 'Error al guardar precobranza', error: error.message });
-        } else {
-            res.status(500).json({ message: 'Error al guardar precobranza', error: 'An unknown error occurred' });
-        }
+        sendError(res, error, 'Error al guardar precobranza');
     }
 };

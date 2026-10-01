@@ -31,6 +31,7 @@ import ofertaRoutes from './oferta.routes';
 import cargaProductosRoutes from './cargaProductos.routes';
 import barcodeRoutes from './barcode.routes';
 import consultaCargaProductosRoutes from './consultaCargaProductos.routes';
+import historialClienteRoutes from './historialCliente.routes';
 
 const router = Router();
 
@@ -66,5 +67,6 @@ router.use('/ofertas', ofertaRoutes);
 router.use('/carga-productos', cargaProductosRoutes);
 router.use('/barcode', barcodeRoutes);
 router.use('/consulta-carga-productos', consultaCargaProductosRoutes);
+router.use('/historial-cliente', historialClienteRoutes);
 
 export default router;
